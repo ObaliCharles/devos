@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Code2, Copy, Plus, Search, Trash2, X } from "lucide-react";
+import { Check, Code2, Copy, Plus, Trash2, X } from "lucide-react";
 import { deleteSnippet, saveSnippet } from "@/lib/actions";
+import { SearchInput } from "./search-input";
 import { EmptyState } from "./ui";
 
 export type SnippetItem = {
@@ -56,10 +57,12 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-faint)" }} />
-          <input className="input pl-9" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search snippets" aria-label="Search snippets" />
-        </div>
+        <SearchInput
+          value={query}
+          onChange={setQuery}
+          placeholder="Search snippets"
+          className="flex-1"
+        />
         <button className="btn btn-primary shrink-0" onClick={() => setEditing(blank())}>
           <Plus size={15} /> New snippet
         </button>

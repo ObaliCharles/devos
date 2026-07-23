@@ -10,7 +10,6 @@ import {
   Link2,
   Pencil,
   Plus,
-  Search,
   Star,
   Trash2,
   X,
@@ -27,6 +26,7 @@ import type { NoteListItem } from "@/lib/queries";
 import { extractLinks } from "@/lib/wikilinks";
 import { relativeDate } from "@/lib/utils";
 import { WikiMarkdown } from "./wiki-markdown";
+import { SearchInput } from "./search-input";
 import { EmptyState } from "./ui";
 
 type Collection = { id: string; name: string; icon: string; color: string };
