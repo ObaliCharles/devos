@@ -1,0 +1,39 @@
+{
+  "name": "developeros",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db": "tsx scripts/dev-db.ts",
+    "seed": "tsx scripts/seed.ts",
+    "smoke": "SMOKE_MONGODB_URI=${SMOKE_MONGODB_URI:-mongodb://127.0.0.1:27017/developeros_smoke} tsx --tsconfig tsconfig.smoke.json scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@clerk/nextjs": "^6.9.6",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^0.468.0",
+    "mongoose": "^8.9.2",
+    "next": "^15.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@tailwindcss/typography": "^0.5.20",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "dotenv": "^16.4.7",
+    "mongodb-memory-server": "^11.2.0",
+    "tailwindcss": "^4.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
