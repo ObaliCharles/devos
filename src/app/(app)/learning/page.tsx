@@ -1,36 +1,25 @@
-import Link from "next/link";
-import { BookOpen, Check, ChevronRight, Lock, Search, Sparkles } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { requireUser } from "@/lib/user";
-import { getRoadmap, listRoadmaps, searchLessons } from "@/lib/queries";
+import { getRoadmap, listRoadmaps } from "@/lib/queries";
 import { isConfigured } from "@/lib/ai";
-import { Badge, EmptyState, PageHeader, ProgressBar, SearchField, type Tone } from "@/components/ui";
+import { Badge, EmptyState, PageHeader, ProgressBar } from "@/components/ui";
 import { RoadmapModes } from "@/components/roadmap-modes";
 import { LearningModePanel } from "@/components/learning-mode-panel";
+import { CourseCatalog } from "@/components/course-catalog";
+import { Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-const DIFFICULTY: Record<string, { label: string; tone: Tone }> = {
-  beginner: { label: "Beginner", tone: "success" },
-  intermediate: { label: "Intermediate", tone: "warning" },
-  advanced: { label: "Advanced", tone: "danger" },
-};
-
-export default async function LearningPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
-  const { q } = await searchParams;
+export default async function LearningPage() {
   const user = await requireUser();
-  const [roadmap, roadmaps, results] = await Promise.all([
+  const [roadmap, roadmaps] = await Promise.all([
     getRoadmap(user._id),
     listRoadmaps(user._id),
-    q ? searchLessons(user._id, q) : Promise.resolve([]),
   ]);
   const configured = isConfigured();
 
-  // No path at all: this is the first-run / empty state, and it should offer
-  // the two ways forward rather than a dead "run the seed script" message.
+  // No path at all: first run. Offer the two ways forward rather than a dead
+  // "run the seed script" message.
   if (!roadmap) {
     return (
       <div className="page-body">
@@ -52,12 +41,9 @@ export default async function LearningPage({
     );
   }
 
-  const progressPct = roadmap.totalLessons
-    ? Math.round((roadmap.masteredLessons / roadmap.totalLessons) * 100)
-    : 0;
-
   return (
     <div className="page-body">
+      {/* 1, the active path, up top */}
       <PageHeader
         eyebrow="Learning path"
         title={roadmap.title}
@@ -79,158 +65,21 @@ export default async function LearningPage({
             )}
           </div>
         }
-        actions={
-          <SearchField
-            action="/learning"
-            defaultValue={q}
-            placeholder="Search lessons…"
-            className="w-full sm:w-[220px]"
-          />
-        }
       />
 
-      {/* The path switcher and AI generator, collapsed by default so the phase
-          list below stays the focus once a path is chosen. */}
+      {/* 2, switch path or generate a new one with AI */}
       <LearningModePanel roadmaps={roadmaps} configured={configured} />
 
-      {/* ------------------------------------------------------- Search results */}
-      {q && (
-        <section className="section-stack">
-          <div className="flex items-center gap-2">
-            <Search size={15} style={{ color: "var(--text-faint)" }} />
-            <h2 className="title-section">
-              {results.length} {results.length === 1 ? "result" : "results"} for “{q}”
-            </h2>
-            <Link href="/learning" className="btn btn-ghost btn-xs ml-auto">
-              Clear
-            </Link>
-          </div>
-          {results.length > 0 ? (
-            <ul className="flex flex-col gap-2">
-              {results.map((r) => (
-                <li key={r.id}>
-                  <Link
-                    href={`/learning/lesson/${r.id}`}
-                    className="card card-link flex items-center gap-3 px-4 py-3 text-[13.5px]"
-                  >
-                    <BookOpen size={15} style={{ color: "var(--text-faint)" }} />
-                    <span className="min-w-0 flex-1 truncate">{r.title}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              compact
-              icon={<Search size={20} />}
-              title={`Nothing matched “${q}”`}
-              body="Try a broader term, or browse the phases below."
-              action={
-                <Link href="/learning" className="btn btn-secondary">
-                  Browse the path
-                </Link>
-              }
-            />
-          )}
-        </section>
-      )}
-
-      {/* -------------------------------------------------------------- Phases */}
-      <div className="flex flex-col gap-10">
-        {roadmap.phases.map((phase) => (
-          <section key={phase.id} aria-labelledby={`phase-${phase.id}`}>
-            <div className="flex flex-wrap items-center gap-3">
-              <p className={`eyebrow ${phase.locked ? "" : "eyebrow-accent"}`}>Phase {phase.order}</p>
-              {phase.locked && (
-                <Badge>
-                  <Lock size={11} /> Locked
-                </Badge>
-              )}
-            </div>
-            <h2 id={`phase-${phase.id}`} className="mt-1.5 text-[20px] font-semibold tracking-[-0.024em]">
-              {phase.title}
-            </h2>
-            {phase.subtitle && <p className="text-meta mt-1">{phase.subtitle}</p>}
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {phase.skills.map((skill) => {
-                const total = skill.lessons.length;
-                const done = skill.mastered;
-                const complete = total > 0 && done === total;
-                const difficulty = DIFFICULTY[skill.difficulty] ?? {
-                  label: skill.difficulty,
-                  tone: "neutral" as Tone,
-                };
-
-                const body = (
-                  <>
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="title-card min-w-0">{skill.title}</h3>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <Badge tone={phase.locked ? "neutral" : difficulty.tone}>
-                          {difficulty.label}
-                        </Badge>
-                        {phase.locked ? (
-                          <span className="icon-tile h-8 w-8">
-                            <Lock size={14} />
-                          </span>
-                        ) : complete ? (
-                          <span className="icon-tile icon-tile-success h-8 w-8">
-                            <Check size={15} strokeWidth={2.6} />
-                          </span>
-                        ) : (
-                          <span className="icon-tile h-8 w-8 transition-colors group-hover:bg-[var(--primary-faint)] group-hover:text-[var(--primary)]">
-                            <ChevronRight size={15} />
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {skill.why && (
-                      <p className="text-body mt-2 line-clamp-2 text-[13px]">{skill.why}</p>
-                    )}
-
-                    <div className="mt-auto flex items-center gap-3 pt-5">
-                      <ProgressBar
-                        value={done}
-                        total={total}
-                        size="sm"
-                        tone={complete ? "success" : "primary"}
-                        label={`${skill.title}: ${done} of ${total} lessons mastered`}
-                      />
-                      <span
-                        className="num shrink-0 text-[12px] font-medium"
-                        style={{ color: "var(--text-faint)" }}
-                      >
-                        {done}/{total}
-                      </span>
-                    </div>
-                  </>
-                );
-
-                return phase.locked ? (
-                  <div
-                    key={skill.id}
-                    className="card flex flex-col p-4"
-                    style={{ opacity: 0.55 }}
-                    aria-disabled
-                  >
-                    {body}
-                  </div>
-                ) : (
-                  <Link
-                    key={skill.id}
-                    href={`/learning/skill/${skill.id}`}
-                    className="card card-link group flex flex-col p-4"
-                  >
-                    {body}
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        ))}
-      </div>
+      {/* 3, the course catalogue: heading, search, categorised course list */}
+      <section className="section-stack">
+        <div>
+          <h2 className="title-page text-[26px]">Courses</h2>
+          <p className="text-body mt-1 text-[14px]">
+            Every course on this path, grouped by category. Search to jump straight to one.
+          </p>
+        </div>
+        <CourseCatalog phases={roadmap.phases} />
+      </section>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
 
 /**
  * The frame around Clerk's sign-in and sign-up widgets. Clerk owns the form;
@@ -46,6 +47,35 @@ export function AuthShell({
         <div className="flex justify-center">{children}</div>
       </div>
     </main>
+  );
+}
+
+/**
+ * Wraps the Clerk widget so the card never renders empty. Clerk's form is
+ * client-only and can take a moment to boot; without this the auth screen shows
+ * the heading and a blank gap until it appears. The skeleton fills that gap
+ * with something the same size, so nothing jumps when the form loads.
+ */
+export function AuthWidget({ children }: { children: ReactNode }) {
+  return (
+    <div className="w-full">
+      <ClerkLoading>
+        <div
+          className="mx-auto w-full max-w-[400px] rounded-[var(--radius-card)] border p-6"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          aria-hidden
+        >
+          <div className="skeleton mx-auto h-4 w-1/2" />
+          <div className="mt-6 space-y-3">
+            <div className="skeleton h-10 w-full" />
+            <div className="skeleton h-10 w-full" />
+          </div>
+          <div className="skeleton mt-5 h-10 w-full" style={{ background: "var(--primary-faint)" }} />
+          <div className="skeleton mx-auto mt-6 h-3 w-2/3" />
+        </div>
+      </ClerkLoading>
+      <ClerkLoaded>{children}</ClerkLoaded>
+    </div>
   );
 }
 

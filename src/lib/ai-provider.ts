@@ -60,14 +60,21 @@ export function modelFor(provider: Provider) {
 }
 
 /**
- * A failure worth falling back on. A malformed request is our bug and will fail
- * identically on the other provider, so it is re-thrown rather than retried;
- * anything else (no credit, rate limit, overloaded, network) is worth a second
- * opinion from Groq.
+ * A failure worth falling back on when a second provider is available.
+ *
+ * Before any text has streamed, almost every Anthropic failure is worth a
+ * second opinion from Groq, the one that bites hardest is an **unbilled key**,
+ * which Anthropic returns as a 400 with "credit balance too low", not a 402.
+ * An earlier version treated every 400 as "our bug, don't retry", which meant
+ * an unbilled Claude key never fell through to a perfectly good Groq key. Groq
+ * speaks a different API, so a request Anthropic rejects can still succeed there
+ * (and if it genuinely is malformed, Groq returns its own error, the user is
+ * no worse off). So: fall over on everything except an auth error, which means
+ * the key itself is wrong and retrying the same request won't help.
  */
 function shouldFailOver(err: unknown) {
   const status = (err as { status?: number })?.status;
-  if (status === 400) return false;
+  if (status === 401) return false; // bad key, a retry can't fix it
   return true;
 }
 
