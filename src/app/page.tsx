@@ -20,6 +20,7 @@ import {
   Twitter,
 } from "lucide-react";
 import { LogoTile, Wordmark } from "@/components/brand";
+import { Reveal } from "@/components/reveal";
 
 /**
  * The public landing page.
@@ -203,35 +204,32 @@ export default function Landing() {
       </section>
 
       {/* ======================================================= How it works */}
-      <section className="mx-auto w-full px-5 py-20 text-center sm:px-8" style={{ maxWidth: 1200 }}>
+      <section className="mx-auto w-full px-5 py-16 text-center sm:px-8 sm:py-20" style={{ maxWidth: 1200 }}>
         <p className="eyebrow eyebrow-accent">How it works</p>
-        <h2 className="mt-3 text-[30px] font-bold tracking-[-0.03em] sm:text-[36px]">
+        <h2 className="mt-3 text-[26px] font-bold tracking-[-0.03em] sm:text-[36px]">
           A better way to become a developer
         </h2>
 
-        <div className="mt-12 flex flex-col items-stretch gap-4 lg:flex-row lg:items-start">
+        {/* Mobile: a clean vertical list of icon + text rows.
+            Desktop: a horizontal flow with connectors between steps. */}
+        <div className="mt-10 flex flex-col gap-3 sm:mt-12 lg:flex-row lg:items-start lg:gap-2">
           {STEPS.map((step, i) => (
-            <div key={step.title} className="flex flex-1 items-center gap-4 lg:flex-col lg:text-center">
-              <div className="flex flex-col items-center gap-4 lg:flex-1">
-                <span
-                  className="grid h-14 w-14 shrink-0 place-items-center rounded-full"
-                  style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--primary)" }}
-                >
-                  <step.icon size={22} />
-                </span>
-                <div className="text-left lg:text-center">
-                  <h3 className="title-card">{step.title}</h3>
-                  <p className="text-body mt-1 text-[13px]">{step.body}</p>
-                </div>
+            <Reveal
+              key={step.title}
+              index={i}
+              className="flex items-center gap-4 text-left lg:flex-1 lg:flex-col lg:text-center"
+            >
+              <span
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-full sm:h-14 sm:w-14"
+                style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--primary)" }}
+              >
+                <step.icon size={22} />
+              </span>
+              <div className="min-w-0 lg:mt-4">
+                <h3 className="title-card">{step.title}</h3>
+                <p className="text-body mt-1 text-[13px]">{step.body}</p>
               </div>
-              {i < STEPS.length - 1 && (
-                <ArrowRight
-                  size={18}
-                  className="hidden shrink-0 lg:mt-4 lg:block"
-                  style={{ color: "var(--text-faint)" }}
-                />
-              )}
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -240,14 +238,14 @@ export default function Landing() {
       <section className="mx-auto w-full px-5 py-8 sm:px-8" style={{ maxWidth: 1200 }}>
         <div className="text-center">
           <p className="eyebrow eyebrow-accent">Explore Journeys</p>
-          <h2 className="mt-3 text-[30px] font-bold tracking-[-0.03em] sm:text-[36px]">
+          <h2 className="mt-3 text-[26px] font-bold tracking-[-0.03em] sm:text-[36px]">
             Structured paths. Real outcomes.
           </h2>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {JOURNEYS.map((j) => (
-            <div key={j.title} className="card flex flex-col p-5">
+        <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
+          {JOURNEYS.map((j, i) => (
+            <Reveal key={j.title} index={i} className="card flex flex-col p-5">
               <span className="icon-tile icon-tile-lg icon-tile-primary">
                 <j.icon size={20} />
               </span>
@@ -264,7 +262,7 @@ export default function Landing() {
               <Link href="/sign-up" className="btn btn-secondary btn-sm btn-block mt-5">
                 Start Journey <ArrowRight size={14} />
               </Link>
-            </div>
+            </Reveal>
           ))}
         </div>
 
@@ -276,25 +274,27 @@ export default function Landing() {
       </section>
 
       {/* ====================================================== Choose your path */}
-      <section className="mx-auto w-full px-5 py-20 text-center sm:px-8" style={{ maxWidth: 1200 }}>
+      <section className="mx-auto w-full px-5 py-16 text-center sm:px-8 sm:py-20" style={{ maxWidth: 1200 }}>
         <p className="eyebrow eyebrow-accent">Choose your path</p>
-        <h2 className="mt-3 text-[30px] font-bold tracking-[-0.03em] sm:text-[36px]">
+        <h2 className="mt-3 text-[26px] font-bold tracking-[-0.03em] sm:text-[36px]">
           Become who you want to become.
         </h2>
 
-        <div className="mt-12 flex flex-wrap items-start justify-center gap-x-8 gap-y-8 sm:gap-x-14">
-          {PATHS.map((p) => (
-            <Link key={p.label} href="/sign-up" className="group flex w-24 flex-col items-center gap-3">
-              <span
-                className="grid h-14 w-14 place-items-center rounded-[var(--radius-card)] transition-all duration-200 group-hover:-translate-y-1"
-                style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-              >
-                <p.icon size={22} />
-              </span>
-              <span className="text-[12.5px] font-medium leading-tight" style={{ color: "var(--text-muted)" }}>
-                {p.label}
-              </span>
-            </Link>
+        <div className="mt-10 flex flex-wrap items-start justify-center gap-x-6 gap-y-7 sm:mt-12 sm:gap-x-14">
+          {PATHS.map((p, i) => (
+            <Reveal key={p.label} index={i} className="w-[84px] sm:w-24">
+              <Link href="/sign-up" className="group flex flex-col items-center gap-3">
+                <span
+                  className="grid h-[52px] w-[52px] place-items-center rounded-[var(--radius-card)] transition-all duration-200 group-hover:-translate-y-1 sm:h-14 sm:w-14"
+                  style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+                >
+                  <p.icon size={22} />
+                </span>
+                <span className="text-[12px] font-medium leading-tight sm:text-[12.5px]" style={{ color: "var(--text-muted)" }}>
+                  {p.label}
+                </span>
+              </Link>
+            </Reveal>
           ))}
         </div>
 
@@ -311,14 +311,14 @@ export default function Landing() {
           <ProgressPreview />
           <div>
             <p className="eyebrow eyebrow-accent">Your journey</p>
-            <h2 className="mt-3 text-[30px] font-bold tracking-[-0.03em] sm:text-[36px]">
+            <h2 className="mt-3 text-[26px] font-bold tracking-[-0.03em] sm:text-[36px]">
               All your progress.
               <br />
               One place.
             </h2>
             <ul className="mt-8 flex flex-col gap-5">
-              {SHOWCASE.map((s) => (
-                <li key={s.title} className="flex gap-4">
+              {SHOWCASE.map((s, i) => (
+                <Reveal as="li" key={s.title} index={i} className="flex gap-4">
                   <span className="icon-tile icon-tile-primary shrink-0">
                     <s.icon size={17} />
                   </span>
@@ -326,7 +326,7 @@ export default function Landing() {
                     <h3 className="title-card">{s.title}</h3>
                     <p className="text-body mt-0.5 text-[13px]">{s.body}</p>
                   </div>
-                </li>
+                </Reveal>
               ))}
             </ul>
             <Link href="/sign-up" className="btn btn-primary mt-8">
@@ -337,9 +337,9 @@ export default function Landing() {
       </section>
 
       {/* =============================================================== CTA */}
-      <section className="mx-auto w-full px-5 py-20 sm:px-8" style={{ maxWidth: 1200 }}>
+      <section className="mx-auto w-full px-5 py-16 sm:px-8 sm:py-20" style={{ maxWidth: 1200 }}>
         <div
-          className="relative overflow-hidden rounded-[var(--radius-dialog)] border px-6 py-16 text-center"
+          className="relative overflow-hidden rounded-[var(--radius-dialog)] border px-5 py-14 text-center sm:px-6 sm:py-16"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
           <div

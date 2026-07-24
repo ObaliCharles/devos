@@ -33,8 +33,10 @@ import { RoadmapSearch } from "@/components/learn/roadmap-search";
 import { CurriculumBuilder } from "@/components/learn/curriculum-builder";
 import { RoadmapCard } from "@/components/learn/roadmap-card";
 import { Discover } from "@/components/learn/discover";
+import { LearnMobile } from "@/components/learn/learn-mobile";
 import { Heatmap } from "@/components/heatmap";
 import { Ring } from "@/components/ui";
+import { Reveal } from "@/components/reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -84,8 +86,39 @@ export default async function LearningPage() {
 
   const completedPct = totalLessons > 0 ? Math.round((lessonsMastered / totalLessons) * 100) : 0;
 
+  // Per-roadmap progress for the mobile list: only the active path has a real
+  // number to show; the rest read 0 until followed.
+  const mobileRoadmaps = roadmaps.map((r) => ({
+    ...r,
+    pct: r.active ? activePct : 0,
+  }));
+
   return (
-    <div className="page-body pb-6">
+    <>
+      {/* ============================================================ MOBILE
+          A compact, list-first experience: tabs, chips, tight rows. Renders
+          only below lg; the desktop hub below takes over from there. */}
+      <div className="page-body pb-8 lg:hidden">
+        <LearnMobile roadmaps={mobileRoadmaps} metaFor={ROADMAP_META} />
+
+        <section id="build-mobile" className="section-stack scroll-mt-4">
+          <div>
+            <h2 className="text-[20px] font-bold tracking-[-0.025em]">Build your own path</h2>
+            <p className="text-body mt-1 text-[13.5px]">
+              Tell AI who you want to become and it writes a real curriculum.
+            </p>
+          </div>
+          <CurriculumBuilder configured={configured} />
+        </section>
+
+        <section className="section-stack">
+          <h2 className="text-[20px] font-bold tracking-[-0.025em]">Discover</h2>
+          <Discover />
+        </section>
+      </div>
+
+      {/* =========================================================== DESKTOP */}
+      <div className="page-body hidden pb-6 lg:flex">
       {/* =========================================================== 1. Hero */}
       <section className="rise pt-2 text-center sm:pt-6">
         <h1 className="mx-auto whitespace-nowrap text-[clamp(26px,7vw,52px)] font-bold leading-[1.05] tracking-[-0.035em]">
@@ -126,12 +159,10 @@ export default async function LearningPage() {
           hrefLabel="View all"
         />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {roadmaps.slice(0, 6).map((r) => (
-            <RoadmapCard
-              key={r.id}
-              roadmap={r}
-              meta={ROADMAP_META[r.title] ?? ROADMAP_META._default}
-            />
+          {roadmaps.slice(0, 6).map((r, i) => (
+            <Reveal key={r.id} index={i}>
+              <RoadmapCard roadmap={r} meta={ROADMAP_META[r.title] ?? ROADMAP_META._default} />
+            </Reveal>
           ))}
           {roadmaps.length === 0 && (
             <div className="card col-span-full p-6 text-center">
@@ -189,7 +220,8 @@ export default async function LearningPage() {
           challengesSolved={counts?.challengesSolved ?? 0}
         />
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 

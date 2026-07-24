@@ -1369,6 +1369,27 @@ samp {
   animation-delay: 200ms;
 }
 
+/* ---- Scroll reveal ----
+   A calm, native settle-in for content as it first enters the viewport, driven
+   by an IntersectionObserver that adds `.is-in`. Deliberately restrained: a
+   short upward glide and a fade, no blur, no scale, no long parallax, so it
+   reads as the content arriving rather than as an effect. Elements start
+   revealed by default (`.reveal` with no JS) and the observer sets the hidden
+   state only once it has mounted, so a JS-less render never hides content. */
+.reveal-ready {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal-ready.is-in {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1380,5 +1401,10 @@ samp {
   }
   .card-link:hover {
     transform: none;
+  }
+  /* Never hide content behind a reveal that will not animate. */
+  .reveal-ready {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
