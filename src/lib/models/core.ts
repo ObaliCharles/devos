@@ -20,6 +20,13 @@ const UserSchema = new Schema(
     lastActiveDay: String,
     dailyGoalMinutes: { type: Number, default: 60 },
 
+    /**
+     * The roadmap the learning pages and dashboard follow. Empty means "the
+     * global default" (the seeded Project Z), which is what every existing user
+     * has. Pointed at an owned roadmap when the user generates or picks one.
+     */
+    activeRoadmap: { type: Schema.Types.ObjectId, ref: "Roadmap", index: true },
+
     /** Everything on /settings. Kept on the user so one read has it all. */
     preferences: {
       theme: { type: String, enum: ["dark", "light"], default: "dark" },

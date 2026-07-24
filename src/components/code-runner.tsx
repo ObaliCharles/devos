@@ -84,10 +84,13 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
   }
 
   return (
+    // min-w-0 on both columns is what stops a long code line from forcing a
+    // grid track wider than the viewport and pushing the whole page past the
+    // phone's right edge. Without it, grid tracks size to their content.
     <div className="grid gap-6 lg:grid-cols-2">
       {/* ------------------------------------------------------- prompt */}
-      <div className="flex flex-col gap-5">
-        <div className="prose-doc card p-5">
+      <div className="flex min-w-0 flex-col gap-5">
+        <div className="prose-doc card min-w-0 max-w-full overflow-x-auto p-5">
           <Markdown remarkPlugins={[remarkGfm]}>{challenge.prompt}</Markdown>
         </div>
 
@@ -120,8 +123,8 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
       </div>
 
       {/* ------------------------------------------------------- editor */}
-      <div className="flex flex-col gap-4">
-        <div className="card overflow-hidden">
+      <div className="flex min-w-0 flex-col gap-4">
+        <div className="card min-w-0 overflow-hidden">
           <div className="flex items-center justify-between border-b px-4 py-2.5" style={{ borderColor: "var(--border)" }}>
             <span className="eyebrow">solution.js</span>
             <button
@@ -132,13 +135,16 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
               <RotateCcw size={11} /> Reset
             </button>
           </div>
+          {/* whitespace-pre + overflow-x-auto: the editor scrolls horizontally
+              inside its own box rather than stretching the page. */}
           <textarea
-            className="block w-full resize-y bg-transparent p-4 font-[family-name:var(--font-mono)] text-[13px] leading-relaxed outline-none"
+            className="block w-full resize-y overflow-auto whitespace-pre bg-transparent p-4 font-[family-name:var(--font-mono)] text-[13px] leading-relaxed outline-none"
             style={{ minHeight: 320, color: "var(--text)" }}
             value={code}
             onChange={(e) => setCode(e.target.value)}
             onKeyDown={handleTab}
             spellCheck={false}
+            wrap="off"
             aria-label="Code editor"
           />
         </div>
@@ -182,9 +188,12 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
 function TestResults({ outcome }: { outcome: RunOutcome }) {
   if (outcome.error) {
     return (
-      <div className="card p-4">
+      <div className="card min-w-0 p-4">
         <p className="eyebrow" style={{ color: "var(--danger)" }}>Error</p>
-        <pre className="mt-2 overflow-x-auto text-[12px]" style={{ color: "var(--danger)" }}>
+        <pre
+          className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-[12px]"
+          style={{ color: "var(--danger)" }}
+        >
           <code>{outcome.error}</code>
         </pre>
       </div>
@@ -192,11 +201,11 @@ function TestResults({ outcome }: { outcome: RunOutcome }) {
   }
 
   return (
-    <div className="card p-4">
-      <div className="flex items-center justify-between">
+    <div className="card min-w-0 p-4">
+      <div className="flex items-center justify-between gap-2">
         <p className="eyebrow">Tests</p>
         <span
-          className="text-sm font-medium tabular-nums"
+          className="num text-sm font-medium"
           style={{ color: outcome.ok ? "var(--success)" : "var(--warning)" }}
         >
           {outcome.passedCount}/{outcome.total} passing · {outcome.runtimeMs}ms
@@ -207,20 +216,22 @@ function TestResults({ outcome }: { outcome: RunOutcome }) {
         {outcome.results.map((r, i) => (
           <li
             key={i}
-            className="rounded-[var(--radius-card)] border p-2.5 text-[12px]"
+            className="min-w-0 rounded-[var(--radius-card)] border p-2.5 text-[12px]"
             style={{
               borderColor: r.passed ? "var(--border)" : "var(--danger)",
               background: r.passed ? "transparent" : "color-mix(in srgb, var(--danger) 8%, transparent)",
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2">
               {r.passed
-                ? <Check size={13} style={{ color: "var(--success)" }} />
-                : <X size={13} style={{ color: "var(--danger)" }} />}
-              <code className="font-[family-name:var(--font-mono)]">{r.hidden ? "hidden test" : r.call}</code>
+                ? <Check size={13} className="mt-0.5 shrink-0" style={{ color: "var(--success)" }} />
+                : <X size={13} className="mt-0.5 shrink-0" style={{ color: "var(--danger)" }} />}
+              <code className="min-w-0 break-all font-[family-name:var(--font-mono)]">
+                {r.hidden ? "hidden test" : r.call}
+              </code>
             </div>
             {!r.passed && !r.hidden && (
-              <div className="mt-1.5 pl-5" style={{ color: "var(--text-muted)" }}>
+              <div className="mt-1.5 break-all pl-5" style={{ color: "var(--text-muted)" }}>
                 expected <code style={{ color: "var(--success)" }}>{r.expected}</code>, got{" "}
                 <code style={{ color: "var(--danger)" }}>{r.got}</code>
               </div>
@@ -233,7 +244,7 @@ function TestResults({ outcome }: { outcome: RunOutcome }) {
         <div className="mt-3">
           <p className="eyebrow">console</p>
           <pre
-            className="mt-1 overflow-x-auto rounded-[var(--radius-card)] border p-2.5 text-[12px]"
+            className="mt-1 max-w-full overflow-x-auto rounded-[var(--radius-card)] border p-2.5 text-[12px]"
             style={{ background: "var(--surface-2)", borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
             <code>{outcome.logs.join("\n")}</code>

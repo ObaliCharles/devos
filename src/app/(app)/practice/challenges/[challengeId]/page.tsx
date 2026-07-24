@@ -1,11 +1,17 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { Check } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getChallenge } from "@/lib/queries";
 import { CodeRunner } from "@/components/code-runner";
+import { Badge, PageHeader, type Tone } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
+
+const DIFFICULTY_TONE: Record<string, Tone> = {
+  easy: "success",
+  medium: "warning",
+  hard: "danger",
+};
 
 export default async function ChallengePage({ params }: { params: Promise<{ challengeId: string }> }) {
   const { challengeId } = await params;
@@ -15,14 +21,23 @@ export default async function ChallengePage({ params }: { params: Promise<{ chal
 
   return (
     <div className="page-body">
-      <Link href="/practice/challenges" className="inline-flex items-center gap-1.5 text-sm" style={{ color: "var(--text-muted)" }}>
-        <ArrowLeft size={14} /> Challenges
-      </Link>
-      <div className="mt-4 mb-6 flex items-center gap-3">
-        <h1 className="text-2xl font-bold">{challenge.title}</h1>
-        <span className="text-xs" style={{ color: "var(--text-faint)" }}>{challenge.difficulty}</span>
-        {challenge.solved && <span className="text-xs" style={{ color: "var(--success)" }}>solved</span>}
-      </div>
+      <PageHeader
+        eyebrow="Practice"
+        title={challenge.title}
+        back={{ href: "/practice/challenges", label: "Challenges" }}
+        meta={
+          <>
+            <Badge tone={DIFFICULTY_TONE[challenge.difficulty] ?? "neutral"}>
+              {challenge.difficulty}
+            </Badge>
+            {challenge.solved && (
+              <Badge tone="success">
+                <Check size={11} /> Solved
+              </Badge>
+            )}
+          </>
+        }
+      />
       <CodeRunner challenge={challenge} />
     </div>
   );

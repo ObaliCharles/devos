@@ -816,9 +816,9 @@ async function checkTierZero() {
   check("tracked time reaches the day's study session", (beat?.minutes ?? 0) > 0);
 
   console.log("\ntier-0 — lesson search");
-  const found = await searchLessons(String(lesson!.title).slice(0, 5));
+  const found = await searchLessons(user._id, String(lesson!.title).slice(0, 5));
   check("a lesson is found by a slice of its title", found.some((l) => l.id === String(lesson!._id)));
-  check("a one-character query returns nothing", (await searchLessons("x")).length === 0);
+  check("a one-character query returns nothing", (await searchLessons(user._id, "x")).length === 0);
 
   delete process.env.SMOKE_CLERK_ID;
 }

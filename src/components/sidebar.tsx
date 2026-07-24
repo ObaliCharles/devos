@@ -3,86 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  BarChart3,
-  BookOpen,
-  Briefcase,
-  Calendar,
-  ChevronsUpDown,
-  Dumbbell,
-  FolderKanban,
-  LayoutDashboard,
-  NotebookPen,
-  PanelLeftClose,
-  PanelLeftOpen,
-  RotateCcw,
-  Settings,
-  Shield,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronsUpDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { LogoTile, Wordmark } from "./brand";
+import { isActive, navGroups, type SidebarUser } from "./nav-config";
 
-type NavItem = { href: string; label: string; icon: LucideIcon };
-type NavGroup = { heading?: string; items: NavItem[] };
-
-/**
- * Navigation is grouped by intent, what you are trying to do, not by which
- * database table the page reads. Learn / Build / Grow is the mental model the
- * whole product is organised around, so the sidebar states it plainly, and a
- * hairline between groups keeps that structure legible even when collapsed to
- * an icon rail where the headings cannot be shown.
- */
-const GROUPS: NavGroup[] = [
-  { items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] },
-  {
-    heading: "Learn",
-    items: [
-      { href: "/learning", label: "Learning", icon: BookOpen },
-      { href: "/review", label: "Review", icon: RotateCcw },
-      { href: "/practice", label: "Practice", icon: Dumbbell },
-      { href: "/notes", label: "Knowledge", icon: NotebookPen },
-    ],
-  },
-  {
-    heading: "Build",
-    items: [
-      { href: "/projects", label: "Projects", icon: FolderKanban },
-      { href: "/ai", label: "AI Centre", icon: Sparkles },
-    ],
-  },
-  {
-    heading: "Grow",
-    items: [
-      { href: "/career", label: "Career", icon: Briefcase },
-      { href: "/analytics", label: "Analytics", icon: BarChart3 },
-      { href: "/calendar", label: "Calendar", icon: Calendar },
-    ],
-  },
-];
-
-export const MOBILE_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/learning", label: "Learn", icon: BookOpen },
-  { href: "/review", label: "Review", icon: RotateCcw },
-  { href: "/projects", label: "Build", icon: FolderKanban },
-  { href: "/ai", label: "AI", icon: Sparkles },
-];
-
-function isActive(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(href + "/");
-}
+export type { SidebarUser };
 
 const STORAGE_KEY = "dos-sidebar-collapsed";
-
-export type SidebarUser = {
-  name: string;
-  plan: string;
-  level: number;
-  title: string;
-  into: number;
-  need: number;
-};
 
 export function Sidebar({
   dueCount = 0,
@@ -110,16 +37,7 @@ export function Sidebar({
     });
   }
 
-  const groups: NavGroup[] = [
-    ...GROUPS,
-    {
-      heading: "System",
-      items: [
-        { href: "/settings", label: "Settings", icon: Settings },
-        ...(isAdmin ? [{ href: "/admin", label: "Admin", icon: Shield }] : []),
-      ],
-    },
-  ];
+  const groups = navGroups(isAdmin);
 
   return (
     <aside
@@ -345,62 +263,5 @@ export function Sidebar({
         </div>
       )}
     </aside>
-  );
-}
-
-/**
- * Phone navigation. Five destinations, thumb-reachable, with a safe-area inset
- * so it clears the home indicator on modern handsets.
- */
-export function MobileNav({ dueCount = 0 }: { dueCount?: number }) {
-  const pathname = usePathname();
-
-  return (
-    <nav
-      className="glass fixed inset-x-0 bottom-0 z-40 flex border-t md:hidden"
-      style={{
-        borderColor: "var(--border)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-      }}
-      aria-label="Main"
-    >
-      {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
-        const active = isActive(pathname, href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            aria-current={active ? "page" : undefined}
-            className="relative flex flex-1 flex-col items-center gap-1 pb-2 pt-2.5 text-[10px] font-medium"
-            style={{
-              color: active ? "var(--primary)" : "var(--text-faint)",
-              transition: "color var(--dur-fast) var(--ease)",
-            }}
-          >
-            <span
-              className="absolute top-0 h-[2px] w-7 rounded-b-full"
-              style={{
-                background: "var(--primary)",
-                opacity: active ? 1 : 0,
-                transition: "opacity var(--dur-fast) var(--ease)",
-              }}
-              aria-hidden
-            />
-            <span className="relative">
-              <Icon size={18} strokeWidth={active ? 2.2 : 1.9} />
-              {href === "/review" && dueCount > 0 && (
-                <span
-                  className="absolute -right-1.5 -top-1 grid h-[15px] min-w-[15px] place-items-center rounded-full px-1 text-[9px] font-bold"
-                  style={{ background: "var(--warning)", color: "#211502" }}
-                >
-                  {dueCount > 9 ? "9+" : dueCount}
-                </span>
-              )}
-            </span>
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }

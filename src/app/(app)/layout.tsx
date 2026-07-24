@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { MobileNav, Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { RouteProgress } from "@/components/route-progress";
 import { getCurrentUser, levelFromXp } from "@/lib/user";
@@ -28,6 +28,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const level = levelFromXp(user.xp ?? 0);
 
+  const navUser = {
+    name: user.name || "Developer",
+    plan: user.role === "admin" ? "Admin" : "Free plan",
+    level: level.level,
+    title: level.title,
+    into: level.into,
+    need: level.need,
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* useSearchParams inside the progress bar needs a Suspense boundary,
@@ -36,27 +45,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <RouteProgress />
       </Suspense>
 
-      <Sidebar
-        dueCount={dueCount}
-        isAdmin={user.role === "admin"}
-        user={{
-          name: user.name || "Developer",
-          plan: user.role === "admin" ? "Admin" : "Free plan",
-          level: level.level,
-          title: level.title,
-          into: level.into,
-          need: level.need,
-        }}
-      />
+      <Sidebar dueCount={dueCount} isAdmin={user.role === "admin"} user={navUser} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar streak={user.currentStreak ?? 0} xp={user.xp ?? 0} unread={unread} />
+        {/* The topbar owns the mobile menu trigger, so navigation on a phone is
+            always one tap from the top of the screen. */}
+        <Topbar
+          streak={user.currentStreak ?? 0}
+          xp={user.xp ?? 0}
+          unread={unread}
+          dueCount={dueCount}
+          isAdmin={user.role === "admin"}
+          navUser={navUser}
+        />
 
-        {/* Symmetric vertical padding (page-top top and bottom) is what lets a
-            full-height route size itself to the viewport exactly. Mobile-nav
-            clearance is a phone-only concern, so it lives in a class that
-            disappears at md rather than a fixed inset every page pays for. */}
-        <main id="main" className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main id="main" className="flex-1 overflow-y-auto">
           <div
             className="page-container"
             style={{ paddingTop: "var(--page-top)", paddingBottom: "var(--page-top)" }}
@@ -65,8 +68,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
-
-      <MobileNav dueCount={dueCount} />
     </div>
   );
 }

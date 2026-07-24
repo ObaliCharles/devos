@@ -18,6 +18,14 @@ const RoadmapSchema = new Schema(
     /** Empty means the roadmap is global. Set it and it is that user's own. */
     owner: { type: Schema.Types.ObjectId, ref: "User", index: true },
     published: { type: Boolean, default: true },
+    /** "curated" is authored/seeded; "ai" was generated for one user. */
+    origin: { type: String, enum: ["curated", "ai"], default: "curated" },
+    /** What the user asked for, kept so a generated path can explain itself. */
+    generatedFrom: {
+      topic: String,
+      goal: String,
+      level: { type: String, enum: ["beginner", "intermediate", "advanced"] },
+    },
   },
   { timestamps: true }
 );

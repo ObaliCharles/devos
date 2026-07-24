@@ -5,22 +5,30 @@ import { UserButton } from "@clerk/nextjs";
 import { Bell, Flame, Moon, Search, Sun, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { CommandPalette } from "./command-palette";
-import { LogoTile } from "./brand";
+import { MobileDrawer } from "./mobile-drawer";
+import type { SidebarUser } from "./nav-config";
 
 /**
  * The top bar is deliberately thin: 56px, one row, no page title. The page
  * owns its own header, so repeating it here would only cost vertical space.
  * What lives here is everything that is true on every route, search, the two
- * streak signals, notifications, theme, account.
+ * streak signals, notifications, theme, account, and on phones the menu
+ * trigger for the navigation drawer.
  */
 export function Topbar({
   streak,
   xp,
   unread = 0,
+  dueCount = 0,
+  isAdmin = false,
+  navUser,
 }: {
   streak: number;
   xp: number;
   unread?: number;
+  dueCount?: number;
+  isAdmin?: boolean;
+  navUser?: SidebarUser;
 }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
@@ -48,10 +56,8 @@ export function Topbar({
       className="glass sticky top-0 z-30 flex shrink-0 items-center gap-3 border-b px-4 sm:px-5"
       style={{ height: "var(--topbar-h)", borderColor: "var(--border)" }}
     >
-      {/* Brand, only on phones, where the sidebar is not on screen */}
-      <Link href="/dashboard" className="flex items-center md:hidden" aria-label="Home">
-        <LogoTile size={28} />
-      </Link>
+      {/* Phone-only: the menu trigger and drawer hold the full navigation. */}
+      <MobileDrawer dueCount={dueCount} isAdmin={isAdmin} user={navUser} />
 
       {/* ------------------------------------------------------- Search */}
       <button

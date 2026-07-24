@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { BookOpen, Check, ChevronRight, Lock, Search } from "lucide-react";
+import { BookOpen, Check, ChevronRight, Lock, Search, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/user";
-import { getRoadmap, searchLessons } from "@/lib/queries";
+import { getRoadmap, listRoadmaps, searchLessons } from "@/lib/queries";
+import { isConfigured } from "@/lib/ai";
 import { Badge, EmptyState, PageHeader, ProgressBar, SearchField, type Tone } from "@/components/ui";
+import { RoadmapModes } from "@/components/roadmap-modes";
+import { LearningModePanel } from "@/components/learning-mode-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -19,18 +22,33 @@ export default async function LearningPage({
 }) {
   const { q } = await searchParams;
   const user = await requireUser();
-  const [roadmap, results] = await Promise.all([
+  const [roadmap, roadmaps, results] = await Promise.all([
     getRoadmap(user._id),
-    q ? searchLessons(q) : Promise.resolve([]),
+    listRoadmaps(user._id),
+    q ? searchLessons(user._id, q) : Promise.resolve([]),
   ]);
+  const configured = isConfigured();
 
+  // No path at all: this is the first-run / empty state, and it should offer
+  // the two ways forward rather than a dead "run the seed script" message.
   if (!roadmap) {
     return (
-      <EmptyState
-        icon={<BookOpen size={22} />}
-        title="No roadmap loaded"
-        body="Run npm run seed to load the starter roadmap, then refresh this page. Everything else in the workspace works without it."
-      />
+      <div className="page-body">
+        <PageHeader
+          eyebrow="Learning"
+          title="Start a learning path"
+          description="Follow a ready-made path, or describe what you want to learn and let the assistant build one for you."
+        />
+        <RoadmapModes roadmaps={roadmaps} configured={configured} />
+        {roadmaps.length === 0 && (
+          <EmptyState
+            compact
+            icon={<BookOpen size={22} />}
+            title="No curated paths yet"
+            body="Run npm run seed to load the starter roadmap, or generate your own path above."
+          />
+        )}
+      </div>
     );
   }
 
@@ -54,6 +72,11 @@ export default async function LearningPage({
             <span className="num shrink-0 text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
               {roadmap.masteredLessons}/{roadmap.totalLessons}
             </span>
+            {roadmap.origin === "ai" && (
+              <Badge tone="primary">
+                <Sparkles size={10} /> AI path
+              </Badge>
+            )}
           </div>
         }
         actions={
@@ -65,6 +88,10 @@ export default async function LearningPage({
           />
         }
       />
+
+      {/* The path switcher and AI generator, collapsed by default so the phase
+          list below stays the focus once a path is chosen. */}
+      <LearningModePanel roadmaps={roadmaps} configured={configured} />
 
       {/* ------------------------------------------------------- Search results */}
       {q && (

@@ -1,6 +1,6 @@
 import { connectDB } from "../db";
 import { dayKey, dayKeyOffset } from "../day";
-import { Lesson, LessonProgress, Note, Phase, Review, Roadmap, Skill, StudySession } from "../models";
+import { Lesson, LessonProgress, Note, Phase, Review, Roadmap, Skill, StudySession, User } from "../models";
 
 export type LessonNode = {
   id: string;
@@ -45,15 +45,25 @@ const GATE_KEYS = ["read", "noted", "exercised", "quizzed", "reviewed"] as const
 export async function getRoadmap(userId: unknown) {
   await connectDB();
 
-  const roadmap = await Roadmap.findOne().lean<{ _id: unknown; title: string; summary?: string }>();
+  const roadmap = await resolveActiveRoadmap(userId);
   if (!roadmap) return null;
 
-  const [phases, skills, lessons, progress] = await Promise.all([
-    Phase.find({ roadmap: roadmap._id }).sort({ order: 1 }).lean(),
-    Skill.find().sort({ order: 1 }).lean(),
-    Lesson.find().sort({ order: 1 }).select("-body -quiz").lean(),
+  // Scope skills and lessons to this roadmap. The v0.1 query pulled every
+  // Skill/Lesson in the database, which only worked because there was exactly
+  // one roadmap; the moment a user generates their own, everything has to be
+  // filtered to the roadmap being shown.
+  const phases = await Phase.find({ roadmap: roadmap._id }).sort({ order: 1 }).lean();
+  const phaseIds = phases.map((p) => p._id);
+
+  const [skills, progress] = await Promise.all([
+    Skill.find({ phase: { $in: phaseIds } }).sort({ order: 1 }).lean(),
     LessonProgress.find({ user: userId }).lean(),
   ]);
+  const skillIds = skills.map((s) => s._id);
+  const lessons = await Lesson.find({ skill: { $in: skillIds } })
+    .sort({ order: 1 })
+    .select("-body -quiz")
+    .lean();
 
   const progressByLesson = new Map(progress.map((p) => [String(p.lesson), p]));
 
@@ -110,12 +120,85 @@ export async function getRoadmap(userId: unknown) {
   });
 
   return {
+    id: String(roadmap._id),
     title: roadmap.title,
     summary: roadmap.summary,
+    origin: roadmap.origin ?? "curated",
     phases: built,
     totalLessons: built.reduce((n, p) => n + p.totalLessons, 0),
     masteredLessons: built.reduce((n, p) => n + p.masteredLessons, 0),
   };
+}
+
+type RoadmapDoc = {
+  _id: unknown;
+  title: string;
+  summary?: string;
+  origin?: string;
+  owner?: unknown;
+};
+
+/**
+ * Which roadmap a user is following. Their explicit choice wins; otherwise the
+ * first they own; otherwise the global curated default. This is what keeps
+ * every existing user on Project Z with no migration, while a generated path
+ * can be made active with a single field on the user.
+ */
+async function resolveActiveRoadmap(userId: unknown): Promise<RoadmapDoc | null> {
+  const user = await User.findById(userId).select("activeRoadmap").lean<{
+    activeRoadmap?: unknown;
+  } | null>();
+
+  if (user?.activeRoadmap) {
+    const chosen = await Roadmap.findById(user.activeRoadmap).lean<RoadmapDoc | null>();
+    if (chosen) return chosen;
+  }
+
+  const owned = await Roadmap.findOne({ owner: userId }).sort({ createdAt: -1 }).lean<RoadmapDoc | null>();
+  if (owned) return owned;
+
+  return Roadmap.findOne({ $or: [{ owner: { $exists: false } }, { owner: null }] })
+    .sort({ createdAt: 1 })
+    .lean<RoadmapDoc | null>();
+}
+
+/**
+ * Every roadmap available to a user: the global curated ones plus any they
+ * own. Used by the learning page to offer a choice between following a
+ * pre-built path and a generated one.
+ */
+export async function listRoadmaps(userId: unknown) {
+  await connectDB();
+
+  const [roadmaps, active] = await Promise.all([
+    Roadmap.find({ $or: [{ owner: userId }, { owner: { $exists: false } }, { owner: null }] })
+      .sort({ createdAt: 1 })
+      .lean<RoadmapDoc[]>(),
+    User.findById(userId).select("activeRoadmap").lean<{ activeRoadmap?: unknown } | null>(),
+  ]);
+
+  const resolved = await resolveActiveRoadmap(userId);
+  const activeId = active?.activeRoadmap ? String(active.activeRoadmap) : resolved ? String(resolved._id) : null;
+
+  // Lesson counts per roadmap, one aggregation rather than a query per card.
+  const withCounts = await Promise.all(
+    roadmaps.map(async (r) => {
+      const phaseIds = (await Phase.find({ roadmap: r._id }).select("_id").lean()).map((p) => p._id);
+      const skillIds = (await Skill.find({ phase: { $in: phaseIds } }).select("_id").lean()).map((s) => s._id);
+      const lessons = await Lesson.countDocuments({ skill: { $in: skillIds } });
+      return {
+        id: String(r._id),
+        title: r.title,
+        summary: r.summary,
+        origin: r.origin ?? "curated",
+        mine: Boolean(r.owner),
+        active: String(r._id) === activeId,
+        lessons,
+      };
+    }),
+  );
+
+  return withCounts;
 }
 
 /** The single most useful thing on the dashboard: what to open next. */
@@ -156,13 +239,24 @@ export async function countDueReviews(userId: unknown) {
  * the Lesson text index is defined for when relevance starts to matter, and
  * swapping to `$text` is a one-line change here.
  */
-export async function searchLessons(query: string, limit = 12) {
+export async function searchLessons(userId: unknown, query: string, limit = 12) {
   const term = query.trim();
   if (term.length < 2) return [];
   await connectDB();
+
+  // Scope to the user's active path. A global search would surface lessons from
+  // other users' generated roadmaps, which are private to them.
+  const roadmap = await resolveActiveRoadmap(userId);
+  if (!roadmap) return [];
+  const phaseIds = (await Phase.find({ roadmap: roadmap._id }).select("_id").lean()).map((p) => p._id);
+  const skillIds = (await Skill.find({ phase: { $in: phaseIds } }).select("_id").lean()).map((s) => s._id);
+
   const rx = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-  const lessons = await Lesson.find({ $or: [{ title: rx }, { body: rx }] })
-    .select("title skill order")
+  const lessons = await Lesson.find({
+    skill: { $in: skillIds },
+    $or: [{ title: rx }, { body: rx }],
+  })
+    .select("title")
     .limit(limit)
     .lean();
   return lessons.map((l) => ({ id: String(l._id), title: String(l.title) }));
