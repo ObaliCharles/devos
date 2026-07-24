@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertTriangle,
+  ArrowLeft,
   Bot,
   Check,
   Copy,
   FileText,
+  MessagesSquare,
   Paperclip,
   Pin,
   Plus,
@@ -107,6 +109,9 @@ export function AiChat({
   const [streamed, setStreamed] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  // The conversation list is a slide-in drawer on phones (ChatGPT-style) and a
+  // fixed rail on desktop. One piece of state drives the mobile drawer.
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -135,6 +140,24 @@ export function AiChat({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamed]);
+
+  // Close the mobile drawer when you switch conversations, and while it is open
+  // lock the page behind it and let Escape dismiss it.
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [active?.id]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDrawerOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [drawerOpen]);
 
   function autosize(el: HTMLTextAreaElement | null) {
     if (!el) return;
@@ -278,10 +301,49 @@ export function AiChat({
 
   const empty = messages.length === 0 && !streaming;
 
+  const activeTitle = active?.title ?? "New chat";
+
   return (
     <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
       {/* ============================================================ Thread */}
-      <div className="panel flex min-h-0 flex-col overflow-hidden max-lg:min-h-[560px]">
+      {/* On phones the thread goes edge-to-edge (ChatGPT-style): the panel loses
+          its border and radius so it fills the screen. On desktop it stays a
+          contained panel beside the rail. */}
+      <div className="panel flex min-h-0 flex-col overflow-hidden max-lg:min-h-0 max-md:rounded-none max-md:border-x-0">
+        {/* --- Header: back, title, and (mobile only) the conversation menu --- */}
+        <header
+          className="flex shrink-0 items-center gap-2 border-b px-3 py-2.5 sm:px-4"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <Link
+            href="/ai"
+            className="btn-icon shrink-0"
+            aria-label="Back to AI centre"
+          >
+            <ArrowLeft size={17} />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-[15px] font-semibold tracking-[-0.01em]">{activeTitle}</h1>
+          </div>
+          <button
+            onClick={newChat}
+            className="btn-icon shrink-0"
+            aria-label="New conversation"
+            title="New conversation"
+          >
+            <Plus size={18} />
+          </button>
+          {/* The rail is always visible on desktop, so the trigger is phone-only. */}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="btn-icon shrink-0 lg:hidden"
+            aria-label="Open conversations"
+            aria-expanded={drawerOpen}
+          >
+            <MessagesSquare size={17} />
+          </button>
+        </header>
+
         {/* Only this region scrolls. */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
           {empty ? (
@@ -428,8 +490,40 @@ export function AiChat({
         </div>
       </div>
 
-      {/* ====================================================== Conversations */}
-      <aside className="flex min-h-0 flex-col gap-3 max-lg:h-auto">
+      {/* ====================================================== Conversations
+          A fixed slide-in drawer on phones (ChatGPT-style), a static rail on
+          desktop. One <aside> serves both: the transform and backdrop only
+          engage below lg, where lg:static / lg:translate-x-0 turn them off. */}
+      <div
+        onClick={() => setDrawerOpen(false)}
+        className="fixed inset-0 z-40 lg:hidden"
+        style={{
+          background: "rgb(0 0 0 / 0.5)",
+          opacity: drawerOpen ? 1 : 0,
+          pointerEvents: drawerOpen ? "auto" : "none",
+          transition: "opacity var(--dur) var(--ease)",
+        }}
+        aria-hidden
+      />
+      <aside
+        className={`flex min-h-0 flex-col gap-3 transition-transform duration-300 max-lg:fixed max-lg:inset-y-0 max-lg:right-0 max-lg:z-50 max-lg:w-[84%] max-lg:max-w-[320px] max-lg:border-l max-lg:p-3 max-lg:shadow-[var(--shadow-xl)] lg:!translate-x-0 ${
+          drawerOpen ? "translate-x-0" : "max-lg:translate-x-full"
+        }`}
+        aria-label="Conversations"
+        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      >
+        {/* Mobile-only drawer header with a close control. */}
+        <div className="flex shrink-0 items-center justify-between lg:hidden">
+          <p className="title-card">Conversations</p>
+          <button
+            onClick={() => setDrawerOpen(false)}
+            className="btn-icon"
+            aria-label="Close conversations"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
         <button className="btn btn-primary btn-block shrink-0" onClick={newChat}>
           <Plus size={15} /> New conversation
         </button>
@@ -490,13 +584,6 @@ export function AiChat({
                       >
                         {c.title}
                       </span>
-                      {isActive && (
-                        <span
-                          className="h-[6px] w-[6px] shrink-0 rounded-full"
-                          style={{ background: "var(--primary)" }}
-                          aria-hidden
-                        />
-                      )}
                     </span>
                     <span className="text-meta mt-1 line-clamp-1 block text-[12px]">
                       {c.preview?.trim() ||
