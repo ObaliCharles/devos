@@ -15,6 +15,7 @@ import {
 } from "@/lib/catalog";
 import type { RoadmapMeta } from "@/lib/learn-content";
 import { ContentIcon } from "./icon";
+import { TechLogo, TECH_WITH_LOGO } from "./tech-logo";
 import { Reveal } from "@/components/reveal";
 
 /**
@@ -40,9 +41,12 @@ type Tab = (typeof TABS)[number];
 export function LearnMobile({
   roadmaps,
   metaFor,
+  courseProgress = {},
 }: {
   roadmaps: RoadmapRow[];
   metaFor: Record<string, RoadmapMeta>;
+  /** courseSlug -> lessons completed, for the per-course progress bar. */
+  courseProgress?: Record<string, number>;
 }) {
   const [tab, setTab] = useState<Tab>("Roadmaps");
   const [track, setTrack] = useState<string>("All");
@@ -109,7 +113,7 @@ export function LearnMobile({
       {tab === "Roadmaps" && (
         <RoadmapList roadmaps={roadmaps} metaFor={metaFor} track={track} q={q} />
       )}
-      {tab === "Courses" && <CourseList track={track} q={q} />}
+      {tab === "Courses" && <CourseList track={track} q={q} progress={courseProgress} />}
       {tab === "Projects" && <ProjectList track={track} q={q} />}
       {tab === "Certifications" && <CertList track={track} q={q} />}
 
@@ -146,6 +150,7 @@ export function LearnMobile({
 
 function Row({
   icon,
+  tech,
   accent,
   title,
   meta,
@@ -157,6 +162,7 @@ function Row({
   badge,
 }: {
   icon: string;
+  tech?: string;
   accent: Accent;
   title: string;
   meta: string;
@@ -167,10 +173,11 @@ function Row({
   busy?: boolean;
   badge?: string;
 }) {
+  const hasLogo = tech && TECH_WITH_LOGO.has(tech);
   const inner = (
     <>
-      <span className={`icon-tile icon-tile-lg icon-tile-${accent}`}>
-        <ContentIcon name={icon} size={20} />
+      <span className={`icon-tile icon-tile-lg ${hasLogo ? "" : `icon-tile-${accent}`}`}>
+        {hasLogo ? <TechLogo name={tech} size={22} /> : <ContentIcon name={icon} size={20} />}
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
@@ -254,14 +261,14 @@ function RoadmapList({
 
   function follow(r: RoadmapRow) {
     if (r.active) {
-      router.push("/learning");
+      router.push("/learning/roadmap");
       return;
     }
     setBusyId(r.id);
     start(async () => {
       await activateRoadmap(r.id);
       router.refresh();
-      router.push("/learning");
+      router.push("/learning/roadmap");
     });
   }
 
@@ -305,7 +312,15 @@ function trackForMeta(m: RoadmapMeta): string[] {
 
 /* -------------------------------------------------------------- Courses */
 
-function CourseList({ track, q }: { track: string; q: string }) {
+function CourseList({
+  track,
+  q,
+  progress,
+}: {
+  track: string;
+  q: string;
+  progress: Record<string, number>;
+}) {
   const filtered = COURSES.filter((c) => {
     const trackOk = track === "All" || c.track === track;
     const qOk = !q || `${c.title} ${c.tagline} ${c.tags.join(" ")}`.toLowerCase().includes(q);
@@ -314,17 +329,28 @@ function CourseList({ track, q }: { track: string; q: string }) {
   if (filtered.length === 0) return <Empty label="courses" />;
   return (
     <ul className="flex flex-col gap-2.5">
-      {filtered.map((c, i) => (
-        <Row
-          key={c.slug}
-          index={i}
-          icon={c.icon}
-          accent={c.accent}
-          title={c.title}
-          meta={`${c.modules.length} modules · ${lessonCount(c)} lessons · ${c.hours}h · ${c.level}`}
-          href={`/learning/course/${c.slug}`}
-        />
-      ))}
+      {filtered.map((c, i) => {
+        const total = lessonCount(c);
+        const done = progress[c.slug] ?? 0;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        return (
+          <Row
+            key={c.slug}
+            index={i}
+            icon={c.icon}
+            tech={c.tech}
+            accent={c.accent}
+            title={c.title}
+            meta={
+              done > 0
+                ? `${done}/${total} lessons done · ${c.hours}h`
+                : `${c.modules.length} modules · ${total} lessons · ${c.hours}h · ${c.level}`
+            }
+            pct={done > 0 ? pct : undefined}
+            href={`/learning/course/${c.slug}`}
+          />
+        );
+      })}
     </ul>
   );
 }

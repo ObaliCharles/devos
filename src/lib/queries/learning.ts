@@ -1,6 +1,6 @@
 import { connectDB } from "../db";
 import { dayKey, dayKeyOffset } from "../day";
-import { Lesson, LessonProgress, Note, Phase, Review, Roadmap, Skill, StudySession, User } from "../models";
+import { CatalogProgress, Lesson, LessonProgress, Note, Phase, Review, Roadmap, Skill, StudySession, User } from "../models";
 
 export type LessonNode = {
   id: string;
@@ -288,4 +288,29 @@ export async function getActivityStrip(userId: unknown, days = 14) {
       lessons: s?.lessonsCompleted ?? 0,
     };
   });
+}
+
+/** The set of completed lesson indices for one catalog course, for the course
+ *  and lesson pages to show progress and completed ticks. */
+export async function getCatalogProgress(userId: unknown, course: string): Promise<number[]> {
+  await connectDB();
+  const doc = await CatalogProgress.findOne({ user: userId, course })
+    .select("completed")
+    .lean<{ completed?: number[] } | null>();
+  return doc?.completed ?? [];
+}
+
+/** Completed-lesson counts for many courses at once, for the Learn list to show
+ *  a progress bar per course. Returns a map of courseSlug -> completed count. */
+export async function getCatalogProgressMap(
+  userId: unknown,
+  courses: string[],
+): Promise<Record<string, number>> {
+  await connectDB();
+  const docs = await CatalogProgress.find({ user: userId, course: { $in: courses } })
+    .select("course completed")
+    .lean<{ course: string; completed?: number[] }[]>();
+  const map: Record<string, number> = {};
+  for (const d of docs) map[d.course] = (d.completed ?? []).length;
+  return map;
 }

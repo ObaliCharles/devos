@@ -20,12 +20,14 @@ import {
   findNextLesson,
   getAchievements,
   getActivityStrip,
+  getCatalogProgressMap,
   getCertificates,
   getProjectStats,
   getRoadmap,
   getUserCounts,
   listRoadmaps,
 } from "@/lib/queries";
+import { COURSES } from "@/lib/catalog";
 import { isConfigured } from "@/lib/ai";
 import { ROADMAP_META } from "@/lib/learn-content";
 import { ContentIcon } from "@/components/learn/icon";
@@ -58,7 +60,7 @@ export default async function LearningPage() {
 
   // One coordinated read across the learning, analytics, project and career
   // modules. Each is defensive so a missing collection never blanks the page.
-  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs] =
+  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress] =
     await Promise.all([
       getRoadmap(user._id).catch(() => null),
       listRoadmaps(user._id).catch(() => []),
@@ -67,6 +69,7 @@ export default async function LearningPage() {
       getUserCounts(user._id, xp, streak).catch(() => null),
       getProjectStats(user._id).catch(() => null),
       getCertificates(user._id).catch(() => []),
+      getCatalogProgressMap(user._id, COURSES.map((c) => c.slug)).catch(() => ({})),
     ]);
 
   const next = findNextLesson(roadmap);
@@ -99,7 +102,11 @@ export default async function LearningPage() {
           A compact, list-first experience: tabs, chips, tight rows. Renders
           only below lg; the desktop hub below takes over from there. */}
       <div className="page-body pb-8 lg:hidden">
-        <LearnMobile roadmaps={mobileRoadmaps} metaFor={ROADMAP_META} />
+        <LearnMobile
+          roadmaps={mobileRoadmaps}
+          metaFor={ROADMAP_META}
+          courseProgress={catalogProgress}
+        />
 
         <section id="build-mobile" className="section-stack scroll-mt-4">
           <div>
@@ -272,7 +279,7 @@ function ContinueLearning({
   pct: number;
   next: NextLesson;
 }) {
-  const href = next ? `/learning/lesson/${next.lesson.id}` : "/dashboard";
+  const href = next ? `/learning/lesson/${next.lesson.id}` : "/learning/roadmap";
   return (
     <div className="panel flex flex-col p-5">
       <p className="eyebrow eyebrow-accent">Continue Learning</p>
@@ -333,9 +340,9 @@ function HowToLearn() {
           icon={<BookOpen size={18} />}
           tone="primary"
           title="Official Roadmaps"
-          body="Curated learning experiences with projects, certificates and milestones. Follow one and it becomes your active path."
-          cta="Explore Roadmaps"
-          href="/dashboard"
+          body="Curated learning experiences with projects, certificates and milestones. Open your active path to see every phase."
+          cta="View my roadmap"
+          href="/learning/roadmap"
         />
         <div className="flex items-center justify-center">
           <span
@@ -419,7 +426,7 @@ function Mission({
       .slice(0, 3)
       .map((l) => l.title) ?? [];
 
-  const href = next ? `/learning/lesson/${next.lesson.id}` : "/dashboard";
+  const href = next ? `/learning/lesson/${next.lesson.id}` : "/learning/roadmap";
 
   return (
     <section className="panel overflow-hidden">

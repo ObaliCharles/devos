@@ -21,6 +21,7 @@
 
 export * from "./learning";
 export * from "./roadmaps";
+export * from "./catalog";
 export * from "./knowledge";
 export * from "./projects";
 export * from "./practice";

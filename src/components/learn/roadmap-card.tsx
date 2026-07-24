@@ -36,13 +36,13 @@ export function RoadmapCard({
 
   function follow() {
     if (r.active) {
-      router.push("/learning");
+      router.push("/learning/roadmap");
       return;
     }
     start(async () => {
       await activateRoadmap(r.id);
       router.refresh();
-      router.push("/learning");
+      router.push("/learning/roadmap");
     });
   }
 

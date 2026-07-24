@@ -107,16 +107,24 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
   }
 
   // Step 2: accept & save — the only place that writes and activates the path.
+  // The learner's own words drive the generation: their goal becomes the topic,
+  // so "I want to become a game developer" builds a game-dev path, not the
+  // default. The role plan only informs the example preview, never the request.
   function acceptAndSave() {
     setError(null);
-    const plan = planForGoal(goal);
+    // Strip the conversational lead-in to get the actual subject.
+    const subject = goal
+      .replace(/^\s*(i\s+want\s+to\s+become|i\s+want\s+to\s+learn|become|learn|master)\s+/i, "")
+      .replace(/^(a|an)\s+/i, "")
+      .trim();
+    const topic = subject || goal.trim();
     startGen(async () => {
       const res = await generateRoadmapAction({
-        topic: title.trim() ? `${title.trim()} — ${plan.topic}` : plan.topic,
-        goal: goal.replace(/^i want to become\s*/i, "become ").trim() || plan.outcome,
+        topic,
+        goal: `Become a capable ${topic}.`,
         level: level.toLowerCase() as "beginner" | "intermediate" | "advanced",
         context:
-          `Preferred path title: ${title.trim() || `${preview.role} Path`}. ` +
+          `Preferred path title: ${title.trim() || `${topic} Path`}. ` +
           `Target duration: ${DURATIONS[durationIdx].label}. ` +
           `${includeProjects ? "Include a hands-on project in each phase. " : ""}` +
           `${includeCerts ? "Call out relevant certifications along the way." : ""}`.trim(),

@@ -48,6 +48,9 @@ export type Course = {
   slug: string;
   title: string;
   icon: string;
+  /** A real technology brand mark key (python/react/docker/git/aws/...), shown
+   *  in place of the generic icon where it exists. See TechLogo. */
+  tech?: string;
   accent: Accent;
   level: Level;
   /** Discover/roadmap grouping. */
@@ -102,6 +105,7 @@ export const COURSES: Course[] = [
   /* ------------------------------------------------------------ Python ---- */
   {
     slug: "python-essentials",
+    tech: "python",
     title: "Python Essentials",
     icon: "Code2",
     accent: "info",
@@ -293,6 +297,7 @@ export const COURSES: Course[] = [
   /* ----------------------------------------------------------- Backend ---- */
   {
     slug: "apis-and-databases",
+    tech: "git",
     title: "APIs & Databases",
     icon: "Server",
     accent: "primary",
@@ -340,6 +345,7 @@ export const COURSES: Course[] = [
   /* --------------------------------------------------------- Cloud/DevOps -- */
   {
     slug: "docker-fundamentals",
+    tech: "docker",
     title: "Docker Fundamentals",
     icon: "Cloud",
     accent: "info",
@@ -386,6 +392,7 @@ export const COURSES: Course[] = [
   /* --------------------------------------------------------- Frontend ----- */
   {
     slug: "react-essentials",
+    tech: "react",
     title: "React Essentials",
     icon: "Smartphone",
     accent: "info",

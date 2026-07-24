@@ -156,6 +156,24 @@ const ReviewSchema = new Schema(
 );
 ReviewSchema.index({ user: 1, lesson: 1 }, { unique: true });
 
+/**
+ * Progress through a catalog course. Catalog courses aren't database lessons
+ * (they're authored, static content), so their per-user completion lives here:
+ * one document per user per course, holding the set of completed lesson indices.
+ * Small, and it keeps catalog progress out of the roadmap LessonProgress model.
+ */
+const CatalogProgressSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    /** The course slug from lib/catalog.ts. */
+    course: { type: String, required: true },
+    /** Flat lesson indices (0-based) the user has completed. */
+    completed: { type: [Number], default: [] },
+  },
+  { timestamps: true }
+);
+CatalogProgressSchema.index({ user: 1, course: 1 }, { unique: true });
+
 export const Roadmap = models.Roadmap ?? model("Roadmap", RoadmapSchema);
 export const Phase = models.Phase ?? model("Phase", PhaseSchema);
 export const Skill = models.Skill ?? model("Skill", SkillSchema);
@@ -163,6 +181,8 @@ export const Topic = models.Topic ?? model("Topic", TopicSchema);
 export const Lesson = models.Lesson ?? model("Lesson", LessonSchema);
 export const LessonProgress = models.LessonProgress ?? model("LessonProgress", LessonProgressSchema);
 export const Review = models.Review ?? model("Review", ReviewSchema);
+export const CatalogProgress =
+  models.CatalogProgress ?? model("CatalogProgress", CatalogProgressSchema);
 
 export type GateKey = keyof InferSchemaType<typeof GateSchema>;
 

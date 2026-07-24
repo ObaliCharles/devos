@@ -3,20 +3,15 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Clock } from "lucide-react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { COURSES, getCourse, flatLessons } from "@/lib/catalog";
+import { getCourse, flatLessons } from "@/lib/catalog";
+import { requireUser } from "@/lib/user";
+import { getCatalogProgress } from "@/lib/queries";
 import { ExplainLesson } from "@/components/learn/explain-lesson";
 import { LessonQuiz } from "@/components/learn/lesson-quiz";
+import { CompleteLesson } from "@/components/learn/complete-lesson";
 
-/** Pre-render every lesson of every course — it's stored, static content. */
-export function generateStaticParams() {
-  const params: { slug: string; lesson: string }[] = [];
-  for (const course of COURSES) {
-    flatLessons(course).forEach((l) => {
-      params.push({ slug: course.slug, lesson: String(l.index + 1) });
-    });
-  }
-  return params;
-}
+// Reads per-user progress, so it renders per request rather than at build time.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -43,9 +38,14 @@ export default async function CourseLessonPage({
   const current = all[idx];
   if (!current) notFound();
 
+  const user = await requireUser();
+  const completed = await getCatalogProgress(user._id, course.slug).catch(() => []);
+  const doneSet = new Set(completed);
+
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx < all.length - 1 ? all[idx + 1] : null;
-  const progressPct = Math.round(((idx + 1) / all.length) * 100);
+  // Course progress by lessons actually completed, not just position reached.
+  const progressPct = Math.round((completed.length / all.length) * 100);
 
   return (
     <div className="page-body measure-reading pb-10">
@@ -58,18 +58,21 @@ export default async function CourseLessonPage({
         <ArrowLeft size={15} /> {course.title}
       </Link>
 
-      {/* Course progress rail */}
+      {/* Course progress rail — reflects lessons actually completed */}
       <div>
         <div className="flex items-center justify-between text-[12px]">
           <span style={{ color: "var(--text-muted)" }}>
-            Lesson {idx + 1} of {all.length}
+            Lesson {idx + 1} of {all.length} · {completed.length} completed
           </span>
           <span className="num font-medium" style={{ color: "var(--text-muted)" }}>
             {progressPct}%
           </span>
         </div>
         <div className="progress progress-sm mt-1.5">
-          <div className="progress-bar" style={{ width: `${progressPct}%` }} />
+          <div
+            className="progress-bar progress-bar-success"
+            style={{ width: `${progressPct}%` }}
+          />
         </div>
       </div>
 
@@ -113,6 +116,29 @@ export default async function CourseLessonPage({
           </div>
         </section>
       )}
+
+      {/* Complete this lesson — credits XP, streak and course progress once */}
+      <div
+        className="card flex flex-wrap items-center justify-between gap-4 p-5"
+        style={{ background: "var(--surface-2)" }}
+      >
+        <div>
+          <p className="title-card">Done with this lesson?</p>
+          <p className="text-body mt-0.5 text-[13px]">
+            Mark it complete to earn XP, keep your streak alive, and track course progress.
+          </p>
+        </div>
+        <CompleteLesson
+          course={course.slug}
+          lessonIndex={idx}
+          nextHref={
+            next
+              ? `/learning/course/${course.slug}/${next.index + 1}`
+              : `/learning/course/${course.slug}`
+          }
+          alreadyDone={doneSet.has(idx)}
+        />
+      </div>
 
       {/* Prev / Next through the course */}
       <nav className="grid gap-3 sm:grid-cols-2" aria-label="Lesson navigation">

@@ -10,14 +10,16 @@ import {
   Lightbulb,
   Target,
 } from "lucide-react";
-import { COURSES, getCourse, lessonCount, flatLessons } from "@/lib/catalog";
+import { Check } from "lucide-react";
+import { getCourse, lessonCount, flatLessons } from "@/lib/catalog";
+import { requireUser } from "@/lib/user";
+import { getCatalogProgress } from "@/lib/queries";
 import { ContentIcon } from "@/components/learn/icon";
+import { TechLogo, TECH_WITH_LOGO } from "@/components/learn/tech-logo";
 import { Reveal } from "@/components/reveal";
 
-/** Pre-render every catalog course, they're static content. */
-export function generateStaticParams() {
-  return COURSES.map((c) => ({ slug: c.slug }));
-}
+// Reads per-user progress, so it renders per request.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -30,11 +32,18 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const course = getCourse(slug);
   if (!course) notFound();
 
+  const user = await requireUser();
+  const completed = await getCatalogProgress(user._id, course.slug).catch(() => []);
+  const doneSet = new Set(completed);
+
   const lessons = lessonCount(course);
   const flat = flatLessons(course);
-  // Map (moduleIndex, lessonInModule) -> 1-based flat route index.
-  const routeIndex = (mi: number, li: number) =>
-    flat.find((f) => f.moduleIndex === mi && f.lessonInModule === li)!.index + 1;
+  const pct = lessons > 0 ? Math.round((completed.length / lessons) * 100) : 0;
+  // First lesson not yet completed — where "Start"/"Resume" should land.
+  const resumeIdx = (flat.find((f) => !doneSet.has(f.index))?.index ?? 0) + 1;
+  // Map (moduleIndex, lessonInModule) -> flat lesson for route + completed state.
+  const flatAt = (mi: number, li: number) =>
+    flat.find((f) => f.moduleIndex === mi && f.lessonInModule === li)!;
 
   return (
     <div className="page-body measure-reading pb-10">
@@ -50,8 +59,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       {/* ------------------------------------------------------------- Header */}
       <header className="rise flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <span className={`icon-tile icon-tile-lg icon-tile-${course.accent} h-14 w-14`}>
-            <ContentIcon name={course.icon} size={26} />
+          <span className={`icon-tile icon-tile-lg h-14 w-14 ${course.tech && TECH_WITH_LOGO.has(course.tech) ? "" : `icon-tile-${course.accent}`}`}>
+            {course.tech && TECH_WITH_LOGO.has(course.tech) ? (
+              <TechLogo name={course.tech} size={30} />
+            ) : (
+              <ContentIcon name={course.icon} size={26} />
+            )}
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -62,10 +75,33 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="text-body mt-1.5 text-[14.5px]">{course.tagline}</p>
           </div>
         </div>
-        <Link href={`/learning/course/${course.slug}/1`} className="btn btn-primary btn-lg shrink-0">
-          Start course <ArrowRight size={16} />
+        <Link
+          href={`/learning/course/${course.slug}/${resumeIdx}`}
+          className="btn btn-primary btn-lg shrink-0"
+        >
+          {completed.length > 0 && completed.length < lessons
+            ? "Resume course"
+            : completed.length >= lessons && lessons > 0
+              ? "Review course"
+              : "Start course"}{" "}
+          <ArrowRight size={16} />
         </Link>
       </header>
+
+      {/* Progress bar — only once you've started */}
+      {completed.length > 0 && (
+        <div className="panel p-4">
+          <div className="flex items-center justify-between text-[13px]">
+            <span className="font-medium">Your progress</span>
+            <span className="num" style={{ color: "var(--text-muted)" }}>
+              {completed.length} / {lessons} lessons · {pct}%
+            </span>
+          </div>
+          <div className="progress mt-2">
+            <div className="progress-bar progress-bar-success" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
 
       {/* Stat strip */}
       <div
@@ -136,18 +172,24 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               </div>
 
               <ul>
-                {mod.lessons.map((lesson, li) => (
+                {mod.lessons.map((lesson, li) => {
+                  const f = flatAt(mi, li);
+                  const isDone = doneSet.has(f.index);
+                  return (
                   <li key={li}>
                     <Link
-                      href={`/learning/course/${course.slug}/${routeIndex(mi, li)}`}
+                      href={`/learning/course/${course.slug}/${f.index + 1}`}
                       className="row-link flex items-start gap-3 border-b px-5 py-3.5 last:border-b-0"
                       style={{ borderColor: "var(--border)", borderRadius: 0 }}
                     >
                       <span
                         className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold"
-                        style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}
+                        style={{
+                          background: isDone ? "var(--success-faint)" : "var(--surface-2)",
+                          color: isDone ? "var(--success)" : "var(--text-faint)",
+                        }}
                       >
-                        {li + 1}
+                        {isDone ? <Check size={13} /> : li + 1}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
@@ -165,7 +207,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                       />
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </Reveal>
           ))}
@@ -187,8 +230,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           <Link href="/projects/new" className="btn btn-secondary">
             <FolderGit2 size={15} /> Start the project
           </Link>
-          <Link href={`/learning/course/${course.slug}/1`} className="btn btn-primary">
-            Start course <ArrowRight size={15} />
+          <Link href={`/learning/course/${course.slug}/${resumeIdx}`} className="btn btn-primary">
+            {completed.length > 0 ? "Resume course" : "Start course"} <ArrowRight size={15} />
           </Link>
         </div>
       </div>

@@ -11,38 +11,49 @@ import { completeChat } from "./ai-provider";
  * the shape is wrong, generation fails cleanly and nothing is persisted.
  */
 
+/**
+ * The schema is deliberately forgiving about the *content* of a lesson and
+ * strict only about its *structure*. Asking a model to emit a full markdown
+ * body and a valid quiz for every one of ~15 lessons in a single strict JSON
+ * call is the reason generation used to fail "shape" validation constantly:
+ * one truncated body or missing quiz array failed the whole tree. So body and
+ * quiz are optional here, the outline (phases → skills → lessons with
+ * objectives) is what must be well-formed, and any lesson the model leaves thin
+ * gets a real body filled in afterwards. Structure is enforced; prose is
+ * best-effort and topped up.
+ */
 const Question = z.object({
   prompt: z.string().min(1),
   choices: z.array(z.string().min(1)).min(2).max(5),
-  answerIndex: z.number().int().min(0),
+  answerIndex: z.coerce.number().int().min(0).default(0),
   explanation: z.string().default(""),
 });
 
 const Lesson = z.object({
-  title: z.string().min(1).max(140),
-  objectives: z.array(z.string().min(1)).min(1).max(6),
-  estimatedMinutes: z.number().int().min(5).max(180).default(30),
-  body: z.string().min(1),
-  quiz: z.array(Question).min(1).max(5),
+  title: z.string().min(1).max(160),
+  objectives: z.array(z.string().min(1)).min(1).max(6).catch(["Understand this lesson's core idea."]),
+  estimatedMinutes: z.coerce.number().int().min(5).max(180).catch(30).default(30),
+  body: z.string().optional().default(""),
+  quiz: z.array(Question).max(5).optional().default([]),
 });
 
 const Skill = z.object({
-  title: z.string().min(1).max(120),
-  why: z.string().min(1).max(400),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).default("beginner"),
-  lessons: z.array(Lesson).min(1).max(6),
+  title: z.string().min(1).max(140),
+  why: z.string().max(500).optional().default(""),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).catch("beginner").default("beginner"),
+  lessons: z.array(Lesson).min(1).max(8),
 });
 
 const Phase = z.object({
-  title: z.string().min(1).max(120),
+  title: z.string().min(1).max(140),
   subtitle: z.string().max(200).optional().default(""),
-  skills: z.array(Skill).min(1).max(5),
+  skills: z.array(Skill).min(1).max(6),
 });
 
 const GeneratedRoadmap = z.object({
-  title: z.string().min(1).max(140),
-  summary: z.string().min(1).max(600),
-  phases: z.array(Phase).min(2).max(6),
+  title: z.string().min(1).max(160),
+  summary: z.string().max(600).optional().default(""),
+  phases: z.array(Phase).min(2).max(8),
 });
 
 export type GeneratedRoadmap = z.infer<typeof GeneratedRoadmap>;
@@ -55,43 +66,43 @@ export type GenerateInput = {
   context?: string;
 };
 
-const SYSTEM = `You are a senior curriculum designer building a structured, masterable learning path inside a developer learning app.
+const SYSTEM = `You are a senior curriculum designer building a structured learning path inside a developer learning app.
+
+Output ONLY valid JSON — no prose, no markdown fences, no commentary. It MUST be complete and closed (every brace and bracket balanced). Finishing the JSON is more important than long lesson bodies.
+
+Shape:
+{
+  "title": string,                     // names the path, e.g. "Become a Backend Engineer"
+  "summary": string,                   // one sentence
+  "phases": [                          // 3 to 5 phases, fundamentals -> advanced
+    {
+      "title": string,
+      "subtitle": string,              // short
+      "skills": [                      // 1 to 2 skills per phase
+        {
+          "title": string,
+          "why": string,               // one sentence: why it matters in practice
+          "difficulty": "beginner" | "intermediate" | "advanced",
+          "lessons": [                 // 2 to 3 lessons per skill
+            {
+              "title": string,
+              "objectives": string[],  // 1 to 3 short objectives
+              "estimatedMinutes": number,
+              "body": string,          // 2 to 4 short markdown paragraphs with one small code example
+              "quiz": [ { "prompt": string, "choices": string[], "answerIndex": number, "explanation": string } ] // exactly 1 question
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 
 Rules:
-- Output ONLY valid JSON. No prose, no markdown fences, no commentary.
-- The JSON must match this exact shape:
-  {
-    "title": string,
-    "summary": string,
-    "phases": [
-      {
-        "title": string,
-        "subtitle": string,
-        "skills": [
-          {
-            "title": string,
-            "why": string,
-            "difficulty": "beginner" | "intermediate" | "advanced",
-            "lessons": [
-              {
-                "title": string,
-                "objectives": string[],
-                "estimatedMinutes": number,
-                "body": string (markdown, 150-400 words, teaches the concept with at least one example),
-                "quiz": [ { "prompt": string, "choices": string[], "answerIndex": number, "explanation": string } ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-- 2 to 4 phases. Each phase 1 to 3 skills. Each skill 2 to 4 lessons. Each lesson 1 to 3 quiz questions.
-- Order phases from fundamentals to advanced. Later phases build on earlier ones.
-- "why" explains, in one or two sentences, why the skill matters in practice.
-- Lesson "body" is real teaching content in markdown: explain the idea, show a concrete example, note a common mistake.
-- Every quiz question has one correct answer; answerIndex is its 0-based position in choices.
-- Keep it focused and achievable. Do not pad. Total lessons should be roughly 8 to 20.`;
+- Aim for about 10 to 16 lessons total. Keep bodies SHORT so the JSON completes.
+- Tailor everything to the learner's topic and goal — do NOT default to Python or AI unless they asked for it.
+- answerIndex is the 0-based position of the correct choice.
+- Order phases from fundamentals to advanced; later phases build on earlier ones.`;
 
 function buildPrompt(input: GenerateInput) {
   const parts = [
@@ -159,22 +170,48 @@ export async function generateRoadmap(input: GenerateInput): Promise<GenerateRes
 
   const result = GeneratedRoadmap.safeParse(parsed);
   if (!result.success) {
+    // Surface the first concrete problem so failures are debuggable rather than
+    // a blanket "wrong shape". The path names exactly which field was off.
+    const issue = result.error.issues[0];
+    const where = issue?.path?.join(".") || "the response";
+    console.error("[roadmap-gen] validation failed:", JSON.stringify(result.error.issues.slice(0, 4)));
     return {
       ok: false,
-      error: "The generated path did not have the right shape. Try a more specific topic and goal.",
+      error: `The generated path was incomplete (${where}: ${issue?.message ?? "invalid"}). Please try again.`,
     };
   }
 
-  // Clamp any out-of-range answerIndex the model may have produced.
+  // Normalise the tree: clamp answer indices and fill any lesson the model left
+  // thin with a real, metadata-driven body so no lesson opens blank.
   for (const phase of result.data.phases) {
     for (const skill of phase.skills) {
       for (const lesson of skill.lessons) {
         for (const q of lesson.quiz) {
           if (q.answerIndex >= q.choices.length) q.answerIndex = 0;
         }
+        if (!lesson.body || lesson.body.trim().length < 40) {
+          lesson.body = fallbackLessonBody(lesson.title, lesson.objectives, skill.title);
+        }
       }
     }
   }
 
   return { ok: true, roadmap: result.data, provider: reply.provider };
+}
+
+/** A real (if brief) body for a lesson the model didn't fully write, so the
+ *  lesson page never opens empty and the in-lesson AI tutor can take it deeper. */
+function fallbackLessonBody(title: string, objectives: string[], skill: string): string {
+  const objs = objectives.map((o) => `- ${o}`).join("\n");
+  return `## ${title}
+
+Part of **${skill}**.
+
+**By the end you'll be able to:**
+
+${objs}
+
+---
+
+Work through the idea, try the smallest example yourself, then use the **AI tutor** on this page for a worked example, a different explanation, or the common mistakes — it has this lesson's context. When you can do the objectives above without looking them up, move on.`;
 }
