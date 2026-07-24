@@ -7,10 +7,10 @@
  * is grounded in current (2026) industry roadmaps rather than invented, so a
  * course page reads like a real syllabus.
  *
- * Full written lesson prose is intentionally NOT frozen here. Every lesson has
- * an "Ask AI to explain" affordance that generates an accurate explanation on
- * demand through the existing assistant, which keeps content fresh and correct
- * instead of stale. This module holds the structure; the AI fills the depth.
+ * Full lesson content is stored (see catalog-lessons.ts) and stitched onto each
+ * lesson at module load, so a lesson page just loads complete teaching content.
+ * The "Ask AI to explain" tutor on the lesson page is for going deeper, not for
+ * filling a blank. This module holds the structure; catalog-lessons.ts the depth.
  *
  * Plain data, no JSX, so it imports on server and client alike.
  *
@@ -21,6 +21,8 @@
  *  - React: React 2026 roadmap (core → hooks → state → data → performance)
  */
 
+import { LESSON_CONTENT, fallbackBody } from "./catalog-lessons";
+
 export type Level = "Beginner" | "Intermediate" | "Advanced";
 export type Accent = "primary" | "info" | "success" | "warning" | "danger";
 
@@ -29,6 +31,11 @@ export type Lesson = {
   minutes: number;
   /** A one-line objective, what you can do after it. */
   objective: string;
+  /** Full markdown teaching content, stored so the lesson page just loads it.
+   *  Authored in catalog-lessons.ts and stitched in at module load. */
+  body?: string;
+  /** A short knowledge-check for the lesson page. */
+  quiz?: { prompt: string; choices: string[]; answer: number }[];
 };
 
 export type Module = {
@@ -60,6 +67,35 @@ export type Course = {
 /** Derived: total lessons across a course's modules. */
 export function lessonCount(course: Course): number {
   return course.modules.reduce((n, m) => n + m.lessons.length, 0);
+}
+
+/** A flat, ordered view of a course's lessons with their module context and a
+ *  stable index, used by the lesson learning route for prev/next navigation. */
+export type FlatLesson = Lesson & {
+  index: number;
+  moduleTitle: string;
+  moduleIndex: number;
+  lessonInModule: number;
+};
+
+export function flatLessons(course: Course): FlatLesson[] {
+  const out: FlatLesson[] = [];
+  course.modules.forEach((m, mi) => {
+    m.lessons.forEach((l, li) => {
+      out.push({
+        ...l,
+        index: out.length,
+        moduleTitle: m.title,
+        moduleIndex: mi,
+        lessonInModule: li,
+      });
+    });
+  });
+  return out;
+}
+
+export function getLesson(course: Course, index: number): FlatLesson | undefined {
+  return flatLessons(course)[index];
 }
 
 export const COURSES: Course[] = [
@@ -435,6 +471,24 @@ export const COURSES: Course[] = [
 
 export function getCourse(slug: string): Course | undefined {
   return COURSES.find((c) => c.slug === slug);
+}
+
+/* --- Stitch stored lesson bodies onto the structure --------------------------
+   Content lives in catalog-lessons.ts (keyed by course slug, in flat lesson
+   order). We fold it onto the matching lessons once at module load, and fill
+   any gap with a metadata-driven fallback body so every lesson always has real
+   content to render, never a blank. */
+for (const course of COURSES) {
+  const content = LESSON_CONTENT[course.slug];
+  let i = 0;
+  for (const mod of course.modules) {
+    for (const lesson of mod.lessons) {
+      const authored = content?.[i];
+      lesson.body = authored?.body ?? fallbackBody(lesson.title, lesson.objective, course.title);
+      if (authored?.quiz) lesson.quiz = authored.quiz;
+      i += 1;
+    }
+  }
 }
 
 /* ------------------------------------------------------------- Projects ---

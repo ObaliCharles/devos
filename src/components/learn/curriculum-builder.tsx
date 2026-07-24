@@ -10,7 +10,9 @@ import {
   ClipboardCheck,
   FolderGit2,
   Loader2,
+  Pencil,
   RotateCcw,
+  Save,
   Sparkles,
   Wand2,
 } from "lucide-react";
@@ -75,8 +77,14 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
   const [includeCerts, setIncludeCerts] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Two-phase flow: configure the request, then review (and edit the title)
+  // before anything is written. Nothing is saved or made active until you press
+  // Accept & save — so a generated path is never committed behind your back.
+  const [phase, setPhase] = useState<"configure" | "review">("configure");
+  const [title, setTitle] = useState("");
+
   // The live preview: an example plan, fit to the chosen duration. This is
-  // illustrative; the real path is written server-side when you generate.
+  // illustrative; the real path is written server-side when you accept it.
   const preview = useMemo(() => {
     const plan = planForGoal(goal);
     const target = DURATIONS[durationIdx].months;
@@ -91,17 +99,27 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
     };
   }, [goal, durationIdx, level, includeProjects, includeCerts]);
 
-  function generate() {
+  // Step 1: review — no write happens here, just move to the editable review.
+  function review() {
+    setError(null);
+    setTitle((t) => t || `${preview.role} Path`);
+    setPhase("review");
+  }
+
+  // Step 2: accept & save — the only place that writes and activates the path.
+  function acceptAndSave() {
     setError(null);
     const plan = planForGoal(goal);
     startGen(async () => {
       const res = await generateRoadmapAction({
-        topic: plan.topic,
+        topic: title.trim() ? `${title.trim()} — ${plan.topic}` : plan.topic,
         goal: goal.replace(/^i want to become\s*/i, "become ").trim() || plan.outcome,
         level: level.toLowerCase() as "beginner" | "intermediate" | "advanced",
-        context: `Target duration: ${DURATIONS[durationIdx].label}. ${
-          includeProjects ? "Include a hands-on project in each phase. " : ""
-        }${includeCerts ? "Call out relevant certifications along the way." : ""}`.trim(),
+        context:
+          `Preferred path title: ${title.trim() || `${preview.role} Path`}. ` +
+          `Target duration: ${DURATIONS[durationIdx].label}. ` +
+          `${includeProjects ? "Include a hands-on project in each phase. " : ""}` +
+          `${includeCerts ? "Call out relevant certifications along the way." : ""}`.trim(),
       });
       if (!res.ok) {
         setError(res.error);
@@ -195,38 +213,47 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
           )}
 
           <button
-            onClick={generate}
-            disabled={pending || !configured || goal.trim().length < 3}
+            onClick={review}
+            disabled={pending || goal.trim().length < 3}
             className="btn btn-primary btn-lg btn-block mt-1"
           >
-            {pending ? (
-              <>
-                <Loader2 size={15} className="animate-spin" /> Writing your curriculum…
-              </>
-            ) : (
-              <>
-                <Sparkles size={15} /> Generate Path
-              </>
-            )}
+            <Sparkles size={15} /> Review path
           </button>
-          {pending && (
-            <p className="text-meta text-center text-[11.5px]">
-              This takes 20–60 seconds. It writes every lesson and quiz, then opens your path.
-            </p>
-          )}
+          <p className="text-meta text-center text-[11.5px]">
+            You&apos;ll review and can rename it before anything is saved.
+          </p>
         </div>
       </div>
 
       {/* --------------------------------------------------- Generated preview */}
       <div className="panel flex flex-col overflow-hidden">
         <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
-          <p className="eyebrow eyebrow-accent">Curriculum Preview</p>
-          <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.02em]">
-            Become {article(preview.role)} {preview.role}
-          </h3>
-          <p className="text-meta mt-0.5">
-            An example of the shape. Generate to get your own, written and saved.
+          <p className="eyebrow eyebrow-accent">
+            {phase === "review" ? "Review your path" : "Curriculum Preview"}
           </p>
+          {phase === "review" ? (
+            <div className="mt-2">
+              <label className="label" htmlFor="cb-title">
+                Path name — edit before saving
+              </label>
+              <input
+                id="cb-title"
+                className="input text-[15px] font-semibold"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={`${preview.role} Path`}
+              />
+            </div>
+          ) : (
+            <>
+              <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.02em]">
+                Become {article(preview.role)} {preview.role}
+              </h3>
+              <p className="text-meta mt-0.5">
+                An example of the shape. Review to name and save your own.
+              </p>
+            </>
+          )}
         </div>
 
         {/* Stat strip */}
@@ -283,13 +310,43 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
           className="mt-auto flex flex-wrap items-center gap-2 border-t px-5 py-4"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
         >
-          <button onClick={generate} disabled={pending || !configured} className="btn btn-primary">
-            {pending ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-            Generate &amp; Start
-          </button>
-          <span className="text-meta ml-auto hidden items-center gap-1.5 sm:flex">
-            <ClipboardCheck size={13} /> {preview.assessments} assessments included
-          </span>
+          {phase === "review" ? (
+            <>
+              <button
+                onClick={acceptAndSave}
+                disabled={pending || !configured}
+                className="btn btn-primary"
+              >
+                {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                {pending ? "Saving your path…" : "Accept & save"}
+              </button>
+              <button onClick={() => setPhase("configure")} disabled={pending} className="btn btn-secondary">
+                <Pencil size={15} /> Edit
+              </button>
+              <button onClick={review} disabled={pending} className="btn btn-ghost">
+                <RotateCcw size={15} /> Regenerate
+              </button>
+              {!configured && (
+                <span className="text-meta w-full text-[11.5px]" style={{ color: "var(--warning)" }}>
+                  Add an AI key in .env.local to write and save the path.
+                </span>
+              )}
+              {pending && (
+                <span className="text-meta w-full text-[11.5px]">
+                  Writing every lesson and quiz — 20–60s — then opening your path.
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              <button onClick={review} disabled={goal.trim().length < 3} className="btn btn-primary">
+                <ArrowRight size={15} /> Review &amp; save
+              </button>
+              <span className="text-meta ml-auto hidden items-center gap-1.5 sm:flex">
+                <ClipboardCheck size={13} /> {preview.assessments} assessments included
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

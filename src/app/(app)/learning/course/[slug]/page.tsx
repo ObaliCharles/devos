@@ -10,9 +10,8 @@ import {
   Lightbulb,
   Target,
 } from "lucide-react";
-import { COURSES, getCourse, lessonCount } from "@/lib/catalog";
+import { COURSES, getCourse, lessonCount, flatLessons } from "@/lib/catalog";
 import { ContentIcon } from "@/components/learn/icon";
-import { ExplainLesson } from "@/components/learn/explain-lesson";
 import { Reveal } from "@/components/reveal";
 
 /** Pre-render every catalog course, they're static content. */
@@ -32,6 +31,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   if (!course) notFound();
 
   const lessons = lessonCount(course);
+  const flat = flatLessons(course);
+  // Map (moduleIndex, lessonInModule) -> 1-based flat route index.
+  const routeIndex = (mi: number, li: number) =>
+    flat.find((f) => f.moduleIndex === mi && f.lessonInModule === li)!.index + 1;
 
   return (
     <div className="page-body measure-reading pb-10">
@@ -59,6 +62,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="text-body mt-1.5 text-[14.5px]">{course.tagline}</p>
           </div>
         </div>
+        <Link href={`/learning/course/${course.slug}/1`} className="btn btn-primary btn-lg shrink-0">
+          Start course <ArrowRight size={16} />
+        </Link>
       </header>
 
       {/* Stat strip */}
@@ -131,12 +137,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
               <ul>
                 {mod.lessons.map((lesson, li) => (
-                  <li
-                    key={li}
-                    className="border-b px-5 py-3.5 last:border-b-0"
-                    style={{ borderColor: "var(--border)" }}
-                  >
-                    <div className="flex items-start gap-3">
+                  <li key={li}>
+                    <Link
+                      href={`/learning/course/${course.slug}/${routeIndex(mi, li)}`}
+                      className="row-link flex items-start gap-3 border-b px-5 py-3.5 last:border-b-0"
+                      style={{ borderColor: "var(--border)", borderRadius: 0 }}
+                    >
                       <span
                         className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold"
                         style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}
@@ -151,13 +157,13 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                           </span>
                         </div>
                         <p className="text-body mt-0.5 text-[12.5px]">{lesson.objective}</p>
-                        <ExplainLesson
-                          course={course.title}
-                          topic={lesson.title}
-                          objective={lesson.objective}
-                        />
                       </div>
-                    </div>
+                      <ArrowRight
+                        size={15}
+                        className="mt-1 shrink-0"
+                        style={{ color: "var(--text-faint)" }}
+                      />
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -174,15 +180,15 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <div>
           <p className="title-card">Ready to start {course.title}?</p>
           <p className="text-body mt-0.5 text-[13px]">
-            Add it to your path, or spin up the project you&apos;ll build.
+            Begin at lesson one, or jump to the project you&apos;ll build.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/learning" className="btn btn-secondary">
-            <BookOpen size={15} /> Back to Learn
+          <Link href="/projects/new" className="btn btn-secondary">
+            <FolderGit2 size={15} /> Start the project
           </Link>
-          <Link href="/projects/new" className="btn btn-primary">
-            Start the project <ArrowRight size={15} />
+          <Link href={`/learning/course/${course.slug}/1`} className="btn btn-primary">
+            Start course <ArrowRight size={15} />
           </Link>
         </div>
       </div>

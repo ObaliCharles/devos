@@ -63,32 +63,38 @@ export type DiscoverItem = {
 };
 
 export const DISCOVER_FALLBACK: DiscoverItem[] = [
-  // Docker
-  { title: "Docker Fundamentals", kind: "Course", level: "Beginner", href: "/learning", tags: ["docker", "containers", "devops"] },
-  { title: "Build Docker Containers", kind: "Project", level: "Beginner", href: "/projects/new", tags: ["docker", "containers"] },
+  // Docker — courses link to real catalog course pages, never back to the list.
+  { title: "Docker Fundamentals", kind: "Course", level: "Beginner", href: "/learning/course/docker-fundamentals", tags: ["docker", "containers", "devops"] },
+  { title: "Dockerized Web App", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["docker", "containers"] },
   { title: "Cloud Engineering", kind: "Roadmap", level: "Includes Docker", href: "/dashboard", tags: ["docker", "cloud", "aws"] },
-  { title: "Docker Associate", kind: "Certification", level: "Official certification", href: "/career/certificates", tags: ["docker"] },
-  { title: "Docker Fundamentals Assessment", kind: "Assessment", level: "Practice quiz", href: "/practice", tags: ["docker"] },
+  { title: "Docker Certified Associate", kind: "Certification", level: "Official certification", href: "/career/certificates", tags: ["docker"] },
+  { title: "Docker Fundamentals Quiz", kind: "Assessment", level: "Practice quiz", href: "/practice", tags: ["docker"] },
 
   // Python
-  { title: "Python Essentials", kind: "Course", level: "Beginner", href: "/learning", tags: ["python", "programming"] },
-  { title: "Build a CLI Task Manager", kind: "Project", level: "Beginner", href: "/projects/new", tags: ["python", "cli"] },
+  { title: "Python Essentials", kind: "Course", level: "Beginner", href: "/learning/course/python-essentials", tags: ["python", "programming"] },
+  { title: "CLI Task Manager", kind: "Project", level: "Beginner", href: "/projects/new", tags: ["python", "cli"] },
   { title: "Python Fullstack", kind: "Roadmap", level: "Beginner friendly", href: "/dashboard", tags: ["python", "web", "fullstack"] },
-  { title: "Python Fundamentals Assessment", kind: "Assessment", level: "Practice quiz", href: "/practice", tags: ["python"] },
+  { title: "PCEP — Python Entry", kind: "Certification", level: "Official certification", href: "/career/certificates", tags: ["python"] },
 
   // AI / ML
-  { title: "Prompt Engineering", kind: "Course", level: "Beginner", href: "/learning", tags: ["ai", "llm", "prompts"] },
-  { title: "Build an AI Chat Assistant", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["ai", "llm", "chatbot"] },
+  { title: "Prompt Engineering", kind: "Course", level: "Beginner", href: "/learning/course/prompt-engineering", tags: ["ai", "llm", "prompts"] },
+  { title: "Building with LLMs", kind: "Course", level: "Intermediate", href: "/learning/course/build-with-llms", tags: ["ai", "llm", "rag"] },
+  { title: "Machine Learning Foundations", kind: "Course", level: "Intermediate", href: "/learning/course/machine-learning-foundations", tags: ["ml", "ai"] },
+  { title: "AI Chat Assistant", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["ai", "llm", "chatbot"] },
   { title: "AI Engineering", kind: "Roadmap", level: "Intermediate", href: "/dashboard", tags: ["ai", "llm", "engineering"] },
-  { title: "Machine Learning", kind: "Roadmap", level: "Advanced", href: "/dashboard", tags: ["ml", "ai", "models"] },
+
+  // Backend / APIs
+  { title: "APIs & Databases", kind: "Course", level: "Intermediate", href: "/learning/course/apis-and-databases", tags: ["backend", "api", "sql"] },
+  { title: "REST API Service", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["backend", "api"] },
+  { title: "Backend Engineering", kind: "Roadmap", level: "Intermediate", href: "/dashboard", tags: ["backend", "api"] },
 
   // React / frontend
-  { title: "React Essentials", kind: "Course", level: "Beginner", href: "/learning", tags: ["react", "frontend", "javascript"] },
-  { title: "Build a Mobile App", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["react", "mobile", "native"] },
+  { title: "React Essentials", kind: "Course", level: "Beginner", href: "/learning/course/react-essentials", tags: ["react", "frontend", "javascript"] },
+  { title: "React Dashboard", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["react", "mobile", "native"] },
   { title: "React Native", kind: "Roadmap", level: "Intermediate", href: "/dashboard", tags: ["react", "mobile"] },
 
   // Security
-  { title: "Web Security Basics", kind: "Course", level: "Beginner", href: "/learning", tags: ["security", "web", "owasp"] },
+  { title: "Web Security Basics", kind: "Course", level: "Beginner", href: "/learning/course/web-security-basics", tags: ["security", "web", "owasp"] },
   { title: "Harden a Web App", kind: "Project", level: "Intermediate", href: "/projects/new", tags: ["security", "web"] },
   { title: "Cyber Security", kind: "Roadmap", level: "Advanced", href: "/dashboard", tags: ["security", "cyber", "defense"] },
 ];
