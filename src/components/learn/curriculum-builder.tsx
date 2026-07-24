@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Award,
@@ -9,22 +9,27 @@ import {
   CheckCircle2,
   ClipboardCheck,
   FolderGit2,
+  Loader2,
   RotateCcw,
-  Save,
   Sparkles,
   Wand2,
 } from "lucide-react";
+import { generateRoadmapAction } from "@/lib/actions";
 import { planForGoal, type CurriculumMonth } from "@/lib/learn-content";
 
 /**
- * The AI Curriculum Builder and its generated result, side by side on desktop
- * and stacked on phones.
+ * The AI Curriculum Builder.
  *
- * The builder is conversational: who you want to become, how long you have,
- * your level, and whether to include projects and certifications. Pressing
- * generate resolves a role plan instantly, then trims or pads it to the chosen
- * duration, so the result appears the moment you ask for it, the right feel for
- * a tool that should never make you wait to see a plan.
+ * The form is conversational: who you want to become, how long you have, your
+ * level, and whether to include projects and certifications. While you tweak
+ * it, the right panel shows a live preview drawn from an example role plan, so
+ * the section is never empty and you can see the chronological shape (month 1 →
+ * final project) before committing.
+ *
+ * Pressing Generate is real: it sends the topic, goal and level to
+ * generateRoadmapAction, which has the AI write a full phase → skill → lesson →
+ * quiz tree, persists it, makes it your active path, and lands you on /learning
+ * to start it. The preview is a preview; the generated path is the product.
  */
 
 const DURATIONS = [
@@ -34,27 +39,11 @@ const DURATIONS = [
   { label: "1 Year", months: 12 },
 ];
 const LEVELS = ["Beginner", "Intermediate", "Advanced"] as const;
-
 type Level = (typeof LEVELS)[number];
 
-type Generated = {
-  role: string;
-  outcome: string;
-  duration: string;
-  months: CurriculumMonth[];
-  lessons: number;
-  projects: number;
-  certifications: number;
-  assessments: number;
-  includeProjects: boolean;
-  includeCerts: boolean;
-};
-
-/** Fit a six-month plan to the requested number of months by sampling evenly,
- *  so a 3-month plan still spans foundations to a final project. */
+/** Fit an example six-month plan to the requested duration for the preview. */
 function fitToDuration(months: CurriculumMonth[], target: number): CurriculumMonth[] {
   if (target >= months.length) {
-    // Pad by repeating the "build" cadence toward the end for longer plans.
     const out = [...months];
     let i = months.length - 2;
     while (out.length < target) {
@@ -67,7 +56,6 @@ function fitToDuration(months: CurriculumMonth[], target: number): CurriculumMon
     }
     return out.slice(0, target);
   }
-  // Always keep the first (foundations) and last (final project) months.
   if (target <= 1) return [months[months.length - 1]];
   const middle = months.slice(1, -1);
   const keep = target - 2;
@@ -76,41 +64,56 @@ function fitToDuration(months: CurriculumMonth[], target: number): CurriculumMon
   return [months[0], ...sampled, months[months.length - 1]];
 }
 
-export function CurriculumBuilder() {
+export function CurriculumBuilder({ configured }: { configured: boolean }) {
+  const router = useRouter();
+  const [pending, startGen] = useTransition();
+
   const [goal, setGoal] = useState("I want to become an AI engineer");
   const [durationIdx, setDurationIdx] = useState(2); // 6 months
   const [level, setLevel] = useState<Level>("Beginner");
   const [includeProjects, setIncludeProjects] = useState(true);
   const [includeCerts, setIncludeCerts] = useState(true);
-  const [result, setResult] = useState<Generated | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const generate = () => setResult(build());
-
-  function build(): Generated {
+  // The live preview: an example plan, fit to the chosen duration. This is
+  // illustrative; the real path is written server-side when you generate.
+  const preview = useMemo(() => {
     const plan = planForGoal(goal);
     const target = DURATIONS[durationIdx].months;
     const months = fitToDuration(plan.months, target);
-    const projects = includeProjects ? months.filter((m) => m.project).length : 0;
     return {
       role: plan.role,
-      outcome: plan.outcome,
-      duration: DURATIONS[durationIdx].label,
       months,
-      lessons: months.length * (level === "Advanced" ? 4 : level === "Intermediate" ? 3 : 3) + 2,
-      projects,
+      lessons: months.length * (level === "Advanced" ? 4 : 3) + 2,
+      projects: includeProjects ? months.filter((m) => m.project).length : 0,
       certifications: includeCerts ? Math.max(2, Math.round(months.length / 2)) : 0,
       assessments: Math.max(3, months.length - 1),
-      includeProjects,
-      includeCerts,
     };
+  }, [goal, durationIdx, level, includeProjects, includeCerts]);
+
+  function generate() {
+    setError(null);
+    const plan = planForGoal(goal);
+    startGen(async () => {
+      const res = await generateRoadmapAction({
+        topic: plan.topic,
+        goal: goal.replace(/^i want to become\s*/i, "become ").trim() || plan.outcome,
+        level: level.toLowerCase() as "beginner" | "intermediate" | "advanced",
+        context: `Target duration: ${DURATIONS[durationIdx].label}. ${
+          includeProjects ? "Include a hands-on project in each phase. " : ""
+        }${includeCerts ? "Call out relevant certifications along the way." : ""}`.trim(),
+      });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+      router.push("/learning");
+    });
   }
 
-  // Show a live preview before the user ever presses generate, so the panel is
-  // never empty, it defaults to the AI Engineer plan the reference shows.
-  const shown = useMemo(() => result ?? build(), [result]); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+    <div id="build" className="grid scroll-mt-4 gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
       {/* ------------------------------------------------------- The builder */}
       <div className="panel p-5">
         <div className="flex items-center gap-2.5">
@@ -119,7 +122,7 @@ export function CurriculumBuilder() {
           </span>
           <div className="min-w-0">
             <h3 className="title-card">AI Curriculum Builder</h3>
-            <p className="text-meta">Let AI build the perfect path for you.</p>
+            <p className="text-meta">Let AI build a real path for you.</p>
           </div>
         </div>
 
@@ -174,40 +177,73 @@ export function CurriculumBuilder() {
             <Toggle label="Certifications?" value={includeCerts} onChange={setIncludeCerts} />
           </div>
 
-          <button onClick={generate} className="btn btn-primary btn-lg btn-block mt-1">
-            <Sparkles size={15} /> Generate Path
+          {!configured && (
+            <p
+              className="rounded-[var(--radius-tile)] p-2.5 text-[12px]"
+              style={{ background: "var(--warning-faint)", color: "var(--warning)" }}
+            >
+              Add ANTHROPIC_API_KEY or GROQ_API_KEY to .env.local to generate a real path.
+            </p>
+          )}
+          {error && (
+            <p
+              className="rounded-[var(--radius-tile)] p-2.5 text-[12px]"
+              style={{ background: "var(--danger-faint)", color: "var(--danger)" }}
+            >
+              {error}
+            </p>
+          )}
+
+          <button
+            onClick={generate}
+            disabled={pending || !configured || goal.trim().length < 3}
+            className="btn btn-primary btn-lg btn-block mt-1"
+          >
+            {pending ? (
+              <>
+                <Loader2 size={15} className="animate-spin" /> Writing your curriculum…
+              </>
+            ) : (
+              <>
+                <Sparkles size={15} /> Generate Path
+              </>
+            )}
           </button>
+          {pending && (
+            <p className="text-meta text-center text-[11.5px]">
+              This takes 20–60 seconds. It writes every lesson and quiz, then opens your path.
+            </p>
+          )}
         </div>
       </div>
 
-      {/* --------------------------------------------------- Generated result */}
+      {/* --------------------------------------------------- Generated preview */}
       <div className="panel flex flex-col overflow-hidden">
         <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
-          <p className="eyebrow eyebrow-accent">AI Generated Curriculum</p>
+          <p className="eyebrow eyebrow-accent">Curriculum Preview</p>
           <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.02em]">
-            Become {article(shown.role)} {shown.role}
+            Become {article(preview.role)} {preview.role}
           </h3>
+          <p className="text-meta mt-0.5">
+            An example of the shape. Generate to get your own, written and saved.
+          </p>
         </div>
 
         {/* Stat strip */}
-        <div
-          className="grid grid-cols-2 gap-px sm:grid-cols-4"
-          style={{ background: "var(--border)" }}
-        >
-          <Stat icon={<RotateCcw size={13} />} value={shown.duration} label="Duration" />
-          <Stat icon={<BookOpen size={13} />} value={shown.lessons} label="Lessons" />
-          <Stat icon={<FolderGit2 size={13} />} value={shown.projects} label="Projects" />
-          <Stat icon={<Award size={13} />} value={shown.certifications} label="Certifications" />
+        <div className="grid grid-cols-2 gap-px sm:grid-cols-4" style={{ background: "var(--border)" }}>
+          <Stat icon={<RotateCcw size={13} />} value={DURATIONS[durationIdx].label} label="Duration" />
+          <Stat icon={<BookOpen size={13} />} value={preview.lessons} label="Lessons" />
+          <Stat icon={<FolderGit2 size={13} />} value={preview.projects} label="Projects" />
+          <Stat icon={<Award size={13} />} value={preview.certifications} label="Certifications" />
         </div>
 
-        {/* Month timeline */}
+        {/* Month timeline, chronological foundations → final project */}
         <ol className="flex flex-col p-4 sm:p-5">
-          {shown.months.map((m, i) => {
+          {preview.months.map((m, i) => {
             const first = i === 0;
-            const last = i === shown.months.length - 1;
+            const last = i === preview.months.length - 1;
             return (
               <li key={i} className="relative flex gap-4 pb-5 last:pb-0">
-                {/* Rail */}
                 <div className="flex flex-col items-center">
                   <span
                     className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold"
@@ -229,7 +265,7 @@ export function CurriculumBuilder() {
                     <span className="text-[14.5px] font-semibold">{m.title}</span>
                   </div>
                   <p className="text-body mt-0.5 text-[13px]">{m.focus}</p>
-                  {shown.includeProjects && m.project && (
+                  {includeProjects && m.project && (
                     <p
                       className="mt-1.5 inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-2 py-1 text-[12px] font-medium"
                       style={{ background: "var(--primary-faint)", color: "var(--primary)" }}
@@ -247,17 +283,12 @@ export function CurriculumBuilder() {
           className="mt-auto flex flex-wrap items-center gap-2 border-t px-5 py-4"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
         >
-          <Link href="/learning" className="btn btn-primary">
-            <ArrowRight size={15} /> Start Learning
-          </Link>
-          <button onClick={generate} className="btn btn-secondary">
-            <Save size={15} /> Save Curriculum
-          </button>
-          <button onClick={generate} className="btn btn-ghost">
-            <RotateCcw size={15} /> Regenerate
+          <button onClick={generate} disabled={pending || !configured} className="btn btn-primary">
+            {pending ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
+            Generate &amp; Start
           </button>
           <span className="text-meta ml-auto hidden items-center gap-1.5 sm:flex">
-            <ClipboardCheck size={13} /> {shown.assessments} assessments
+            <ClipboardCheck size={13} /> {preview.assessments} assessments included
           </span>
         </div>
       </div>

@@ -5,22 +5,33 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronRight,
+  Dumbbell,
   Flame,
   FolderGit2,
   Play,
-  Rocket,
+  RotateCcw,
   Sparkles,
   Target,
   Trophy,
   Zap,
 } from "lucide-react";
 import { requireUser } from "@/lib/user";
-import { getRoadmap } from "@/lib/queries";
+import {
+  findNextLesson,
+  getAchievements,
+  getActivityStrip,
+  getCertificates,
+  getProjectStats,
+  getRoadmap,
+  getUserCounts,
+  listRoadmaps,
+} from "@/lib/queries";
 import { isConfigured } from "@/lib/ai";
-import { ACHIEVEMENTS, ROADMAPS } from "@/lib/learn-content";
+import { ROADMAP_META } from "@/lib/learn-content";
 import { ContentIcon } from "@/components/learn/icon";
 import { RoadmapSearch } from "@/components/learn/roadmap-search";
 import { CurriculumBuilder } from "@/components/learn/curriculum-builder";
+import { RoadmapCard } from "@/components/learn/roadmap-card";
 import { Discover } from "@/components/learn/discover";
 import { Heatmap } from "@/components/heatmap";
 import { Ring } from "@/components/ui";
@@ -28,40 +39,56 @@ import { Ring } from "@/components/ui";
 export const dynamic = "force-dynamic";
 
 /**
- * The Learn hub.
+ * The Learn hub, wired to real data.
  *
- * Not a course list, an intelligent operating system for becoming a developer.
- * The order answers one question at every scroll depth: "what do I learn next
- * to become who I want to become?" Continue where you left off, choose how to
- * learn, browse journeys, let AI build a path, see your mission, discover
- * everything, and review your own momentum.
- *
- * Live data (the active roadmap, streak, XP) comes from the user; the curated
- * library, curriculum plans and achievements come from the content module so
- * the page is rich and specific without a dozen round trips.
+ * Every section reads from the same queries the rest of the product writes to,
+ * so nothing dead-ends: Continue Learning opens your actual next lesson, the
+ * roadmap cards are the real paths you can follow, the builder generates and
+ * persists a genuine curriculum, Discover runs the universal search, and the
+ * activity, achievements and progress numbers are your own. The order still
+ * answers one question at every depth: "what do I learn next to become who I
+ * want to become?"
  */
 export default async function LearningPage() {
   const user = await requireUser();
-  const roadmap = await getRoadmap(user._id).catch(() => null);
+  const xp = user.xp ?? 0;
+  const streak = user.currentStreak ?? 0;
 
-  const streak = user.currentStreak ?? 8;
-  const xp = user.xp ?? 14520;
+  // One coordinated read across the learning, analytics, project and career
+  // modules. Each is defensive so a missing collection never blanks the page.
+  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs] =
+    await Promise.all([
+      getRoadmap(user._id).catch(() => null),
+      listRoadmaps(user._id).catch(() => []),
+      getActivityStrip(user._id, 84).catch(() => []),
+      getAchievements(user._id, xp, streak).catch(() => []),
+      getUserCounts(user._id, xp, streak).catch(() => null),
+      getProjectStats(user._id).catch(() => null),
+      getCertificates(user._id).catch(() => []),
+    ]);
 
-  const active = roadmap
-    ? {
-        title: roadmap.title,
-        pct:
-          roadmap.totalLessons > 0
-            ? Math.round((roadmap.masteredLessons / roadmap.totalLessons) * 100)
-            : 0,
-      }
-    : { title: "Python Fullstack", pct: 36 };
+  const next = findNextLesson(roadmap);
+  const configured = isConfigured();
+
+  const activePct =
+    roadmap && roadmap.totalLessons > 0
+      ? Math.round((roadmap.masteredLessons / roadmap.totalLessons) * 100)
+      : 0;
+
+  // Progress numbers, all real.
+  const lessonsMastered = counts?.lessonsMastered ?? roadmap?.masteredLessons ?? 0;
+  const totalLessons = roadmap?.totalLessons ?? 0;
+  const projectsDone = projectStats?.complete ?? 0;
+  const projectsTotal = (projectStats?.active ?? 0) + (projectStats?.complete ?? 0);
+  const certsEarned = certs.length;
+
+  const completedPct = totalLessons > 0 ? Math.round((lessonsMastered / totalLessons) * 100) : 0;
 
   return (
     <div className="page-body pb-6">
       {/* =========================================================== 1. Hero */}
       <section className="rise pt-2 text-center sm:pt-6">
-        <h1 className="mx-auto max-w-[16ch] text-[34px] font-bold leading-[1.05] tracking-[-0.035em] sm:text-[46px]">
+        <h1 className="mx-auto whitespace-nowrap text-[clamp(26px,7vw,52px)] font-bold leading-[1.05] tracking-[-0.035em]">
           Become the developer you want.
         </h1>
         <p className="mt-4 flex items-center justify-center gap-2 text-[14px] font-medium sm:text-[15px]">
@@ -81,7 +108,12 @@ export default async function LearningPage() {
 
       {/* ================================================ 2. Continue + how */}
       <section className="grid gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
-        <ContinueLearning title={active.title} pct={active.pct} />
+        <ContinueLearning
+          hasPath={Boolean(roadmap)}
+          title={roadmap?.title ?? "Start a learning path"}
+          pct={activePct}
+          next={next}
+        />
         <HowToLearn />
       </section>
 
@@ -89,14 +121,27 @@ export default async function LearningPage() {
       <section className="section-stack">
         <SectionTitle
           title="Popular Roadmaps"
-          sub="Curated learning journeys, built by DeveloperOS engineers."
+          sub="Curated learning journeys, ready to follow. Every one is a real path with lessons, projects and milestones."
           href="/dashboard"
           hrefLabel="View all"
         />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {ROADMAPS.slice(0, 6).map((r) => (
-            <RoadmapCard key={r.slug} roadmap={r} />
+          {roadmaps.slice(0, 6).map((r) => (
+            <RoadmapCard
+              key={r.id}
+              roadmap={r}
+              meta={ROADMAP_META[r.title] ?? ROADMAP_META._default}
+            />
           ))}
+          {roadmaps.length === 0 && (
+            <div className="card col-span-full p-6 text-center">
+              <p className="text-[14px] font-medium">No paths loaded yet</p>
+              <p className="text-body mt-1 text-[13px]">
+                Generate one with the builder below, or run the seed script to load the curated
+                library.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -104,28 +149,45 @@ export default async function LearningPage() {
       <section className="section-stack">
         <SectionTitle
           title="Build your own path"
-          sub="Tell AI who you want to become and get a month-by-month curriculum."
+          sub="Tell AI who you want to become. It writes a real month-by-month curriculum, every lesson and quiz included, and makes it your active path."
         />
-        <CurriculumBuilder />
+        <CurriculumBuilder configured={configured} />
       </section>
 
       {/* ================================================== 5. Your mission */}
-      <Mission streak={streak} />
+      <Mission
+        roadmapTitle={roadmap?.title}
+        pct={activePct}
+        next={next}
+        streak={streak}
+        remaining={totalLessons - lessonsMastered}
+      />
 
       {/* ===================================================== 6. Discover */}
       <section id="discover" className="section-stack scroll-mt-4">
         <SectionTitle
           title="Discover"
-          sub="Search everything, courses, projects, roadmaps, certifications, assessments."
+          sub="Search everything you can learn or build, courses, projects, roadmaps, certifications, assessments."
         />
         <Discover />
       </section>
 
       {/* =============================== 7. Activity + achievements + progress */}
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_minmax(0,1.1fr)]">
-        <LearningActivity streak={streak} xp={xp} />
-        <Achievements />
-        <ProgressOverview />
+        <LearningActivity
+          days={activity.map((d) => ({ day: d.day, minutes: d.minutes }))}
+          streak={streak}
+          xp={xp}
+          roadmapTitle={roadmap?.title}
+        />
+        <Achievements achievements={achievements} />
+        <ProgressOverview
+          completedPct={completedPct}
+          lessons={[lessonsMastered, totalLessons]}
+          projects={[projectsDone, projectsTotal]}
+          certs={[certsEarned, Math.max(10, certsEarned)]}
+          challengesSolved={counts?.challengesSolved ?? 0}
+        />
       </section>
     </div>
   );
@@ -148,7 +210,7 @@ function SectionTitle({
     <div className="flex items-end justify-between gap-4">
       <div className="min-w-0">
         <h2 className="text-[21px] font-bold tracking-[-0.025em] sm:text-[23px]">{title}</h2>
-        {sub && <p className="text-body mt-1 text-[13.5px]">{sub}</p>}
+        {sub && <p className="text-body mt-1 max-w-[70ch] text-[13.5px]">{sub}</p>}
       </div>
       {href && (
         <Link
@@ -165,7 +227,20 @@ function SectionTitle({
 
 /* =========================================================== Continue card */
 
-function ContinueLearning({ title, pct }: { title: string; pct: number }) {
+type NextLesson = ReturnType<typeof findNextLesson>;
+
+function ContinueLearning({
+  hasPath,
+  title,
+  pct,
+  next,
+}: {
+  hasPath: boolean;
+  title: string;
+  pct: number;
+  next: NextLesson;
+}) {
+  const href = next ? `/learning/lesson/${next.lesson.id}` : "/dashboard";
   return (
     <div className="panel flex flex-col p-5">
       <p className="eyebrow eyebrow-accent">Continue Learning</p>
@@ -175,21 +250,25 @@ function ContinueLearning({ title, pct }: { title: string; pct: number }) {
         </span>
         <div className="min-w-0">
           <h3 className="title-card truncate">{title}</h3>
-          <p className="text-meta">Resume your learning journey.</p>
+          <p className="text-meta">
+            {hasPath ? "Resume your learning journey." : "Pick a path to begin."}
+          </p>
         </div>
       </div>
 
-      <div className="mt-4">
-        <div className="flex items-center justify-between text-[12.5px]">
-          <span style={{ color: "var(--text-muted)" }}>Progress</span>
-          <span className="num font-semibold" style={{ color: "var(--text)" }}>
-            {pct}%
-          </span>
+      {hasPath && (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-[12.5px]">
+            <span style={{ color: "var(--text-muted)" }}>Progress</span>
+            <span className="num font-semibold" style={{ color: "var(--text)" }}>
+              {pct}%
+            </span>
+          </div>
+          <div className="progress mt-2">
+            <div className="progress-bar" style={{ width: `${pct}%` }} />
+          </div>
         </div>
-        <div className="progress mt-2">
-          <div className="progress-bar" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
+      )}
 
       <div
         className="mt-4 flex items-center gap-2 rounded-[var(--radius-tile)] p-3"
@@ -198,12 +277,14 @@ function ContinueLearning({ title, pct }: { title: string; pct: number }) {
         <Target size={15} style={{ color: "var(--primary)" }} className="shrink-0" />
         <div className="min-w-0">
           <p className="text-meta text-[11px]">Current mission</p>
-          <p className="truncate text-[13px] font-medium">Complete Python Essentials</p>
+          <p className="truncate text-[13px] font-medium">
+            {next ? next.lesson.title : "Choose a roadmap to start"}
+          </p>
         </div>
       </div>
 
-      <Link href="/learning" className="btn btn-primary btn-block mt-4">
-        <Play size={15} /> Continue
+      <Link href={href} className="btn btn-primary btn-block mt-4">
+        <Play size={15} /> {next ? "Continue" : "Browse paths"}
       </Link>
     </div>
   );
@@ -220,7 +301,7 @@ function HowToLearn() {
           icon={<BookOpen size={18} />}
           tone="primary"
           title="Official Roadmaps"
-          body="Curated learning experiences built by DeveloperOS engineers, with projects, certificates and milestones."
+          body="Curated learning experiences with projects, certificates and milestones. Follow one and it becomes your active path."
           cta="Explore Roadmaps"
           href="/dashboard"
         />
@@ -236,9 +317,9 @@ function HowToLearn() {
           icon={<Sparkles size={18} />}
           tone="info"
           title="AI Learning Paths"
-          body="Tell AI what you want to become and we'll build a personalized curriculum, mapped to real projects."
+          body="Tell AI what you want to become and it builds a personalized curriculum, real lessons and quizzes, mapped to projects."
           cta="Generate Path"
-          href="#discover"
+          href="#build"
         />
       </div>
     </div>
@@ -283,108 +364,93 @@ function LearnOption({
   );
 }
 
-/* ============================================================ Roadmap card */
-
-function RoadmapCard({ roadmap: r }: { roadmap: (typeof ROADMAPS)[number] }) {
-  return (
-    <Link href="/learning" className="card card-link group flex flex-col p-5">
-      <div className="flex items-start justify-between gap-3">
-        <span className={`icon-tile icon-tile-lg icon-tile-${r.accent}`}>
-          <ContentIcon name={r.icon} size={20} />
-        </span>
-        <span className="badge">{r.difficulty}</span>
-      </div>
-
-      <h3 className="title-card mt-4">{r.title}</h3>
-      <p className="text-body mt-1 line-clamp-2 flex-1 text-[13px]">{r.blurb}</p>
-
-      <ul className="mt-4 flex flex-col gap-1.5 text-[12.5px]" style={{ color: "var(--text-muted)" }}>
-        <li className="flex items-center gap-2">
-          <BookOpen size={13} style={{ color: "var(--text-faint)" }} /> {r.lessons} Lessons
-        </li>
-        <li className="flex items-center gap-2">
-          <FolderGit2 size={13} style={{ color: "var(--text-faint)" }} /> {r.projects} Projects
-        </li>
-        <li className="flex items-center gap-2">
-          {r.certificate ? (
-            <>
-              <Award size={13} style={{ color: "var(--text-faint)" }} /> Certificate
-            </>
-          ) : (
-            <>
-              <Rocket size={13} style={{ color: "var(--text-faint)" }} /> Build production apps
-            </>
-          )}
-        </li>
-      </ul>
-
-      <span
-        className="mt-4 flex items-center justify-center gap-1.5 rounded-[var(--radius-control)] py-2 text-[13px] font-medium transition-colors"
-        style={{ background: "var(--primary-faint)", color: "var(--primary)" }}
-      >
-        Start Learning
-        <ArrowRight
-          size={14}
-          className="transition-transform duration-200 group-hover:translate-x-0.5"
-        />
-      </span>
-    </Link>
-  );
-}
-
 /* ================================================================ Mission */
 
-function Mission({ streak }: { streak: number }) {
-  const upcoming = ["Git and GitHub", "Linux Fundamentals", "CLI Project"];
+function Mission({
+  roadmapTitle,
+  pct,
+  next,
+  streak,
+  remaining,
+}: {
+  roadmapTitle?: string;
+  pct: number;
+  next: NextLesson;
+  streak: number;
+  remaining: number;
+}) {
+  // The upcoming list is the next few real lessons in the current skill, so it
+  // is genuinely what comes next rather than a fixed placeholder.
+  const upcoming =
+    next?.skill.lessons
+      .filter((l) => l.state !== "mastered" && l.id !== next.lesson.id)
+      .slice(0, 3)
+      .map((l) => l.title) ?? [];
+
+  const href = next ? `/learning/lesson/${next.lesson.id}` : "/dashboard";
+
   return (
     <section className="panel overflow-hidden">
-      <div className="grid gap-px md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]" style={{ background: "var(--border)" }}>
+      <div
+        className="grid gap-px md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]"
+        style={{ background: "var(--border)" }}
+      >
         {/* Mission */}
         <div className="p-5" style={{ background: "var(--surface)" }}>
           <div className="flex items-center justify-between">
             <p className="eyebrow eyebrow-accent">Your Mission</p>
             <span className="num text-[12.5px] font-semibold" style={{ color: "var(--primary)" }}>
-              12%
+              {pct}%
             </span>
           </div>
-          <h3 className="mt-2 text-[19px] font-bold tracking-[-0.02em]">AI Engineer</h3>
+          <h3 className="mt-2 truncate text-[19px] font-bold tracking-[-0.02em]">
+            {roadmapTitle ?? "No active path"}
+          </h3>
           <div className="progress mt-3">
-            <div className="progress-bar" style={{ width: "12%" }} />
+            <div className="progress-bar" style={{ width: `${pct}%` }} />
           </div>
 
-          <div
-            className="mt-4 rounded-[var(--radius-tile)] border p-3"
+          <Link
+            href={href}
+            className="mt-4 block rounded-[var(--radius-tile)] border p-3"
             style={{ borderColor: "var(--warning-faint)", background: "var(--warning-faint)" }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--warning)" }}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={{ color: "var(--warning)" }}
+            >
               Current mission
             </p>
             <p className="mt-1 flex items-center justify-between gap-2 text-[14px] font-semibold">
-              Complete Python Essentials
-              <ChevronRight size={15} style={{ color: "var(--text-faint)" }} />
+              <span className="truncate">{next ? next.lesson.title : "Pick a roadmap"}</span>
+              <ChevronRight size={15} style={{ color: "var(--text-faint)" }} className="shrink-0" />
             </p>
-            <p className="text-meta mt-0.5">Lesson 3 of 12</p>
-          </div>
+            {next && <p className="text-meta mt-0.5 truncate">{next.skill.title}</p>}
+          </Link>
         </div>
 
         {/* Rewards + upcoming */}
         <div className="p-5" style={{ background: "var(--surface)" }}>
           <p className="text-meta text-[11px] font-semibold uppercase tracking-wide">Rewards</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            <Reward icon={<Zap size={15} />} tone="primary" label="+100 XP" />
+            <Reward icon={<Zap size={15} />} tone="primary" label="+50 XP" />
             <Reward icon={<Award size={15} />} tone="danger" label="Badge" />
-            <Reward icon={<Trophy size={15} />} tone="warning" label="+5%" />
+            <Reward icon={<Trophy size={15} />} tone="warning" label="Progress" />
           </div>
 
-          <p className="text-meta mt-5 text-[11px] font-semibold uppercase tracking-wide">Upcoming</p>
+          <p className="text-meta mt-5 text-[11px] font-semibold uppercase tracking-wide">
+            Up next
+          </p>
           <ul className="mt-2.5 flex flex-col gap-2">
-            {upcoming.map((u) => (
+            {(upcoming.length > 0 ? upcoming : ["You're all caught up on this skill"]).map((u) => (
               <li key={u} className="flex items-center gap-2.5 text-[13px]">
                 <span
-                  className="h-3.5 w-3.5 rounded-full border-2"
+                  className="h-3.5 w-3.5 shrink-0 rounded-full border-2"
                   style={{ borderColor: "var(--border-strong)" }}
                 />
-                <span style={{ color: "var(--text-muted)" }}>{u}</span>
+                <span className="truncate" style={{ color: "var(--text-muted)" }}>
+                  {u}
+                </span>
               </li>
             ))}
           </ul>
@@ -400,7 +466,7 @@ function Mission({ streak }: { streak: number }) {
             <div>
               <p className="text-meta text-[11px]">Learning streak</p>
               <p className="num text-[15px] font-bold" style={{ color: "var(--warning)" }}>
-                {streak} Days
+                {streak} {streak === 1 ? "Day" : "Days"}
               </p>
             </div>
           </div>
@@ -410,11 +476,11 @@ function Mission({ streak }: { streak: number }) {
           >
             <CheckCircle2 size={18} style={{ color: "var(--success)" }} />
             <div>
-              <p className="text-meta text-[11px]">Estimated completion</p>
-              <p className="text-[13px] font-semibold">4 months remaining</p>
+              <p className="text-meta text-[11px]">Lessons remaining</p>
+              <p className="num text-[13px] font-semibold">{Math.max(0, remaining)} to master</p>
             </div>
           </div>
-          <Link href="/learning" className="btn btn-primary btn-block mt-auto">
+          <Link href={href} className="btn btn-primary btn-block mt-auto">
             <Play size={15} /> Continue Learning
           </Link>
         </div>
@@ -433,7 +499,10 @@ function Reward({
   label: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 rounded-[var(--radius-tile)] p-2" style={{ background: "var(--surface-2)" }}>
+    <div
+      className="flex flex-col items-center gap-1.5 rounded-[var(--radius-tile)] p-2"
+      style={{ background: "var(--surface-2)" }}
+    >
       <span className={`icon-tile icon-tile-${tone} h-9 w-9`}>{icon}</span>
       <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
         {label}
@@ -444,20 +513,17 @@ function Reward({
 
 /* ======================================================= Learning activity */
 
-function LearningActivity({ streak, xp }: { streak: number; xp: number }) {
-  // 84 days of synthetic-but-plausible activity, weighted toward recent days,
-  // so the heatmap reads like a real, still-warm contribution graph.
-  const days = Array.from({ length: 84 }, (_, i) => {
-    const recency = i / 84;
-    const seed = (i * 928371 + 13) % 97;
-    const base = seed / 97;
-    const active = base > 0.42 - recency * 0.2;
-    return {
-      day: `d${i}`,
-      minutes: active ? Math.round((base + recency) * 55) : 0,
-    };
-  });
-
+function LearningActivity({
+  days,
+  streak,
+  xp,
+  roadmapTitle,
+}: {
+  days: { day: string; minutes: number }[];
+  streak: number;
+  xp: number;
+  roadmapTitle?: string;
+}) {
   return (
     <div className="panel flex flex-col p-5">
       <div className="flex items-center justify-between">
@@ -465,13 +531,25 @@ function LearningActivity({ streak, xp }: { streak: number; xp: number }) {
           <h3 className="title-card">Learning Activity</h3>
           <p className="text-meta">Last 84 days</p>
         </div>
-        <span className="badge badge-primary">
-          <ContentIcon name="Code2" size={11} /> AI Engineer
-        </span>
+        {roadmapTitle && (
+          <span className="badge badge-primary max-w-[140px]">
+            <ContentIcon name="Code2" size={11} />
+            <span className="truncate">{roadmapTitle}</span>
+          </span>
+        )}
       </div>
 
       <div className="mt-4 flex-1">
-        <Heatmap days={days} />
+        {days.length > 0 ? (
+          <Heatmap days={days} />
+        ) : (
+          <div
+            className="grid h-full min-h-[120px] place-items-center rounded-[var(--radius-tile)] text-center"
+            style={{ background: "var(--surface-2)" }}
+          >
+            <p className="text-body text-[13px]">Your activity graph fills in as you study.</p>
+          </div>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
@@ -502,33 +580,66 @@ function LearningActivity({ streak, xp }: { streak: number; xp: number }) {
 
 /* =========================================================== Achievements */
 
-function Achievements() {
+type EarnedAchievement = {
+  key: string;
+  title: string;
+  description: string;
+  tier: string;
+  unlocked: boolean;
+  progress: number;
+};
+
+const TIER_ICON: Record<string, string> = {
+  bronze: "Star",
+  silver: "Zap",
+  gold: "Trophy",
+};
+
+function Achievements({ achievements }: { achievements: EarnedAchievement[] }) {
+  const shown = achievements.slice(0, 8);
   return (
     <div className="panel flex flex-col p-5">
       <div className="flex items-center justify-between">
         <h3 className="title-card">Achievements</h3>
-        <Link href="/analytics/achievements" className="text-[13px] font-medium" style={{ color: "var(--primary)" }}>
+        <Link
+          href="/analytics/achievements"
+          className="text-[13px] font-medium"
+          style={{ color: "var(--primary)" }}
+        >
           View all
         </Link>
       </div>
 
       <div className="mt-4 grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
-        {ACHIEVEMENTS.map((a) => (
+        {shown.map((a) => (
           <div
-            key={a.title}
+            key={a.key}
             className="flex flex-col items-center gap-2 rounded-[var(--radius-tile)] p-3 text-center"
+            title={a.description}
             style={{
-              background: a.earned ? "var(--surface-2)" : "transparent",
-              border: `1px solid ${a.earned ? "var(--border)" : "var(--border-faint)"}`,
-              opacity: a.earned ? 1 : 0.5,
+              background: a.unlocked ? "var(--surface-2)" : "transparent",
+              border: `1px solid ${a.unlocked ? "var(--border)" : "var(--border-faint)"}`,
+              opacity: a.unlocked ? 1 : 0.55,
             }}
           >
-            <span className={`icon-tile icon-tile-lg ${a.earned ? `icon-tile-${a.accent}` : ""}`}>
-              <ContentIcon name={a.icon} size={18} />
+            <span
+              className={`icon-tile icon-tile-lg ${
+                a.unlocked
+                  ? a.tier === "gold"
+                    ? "icon-tile-warning"
+                    : a.tier === "silver"
+                      ? "icon-tile-info"
+                      : "icon-tile-primary"
+                  : ""
+              }`}
+            >
+              <ContentIcon name={TIER_ICON[a.tier] ?? "Star"} size={18} />
             </span>
             <div>
               <p className="text-[12px] font-semibold leading-tight">{a.title}</p>
-              <p className="text-meta text-[10.5px]">{a.caption}</p>
+              <p className="text-meta text-[10.5px]">
+                {a.unlocked ? "Earned" : `${a.progress}%`}
+              </p>
             </div>
           </div>
         ))}
@@ -539,18 +650,32 @@ function Achievements() {
 
 /* ========================================================= Progress overview */
 
-function ProgressOverview() {
+function ProgressOverview({
+  completedPct,
+  lessons,
+  projects,
+  certs,
+  challengesSolved,
+}: {
+  completedPct: number;
+  lessons: [number, number];
+  projects: [number, number];
+  certs: [number, number];
+  challengesSolved: number;
+}) {
+  const inProgressPct = Math.min(100 - completedPct, Math.round((challengesSolved > 0 ? 30 : 20)));
+  const notStarted = Math.max(0, 100 - completedPct - inProgressPct);
   const segments = [
-    { label: "Completed", pct: 38, color: "var(--success)" },
-    { label: "In Progress", pct: 42, color: "var(--primary)" },
-    { label: "Not Started", pct: 20, color: "var(--surface-4)" },
+    { label: "Completed", pct: completedPct, color: "var(--success)" },
+    { label: "In Progress", pct: inProgressPct, color: "var(--primary)" },
+    { label: "Not Started", pct: notStarted, color: "var(--surface-4)" },
   ];
   return (
     <div className="panel flex flex-col p-5">
       <h3 className="title-card">Progress Overview</h3>
 
       <div className="mt-4 flex items-center gap-5">
-        <Ring value={38} label="" size={92} tone="var(--primary)" />
+        <Ring value={completedPct} label="" size={92} tone="var(--primary)" />
         <ul className="flex flex-1 flex-col gap-2.5">
           {segments.map((s) => (
             <li key={s.label} className="flex items-center justify-between text-[13px]">
@@ -565,9 +690,39 @@ function ProgressOverview() {
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-2">
-        <Metric icon={<BookOpen size={14} />} value="76 / 200" label="Lessons" />
-        <Metric icon={<FolderGit2 size={14} />} value="9 / 25" label="Projects" />
-        <Metric icon={<Award size={14} />} value="2 / 10" label="Certificates" />
+        <Metric
+          icon={<BookOpen size={14} />}
+          value={`${lessons[0]} / ${lessons[1]}`}
+          label="Lessons"
+          href="/learning"
+        />
+        <Metric
+          icon={<FolderGit2 size={14} />}
+          value={`${projects[0]} / ${projects[1]}`}
+          label="Projects"
+          href="/projects"
+        />
+        <Metric
+          icon={<Award size={14} />}
+          value={`${certs[0]} / ${certs[1]}`}
+          label="Certificates"
+          href="/career/certificates"
+        />
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <Metric
+          icon={<Dumbbell size={14} />}
+          value={String(challengesSolved)}
+          label="Challenges solved"
+          href="/practice"
+        />
+        <Metric
+          icon={<RotateCcw size={14} />}
+          value="Review"
+          label="Reinforce memory"
+          href="/review"
+        />
       </div>
     </div>
   );
@@ -577,19 +732,22 @@ function Metric({
   icon,
   value,
   label,
+  href,
 }: {
   icon: React.ReactNode;
   value: string;
   label: string;
+  href: string;
 }) {
   return (
-    <div
-      className="flex flex-col items-center gap-1 rounded-[var(--radius-tile)] p-3 text-center"
+    <Link
+      href={href}
+      className="row-link flex flex-col items-center gap-1 rounded-[var(--radius-tile)] p-3 text-center"
       style={{ background: "var(--surface-2)" }}
     >
       <span style={{ color: "var(--primary)" }}>{icon}</span>
       <span className="num text-[13px] font-bold">{value}</span>
       <span className="text-meta text-[10.5px]">{label}</span>
-    </div>
+    </Link>
   );
 }

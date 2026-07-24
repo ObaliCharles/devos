@@ -1,21 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Award,
   BookOpen,
   ClipboardList,
   FolderGit2,
+  Loader2,
   Route,
   Search,
 } from "lucide-react";
-import { DISCOVER, type DiscoverItem, type DiscoverKind } from "@/lib/learn-content";
+import { DISCOVER_FALLBACK, type DiscoverItem, type DiscoverKind } from "@/lib/learn-content";
 
 /**
- * Discover: one search bar over the whole library. As you type, the results
- * re-group into their five kinds, Courses, Projects, Roadmaps, Certifications,
- * Assessments, matching the reference where searching "Docker" surfaces one of
- * each. Empty query shows a curated default so the section is never blank.
+ * Discover: one search bar over everything you can learn or build.
+ *
+ * It calls the real universal search (/api/search) for lessons, projects,
+ * notes, challenges and snippets you actually have, then fills any thin columns
+ * with the curated fallback index so a fresh account still sees a useful result
+ * for common terms. Real hits always take precedence and always link to the
+ * real route. Results re-group live into the five kinds as you type.
  */
 
 const KINDS: { kind: DiscoverKind; plural: string; icon: React.ReactNode; accent: string }[] = [
@@ -26,9 +31,34 @@ const KINDS: { kind: DiscoverKind; plural: string; icon: React.ReactNode; accent
   { kind: "Assessment", plural: "Assessments", icon: <ClipboardList size={13} />, accent: "var(--danger)" },
 ];
 
-const TABS: (DiscoverKind | "All")[] = ["All", "Course", "Project", "Roadmap", "Certification", "Assessment"];
+const TABS: (DiscoverKind | "All")[] = [
+  "All",
+  "Course",
+  "Project",
+  "Roadmap",
+  "Certification",
+  "Assessment",
+];
 
-function matches(item: DiscoverItem, q: string) {
+type SearchHit = { type: string; id: string; title: string; subtitle?: string; href: string };
+
+/** Map a universal-search hit's type to a Discover column. */
+function kindFor(type: string): DiscoverKind {
+  switch (type) {
+    case "Lesson":
+      return "Course";
+    case "Challenge":
+      return "Assessment";
+    case "Project":
+    case "Snippet":
+    case "Note":
+      return "Project";
+    default:
+      return "Course";
+  }
+}
+
+function matchesFallback(item: DiscoverItem, q: string) {
   if (!q) return true;
   const hay = `${item.title} ${item.tags.join(" ")} ${item.level}`.toLowerCase();
   return q
@@ -40,9 +70,11 @@ function matches(item: DiscoverItem, q: string) {
 export function Discover() {
   const [query, setQuery] = useState("Docker");
   const [tab, setTab] = useState<DiscoverKind | "All">("All");
+  const [hits, setHits] = useState<SearchHit[]>([]);
+  const [loading, setLoading] = useState(false);
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // The hero search seeds this section via a custom event, so the two search
-  // affordances stay in sync without hoisting state through the whole page.
+  // Seed from the hero search.
   useEffect(() => {
     function onSearch(e: Event) {
       const term = (e as CustomEvent<string>).detail;
@@ -55,13 +87,54 @@ export function Discover() {
     return () => window.removeEventListener("discover-search", onSearch);
   }, []);
 
-  const groups = useMemo(() => {
-    const hits = DISCOVER.filter((i) => matches(i, query.trim()));
-    return KINDS.map((k) => ({
-      ...k,
-      items: hits.filter((i) => i.kind === k.kind).slice(0, 4),
-    })).filter((g) => g.items.length > 0);
+  // Debounced call to the real search endpoint.
+  useEffect(() => {
+    const term = query.trim();
+    if (debounce.current) clearTimeout(debounce.current);
+    if (term.length < 2) {
+      setHits([]);
+      return;
+    }
+    setLoading(true);
+    debounce.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(term)}`);
+        const data = (await res.json()) as { hits?: SearchHit[] };
+        setHits(data.hits ?? []);
+      } catch {
+        setHits([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 220);
+    return () => {
+      if (debounce.current) clearTimeout(debounce.current);
+    };
   }, [query]);
+
+  // Build the five columns: real hits first, topped up from the fallback index
+  // so no common term ever returns an empty section on a fresh account.
+  const groups = useMemo(() => {
+    const term = query.trim();
+    const realByKind = new Map<DiscoverKind, DiscoverItem[]>();
+    for (const h of hits) {
+      const kind = kindFor(h.type);
+      const list = realByKind.get(kind) ?? [];
+      list.push({ title: h.title, kind, level: h.subtitle || h.type, href: h.href, tags: [] });
+      realByKind.set(kind, list);
+    }
+
+    const fallback = DISCOVER_FALLBACK.filter((i) => matchesFallback(i, term));
+
+    return KINDS.map((k) => {
+      const real = realByKind.get(k.kind) ?? [];
+      const seen = new Set(real.map((r) => r.title.toLowerCase()));
+      const filler = fallback
+        .filter((f) => f.kind === k.kind && !seen.has(f.title.toLowerCase()))
+        .slice(0, Math.max(0, 4 - real.length));
+      return { ...k, items: [...real, ...filler].slice(0, 4), realCount: real.length };
+    }).filter((g) => g.items.length > 0);
+  }, [hits, query]);
 
   const visibleGroups = tab === "All" ? groups : groups.filter((g) => g.kind === tab);
   const total = groups.reduce((n, g) => n + g.items.length, 0);
@@ -70,7 +143,11 @@ export function Discover() {
     <section className="panel overflow-hidden">
       <div className="border-b p-4 sm:p-5" style={{ borderColor: "var(--border)" }}>
         <label className="search h-11">
-          <Search size={16} style={{ color: "var(--text-faint)" }} />
+          {loading ? (
+            <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-faint)" }} />
+          ) : (
+            <Search size={16} style={{ color: "var(--text-faint)" }} />
+          )}
           <input
             className="search-input text-[14.5px]"
             value={query}
@@ -114,7 +191,10 @@ export function Discover() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-px sm:grid-cols-2 xl:grid-cols-4" style={{ background: "var(--border)" }}>
+        <div
+          className="grid gap-px sm:grid-cols-2 xl:grid-cols-4"
+          style={{ background: "var(--border)" }}
+        >
           {visibleGroups.map((g) => (
             <div key={g.kind} className="p-4 sm:p-5" style={{ background: "var(--surface)" }}>
               <div className="mb-3 flex items-center justify-between">
@@ -129,7 +209,10 @@ export function Discover() {
               <ul className="flex flex-col gap-1">
                 {g.items.map((item) => (
                   <li key={`${item.kind}-${item.title}`}>
-                    <button className="row-link flex w-full items-center gap-3 p-2 text-left">
+                    <Link
+                      href={item.href}
+                      className="row-link flex w-full items-center gap-3 p-2 text-left"
+                    >
                       <span
                         className="grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-tile)]"
                         style={{
@@ -143,7 +226,7 @@ export function Discover() {
                         <span className="block truncate text-[13px] font-medium">{item.title}</span>
                         <span className="text-meta block truncate text-[11.5px]">{item.level}</span>
                       </span>
-                    </button>
+                    </Link>
                   </li>
                 ))}
               </ul>
