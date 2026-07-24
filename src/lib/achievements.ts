@@ -1,7 +1,7 @@
 /**
  * The achievement engine. Definitions live here so the engine can re-evaluate
  * them from the user's real counts; the `Achievement` collection only records
- * what has been unlocked. BACKLOG notes XP and levels exist but badges do not —
+ * what has been unlocked. BACKLOG notes XP and levels exist but badges do not, 
  * this is the badges.
  *
  * Each badge has a `metric` the engine knows how to count and a `threshold`.

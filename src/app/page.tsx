@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Check, Lock } from "lucide-react";
+import { Check, Lock } from "lucide-react";
+import { LogoTile, Wordmark } from "@/components/brand";
 
 const GATE = [
   "Read the lesson",
@@ -9,42 +10,30 @@ const GATE = [
   "Review the summary",
 ];
 
-const MODULES: [string, string][] = [
-  ["Learning", "A roadmap gated by real mastery, not checkboxes."],
-  ["Practice", "Coding challenges your code actually runs against."],
-  ["Knowledge", "Linked notes, backlinks, a graph, spaced-repetition flashcards."],
-  ["Projects", "Kanban, milestones, bug tracker, database and API designers."],
-  ["AI centre", "An assistant that can see your lessons, projects and notes."],
-  ["Career", "ATS resume, portfolio from your projects, application tracker."],
-  ["Analytics", "Time, goals, habits, focus timer, achievements."],
-  ["Calendar", "Your deadlines from every module in one place."],
-  ["Admin", "User, content and roadmap management with an audit trail."],
+// Names, not sales copy. The grid says what the workspace holds; the product
+// itself is where each one earns its keep.
+const MODULES = [
+  "Learning",
+  "Practice",
+  "Knowledge",
+  "Projects",
+  "AI centre",
+  "Career",
+  "Analytics",
+  "Calendar",
 ];
 
 export default function Landing() {
   return (
     <main className="min-h-screen">
-      <header
-        className="glass sticky top-0 z-30 border-b"
-        style={{ borderColor: "var(--border)" }}
-      >
+      <header className="glass sticky top-0 z-30 border-b" style={{ borderColor: "var(--border)" }}>
         <div
-          className="page-container flex items-center justify-between"
-          style={{ height: "var(--topbar-h)", maxWidth: 1120 }}
+          className="mx-auto flex w-full items-center justify-between px-5 sm:px-8"
+          style={{ height: "var(--topbar-h)", maxWidth: 1080 }}
         >
-          <span className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em]">
-            <span
-              className="grid h-[26px] w-[26px] place-items-center rounded-[var(--radius-tile)] text-[13px] font-bold"
-              style={{
-                background: "var(--primary)",
-                color: "var(--primary-ink)",
-                boxShadow: "var(--sheen)",
-              }}
-            >
-              D
-            </span>
-            Developer<span style={{ color: "var(--primary)" }}>OS</span>
-          </span>
+          <Link href="/" aria-label="DeveloperOS home">
+            <Wordmark size="sm" />
+          </Link>
           <nav className="flex items-center gap-2">
             <Link href="/sign-in" className="btn btn-ghost btn-sm">
               Sign in
@@ -56,32 +45,33 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* ------------------------------------------------------------- Hero */}
-      <section
-        className="page-container pb-16 pt-16 sm:pt-24"
-        style={{ maxWidth: 1120 }}
-      >
-        <span className="badge badge-lg rise">
+      {/* ------------------------------------------------------------- Hero
+          Centred, so the whitespace reads as composition rather than a column
+          shoved to the left of a wide screen. */}
+      <section className="mx-auto w-full px-5 pb-16 pt-20 text-center sm:px-8 sm:pt-28" style={{ maxWidth: 760 }}>
+        <span className="badge badge-lg rise mx-auto">
           <span
             className="h-1.5 w-1.5 rounded-full"
             style={{ background: "var(--success)" }}
             aria-hidden
           />
-          Twelve modules · one workspace
+          Twelve modules, one workspace
         </span>
-        <h1 className="rise mt-5 max-w-3xl text-[40px] font-bold leading-[1.05] tracking-[-0.035em] sm:text-[58px]">
+
+        <h1 className="rise mx-auto mt-6 text-[38px] font-bold leading-[1.06] tracking-[-0.038em] sm:text-[56px]">
           You cannot mark it done
-          <br />
-          until you can actually do it.
+          <br className="hidden sm:block" /> until you can actually do it.
         </h1>
-        <p className="rise text-body mt-6 max-w-[58ch] text-[15.5px]">
-          Most learning tools let you tick a box and move on. DeveloperOS doesn&apos;t. Every lesson
-          is locked behind five requirements, and the lock is enforced on the server — not by your
-          own willpower at 11&nbsp;p.m.
+
+        <p className="rise text-body mx-auto mt-6 max-w-[54ch] text-[16px]">
+          Most learning tools let you tick a box and move on. DeveloperOS does not. Every lesson is
+          locked behind five requirements, enforced on the server rather than on your willpower at
+          midnight.
         </p>
-        <div className="rise mt-8 flex flex-wrap gap-2.5">
+
+        <div className="rise mt-9 flex flex-wrap items-center justify-center gap-2.5">
           <Link href="/sign-up" className="btn btn-primary btn-lg">
-            Start the roadmap <ArrowRight size={16} />
+            Start the roadmap
           </Link>
           <Link href="/sign-in" className="btn btn-secondary btn-lg">
             I already have an account
@@ -89,21 +79,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* The whole workspace, named. Learning is the reason; the rest is the OS */}
-      <section className="page-container pb-20" style={{ maxWidth: 1120 }}>
-        <p className="eyebrow eyebrow-accent">One workspace</p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {MODULES.map(([title, body]) => (
-            <div key={title} className="card p-4">
-              <h2 className="title-card">{title}</h2>
-              <p className="text-body mt-1.5 text-[13px]">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Signature element: the gate itself, shown rather than described */}
-      <section className="page-container pb-24" style={{ maxWidth: 900 }}>
+      {/* ------------------------------------------------------- The gate
+          The signature idea, shown rather than described. */}
+      <section className="mx-auto w-full px-5 pb-20 sm:px-8" style={{ maxWidth: 640 }}>
         <div className="panel overflow-hidden">
           <div
             className="flex items-center justify-between gap-4 border-b px-5 py-4"
@@ -125,7 +103,9 @@ export default function Landing() {
                   className="flex items-center gap-3 border-b px-5 py-3"
                   style={{ borderColor: "var(--border)" }}
                 >
-                  <span className={`icon-tile num h-7 w-7 text-[12px] ${done ? "icon-tile-success" : ""}`}>
+                  <span
+                    className={`icon-tile num h-7 w-7 text-[12px] ${done ? "icon-tile-success" : ""}`}
+                  >
                     {done ? <Check size={14} strokeWidth={2.8} /> : i + 1}
                   </span>
                   <span
@@ -150,6 +130,45 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* --------------------------------------------------- The workspace */}
+      <section className="mx-auto w-full px-5 pb-24 text-center sm:px-8" style={{ maxWidth: 760 }}>
+        <p className="eyebrow eyebrow-accent">Everything in one place</p>
+        <h2 className="mx-auto mt-3 max-w-[20ch] text-[26px] font-bold tracking-[-0.03em] sm:text-[32px]">
+          Learning is the reason. The rest is the operating system.
+        </h2>
+        <div className="mx-auto mt-8 flex flex-wrap justify-center gap-2">
+          {MODULES.map((name) => (
+            <span
+              key={name}
+              className="rounded-[var(--radius-control)] border px-3.5 py-2 text-[13.5px] font-medium"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-12">
+          <Link href="/sign-up" className="btn btn-primary btn-lg">
+            Start the roadmap
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t" style={{ borderColor: "var(--border)" }}>
+        <div
+          className="mx-auto flex w-full flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-8"
+          style={{ maxWidth: 1080 }}
+        >
+          <span className="flex items-center gap-2 text-[13px]" style={{ color: "var(--text-faint)" }}>
+            <LogoTile size={20} radius="var(--radius-xs)" /> DeveloperOS
+          </span>
+          <span className="text-[13px]" style={{ color: "var(--text-faint)" }}>
+            Built to ship.
+          </span>
+        </div>
+      </footer>
     </main>
   );
 }

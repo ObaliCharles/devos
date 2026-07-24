@@ -18,7 +18,7 @@ const STEPS: { key: GateKey; label: string; hint: string; manual: boolean }[] = 
 
 /**
  * A segmented arc that fills as requirements are met. Five segments, one per
- * requirement — the shape itself tells you how far off you are.
+ * requirement, the shape itself tells you how far off you are.
  */
 function GateRing({ done }: { done: number }) {
   const size = 72;
@@ -66,7 +66,7 @@ export function MasteryGate({
    * Only the three self-reported steps are held locally, and only so the tick
    * appears before the round trip finishes. `noted` and `quizzed` are earned
    * elsewhere on the page, so they are read straight from the server on every
-   * render — the note composer and the quiz call router.refresh() when they
+   * render, the note composer and the quiz call router.refresh() when they
    * succeed, which is what makes this component light up without a reload.
    */
   const [optimistic, setOptimistic] = useState<Partial<GateState>>({});
@@ -106,7 +106,7 @@ export function MasteryGate({
           <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
             {isMastered
               ? "Mastered. This lesson is now in your revision queue."
-              : "Five requirements. The check runs on the server, so there is no way around it — which is the point."}
+              : "Five requirements. The check runs on the server, so there is no way around it, which is the point."}
           </p>
         </div>
       </div>

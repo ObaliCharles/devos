@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui";
 export const dynamic = "force-dynamic";
 
 /**
- * The admin shell. The guard is here, once — every page under it is protected
+ * The admin shell. The guard is here, once, every page under it is protected
  * because it cannot render without passing this layout. A non-admin is sent to
  * the dashboard rather than shown a 403, because the existence of the page is
  * not a secret, only its contents.

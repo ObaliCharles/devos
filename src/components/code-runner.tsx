@@ -25,7 +25,7 @@ export type ChallengeData = {
 
 /**
  * The challenge workspace: prompt on the left, editor and results on the right.
- * The editor is a good textarea, not Monaco — DECISIONS 004 defers Monaco until
+ * The editor is a good textarea, not Monaco, DECISIONS 004 defers Monaco until
  * it earns its place, and a monospace textarea with tab handling runs the same
  * code against the same server executor. Monaco is a later upgrade, not a
  * blocker.
@@ -167,7 +167,7 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
               </p>
             ) : (
               <p className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--danger)" }}>
-                <X size={16} /> Not yet — some tests still fail.
+                <X size={16} /> Not yet, some tests still fail.
               </p>
             )}
           </div>

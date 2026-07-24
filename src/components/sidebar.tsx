@@ -21,12 +21,13 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { LogoTile, Wordmark } from "./brand";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 type NavGroup = { heading?: string; items: NavItem[] };
 
 /**
- * Navigation is grouped by intent — what you are trying to do — not by which
+ * Navigation is grouped by intent, what you are trying to do, not by which
  * database table the page reads. Learn / Build / Grow is the mental model the
  * whole product is organised around, so the sidebar states it plainly, and a
  * hairline between groups keeps that structure legible even when collapsed to
@@ -138,7 +139,7 @@ export function Sidebar({
         style={{ height: "var(--topbar-h)" }}
       >
         {collapsed ? (
-          // Collapsed, the logo tile and the expand control share one 28px
+          // Collapsed, the monogram tile and the expand control share one 28px
           // square: the mark by default, the control on hover or keyboard
           // focus. A permanent second button in a 68px rail is one control too
           // many, and a rail with no way out of it is a trap.
@@ -146,14 +147,9 @@ export function Sidebar({
             <Link
               href="/dashboard"
               aria-label="DeveloperOS home"
-              className="grid h-[28px] w-[28px] place-items-center rounded-[var(--radius-tile)] text-[13px] font-bold transition-opacity duration-150 group-hover/brand:pointer-events-none group-hover/brand:opacity-0"
-              style={{
-                background: "var(--primary)",
-                color: "var(--primary-ink)",
-                boxShadow: "var(--sheen)",
-              }}
+              className="grid place-items-center transition-opacity duration-150 group-hover/brand:pointer-events-none group-hover/brand:opacity-0"
             >
-              D
+              <LogoTile size={28} />
             </Link>
             <button
               onClick={toggle}
@@ -166,24 +162,8 @@ export function Sidebar({
           </span>
         ) : (
           <>
-            <Link
-              href="/dashboard"
-              className="flex min-w-0 items-center gap-2.5"
-              aria-label="DeveloperOS home"
-            >
-              <span
-                className="grid h-[28px] w-[28px] shrink-0 place-items-center rounded-[var(--radius-tile)] text-[13px] font-bold"
-                style={{
-                  background: "var(--primary)",
-                  color: "var(--primary-ink)",
-                  boxShadow: "var(--sheen)",
-                }}
-              >
-                D
-              </span>
-              <span className="truncate text-[15px] font-bold tracking-[-0.022em]">
-                Developer<span style={{ color: "var(--primary)" }}>OS</span>
-              </span>
+            <Link href="/dashboard" aria-label="DeveloperOS home" className="min-w-0">
+              <Wordmark size="sm" />
             </Link>
 
             <button
@@ -228,7 +208,7 @@ export function Sidebar({
                       href={href}
                       aria-current={active ? "page" : undefined}
                       // A CSS tooltip would be clipped by this nav's own scroll
-                      // container, so collapsed labels use the native one —
+                      // container, so collapsed labels use the native one, 
                       // which also survives keyboard focus.
                       title={collapsed ? label : undefined}
                       className={`relative flex h-[36px] items-center rounded-[var(--radius-control)] text-[13.5px] font-medium ${
@@ -317,7 +297,7 @@ export function Sidebar({
               >
                 {user.name.charAt(0).toUpperCase()}
               </span>
-              {/* Presence dot — you are, by definition, online right now */}
+              {/* Presence dot, you are, by definition, online right now */}
               <span
                 className="absolute -bottom-px -right-px h-[9px] w-[9px] rounded-full"
                 style={{ background: "var(--success)", boxShadow: "0 0 0 2px var(--surface)" }}

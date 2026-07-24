@@ -6,7 +6,7 @@
  * streak can advance twice in one sitting and the activity chart draws a bar on
  * a day the user was asleep. Local date parts, formatted by hand, avoid it.
  *
- * Pure and dependency-free on purpose — this is the one piece of date handling
+ * Pure and dependency-free on purpose, this is the one piece of date handling
  * everything else agrees on.
  */
 export function dayKey(date: Date = new Date()) {

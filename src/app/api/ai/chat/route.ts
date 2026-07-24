@@ -15,7 +15,7 @@ const Body = z.object({
 
 /**
  * Streaming chat. The response is Server-Sent-Events so the client can render
- * tokens as they arrive — the BACKLOG asks for this, and a tutor that appears
+ * tokens as they arrive, the BACKLOG asks for this, and a tutor that appears
  * word by word feels alive where one that pauses for ten seconds feels broken.
  *
  * The cap is checked before the request goes out, and usage is recorded after.
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     async start(controller) {
       try {
         // streamChat picks Anthropic first and silently retries on Groq if the
-        // Anthropic call fails before any text has been sent — which is what
+        // Anthropic call fails before any text has been sent, which is what
         // an unbilled API key looks like.
         const { text, usage, provider } = await streamChat({
           system,
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
           encoder.encode(
             `data: ${JSON.stringify({
               error:
-                "Every configured AI provider refused that request. Check the server logs — an unbilled Anthropic key with no GROQ_API_KEY set is the usual cause.",
+                "Every configured AI provider refused that request. Check the server logs, an unbilled Anthropic key with no GROQ_API_KEY set is the usual cause.",
             })}\n\n`,
           ),
         );

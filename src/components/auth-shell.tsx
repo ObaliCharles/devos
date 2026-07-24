@@ -51,7 +51,7 @@ export function AuthShell({
 
 /**
  * Clerk theming, in one place. Its widget renders outside our CSS cascade, so
- * the tokens have to be handed to it explicitly — and only once, rather than
+ * the tokens have to be handed to it explicitly, and only once, rather than
  * copy-pasted into each auth route.
  */
 export const CLERK_APPEARANCE = {

@@ -61,7 +61,7 @@ export function StatusScreen({
 
 /**
  * The skeleton shown while a route's data resolves. It mirrors the real page
- * shape — header, tiles, body — so the layout does not jump when content
+ * shape, header, tiles, body, so the layout does not jump when content
  * arrives. A centred spinner would tell you less and move more.
  */
 export function PageSkeleton() {

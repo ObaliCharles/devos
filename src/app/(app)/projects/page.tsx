@@ -104,7 +104,7 @@ export default async function ProjectsPage({
             title={showArchived ? "Nothing archived" : "No projects yet"}
             body={
               showArchived
-                ? "Projects you archive stay here — searchable, and out of the way."
+                ? "Projects you archive stay here, searchable, and out of the way."
                 : "Pick something you have just learned and build the smallest version of it that actually runs."
             }
             action={

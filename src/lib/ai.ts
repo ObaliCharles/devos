@@ -9,7 +9,7 @@ import type { Provider } from "./ai-provider";
  *
  * The BACKLOG calls rate limiting "urgent before launch" and warns that one
  * loop in a client component can cost real money. So the cap is enforced here,
- * server-side, before any request goes out — not in the UI, which cannot be
+ * server-side, before any request goes out, not in the UI, which cannot be
  * trusted, and not as an afterthought.
  */
 
@@ -25,7 +25,7 @@ const PRICING: Record<Provider, { input: number; output: number }> = {
 };
 
 // Per-user, per-day ceilings. Generous for one person, ruinous for a runaway
-// loop — which is the point.
+// loop, which is the point.
 export const DAILY_REQUEST_CAP = 200;
 export const DAILY_COST_CAP_MICROS = 2_000_000; // $2.00 a day
 

@@ -9,12 +9,12 @@ import { segment } from "@/lib/wikilinks";
  * Markdown with `[[wiki links]]` turned into real links. The trick is that
  * react-markdown does not know the `[[ ]]` syntax, so the body is split on
  * links first; the text runs go through Markdown, and each link becomes a
- * router Link. Splitting rather than a regex-replace keeps it safe — no
+ * router Link. Splitting rather than a regex-replace keeps it safe, no
  * dangerouslySetInnerHTML anywhere.
  *
  * `titleToId` maps a lowercased note title to its id so a link can navigate. A
  * link to a note that does not exist renders muted, the way Obsidian shows an
- * unresolved link — a prompt to create it, not an error.
+ * unresolved link, a prompt to create it, not an error.
  */
 export function WikiMarkdown({
   body,

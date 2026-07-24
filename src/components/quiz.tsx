@@ -99,7 +99,7 @@ export function Quiz({ lessonId, questions }: { lessonId: string; questions: Que
             className="text-sm font-medium"
             style={{ color: result.passed ? "var(--success)" : "var(--danger)" }}
           >
-            {result.score}% — {result.passed ? "passed" : "you need 80% to clear this gate"}
+            {result.score}%, {result.passed ? "passed" : "you need 80% to clear this gate"}
           </span>
           {!result.passed && (
             <button className="btn btn-ghost" onClick={retry}>

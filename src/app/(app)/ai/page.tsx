@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, BookText, Brain, MessageSquare, Sparkles, Wand2 } from "lucide-react";
+import { AlertTriangle, BookText, Brain, MessageSquare, Sparkles, Wand2 } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { findNextLesson, getAiUsage, getConversations, getRoadmap } from "@/lib/queries";
 import { isConfigured, providerStatus } from "@/lib/ai";
@@ -47,7 +47,7 @@ export default async function AiPage() {
       <PageHeader
         eyebrow="AI centre"
         title="Your assistant"
-        description="Not a chatbot bolted on the side — an assistant that can see what you are learning, building and writing."
+        description="An assistant that can see what you are learning, building and writing."
         actions={
           <Link href="/ai/chat" className="btn btn-primary">
             <Sparkles size={15} /> New chat
@@ -111,16 +111,9 @@ export default async function AiPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         {TOOLS.map((t) => (
           <Link key={t.href} href={t.href} className="card card-link group flex flex-col p-4">
-            <div className="flex items-start justify-between">
-              <IconTile tone="primary">
-                <t.icon size={17} />
-              </IconTile>
-              <ArrowRight
-                size={15}
-                className="mt-2 transition-transform duration-200 group-hover:translate-x-0.5"
-                style={{ color: "var(--text-faint)" }}
-              />
-            </div>
+            <IconTile tone="primary">
+              <t.icon size={17} />
+            </IconTile>
             <h2 className="title-card mt-4">{t.title}</h2>
             <p className="text-body mt-1 text-[13px]">{t.body}</p>
           </Link>
@@ -139,7 +132,6 @@ export default async function AiPage() {
             <p className="eyebrow">Pick up where you left off</p>
             <p className="mt-1 truncate text-[15px] font-medium">{next.lesson.title}</p>
           </div>
-          <ArrowRight size={16} className="shrink-0" style={{ color: "var(--text-faint)" }} />
         </Link>
       )}
 
@@ -158,7 +150,6 @@ export default async function AiPage() {
                   <span className="text-meta shrink-0">
                     {c.messageCount} {c.messageCount === 1 ? "message" : "messages"}
                   </span>
-                  <ArrowRight size={14} className="shrink-0" style={{ color: "var(--text-faint)" }} />
                 </Link>
               </li>
             ))}

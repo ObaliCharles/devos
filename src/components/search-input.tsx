@@ -7,7 +7,7 @@ import { forwardRef } from "react";
  * The one search box for the whole product.
  *
  * Before this there were three: a `.input` with an absolutely-positioned
- * magnifier, a GET-form field, and a couple of bespoke ones — all slightly
+ * magnifier, a GET-form field, and a couple of bespoke ones, all slightly
  * different heights, paddings and icon offsets. Every controlled search now
  * renders this, so a search field looks and behaves the same everywhere:
  * leading magnifier, a clear button that appears once there is text, Escape to

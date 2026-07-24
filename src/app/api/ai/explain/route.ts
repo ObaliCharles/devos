@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // The in-lesson tutor shares the same daily cap as the chat — one loop here
+    // The in-lesson tutor shares the same daily cap as the chat, one loop here
     // is exactly the runaway cost the BACKLOG warns about.
     const cap = await checkCap(user._id);
     if (!cap.ok) return Response.json({ error: cap.reason }, { status: 429 });
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     const { text, usage, provider } = await completeChat({
       maxTokens: 900,
       system:
-        "You are the tutor inside DeveloperOS. You never hand over a finished solution to the learner's exercise — " +
+        "You are the tutor inside DeveloperOS. You never hand over a finished solution to the learner's exercise, " +
         "you explain the idea well enough that they can write it themselves. Be concrete, use code, and stay under " +
         "300 words unless the question genuinely needs more.",
       messages: [

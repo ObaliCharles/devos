@@ -1,5 +1,5 @@
 /**
- * A GitHub-style contribution heatmap. Server component — pure presentation
+ * A GitHub-style contribution heatmap. Server component, pure presentation
  * over data the page already fetched, so it ships no JavaScript.
  *
  * Twelve weeks of days, shaded by intensity relative to the busiest day, using
@@ -36,7 +36,7 @@ export function Heatmap({ days }: { days: { day: string; minutes: number }[] }) 
   return (
     <div>
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {/* Weekday gutter — three labels, not seven, so it reads as an axis
+        {/* Weekday gutter, three labels, not seven, so it reads as an axis
             rather than a second grid competing with the data. */}
         <div className="flex shrink-0 flex-col gap-[3px] pr-0.5">
           {DAY_LABELS.map((label, i) => (

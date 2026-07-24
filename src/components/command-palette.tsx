@@ -22,7 +22,7 @@ import {
 import type { SearchHit } from "@/lib/queries";
 
 /**
- * The global command palette — ⌘K / Ctrl+K. Two jobs: jump to any page, and
+ * The global command palette, ⌘K / Ctrl+K. Two jobs: jump to any page, and
  * search the user's own content (lessons, notes, projects, challenges,
  * snippets) through /api/search.
  *
@@ -111,7 +111,7 @@ export function CommandPalette() {
   }, [open]);
 
   // Debounced content search, with the in-flight request aborted when the
-  // query moves on — otherwise a slow early response can overwrite a fast late
+  // query moves on, otherwise a slow early response can overwrite a fast late
   // one and the list flickers back to stale results.
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -130,7 +130,7 @@ export function CommandPalette() {
         setHits(data.hits ?? []);
         setIndex(0);
       } catch {
-        /* aborted or offline — leave the previous results in place */
+        /* aborted or offline, leave the previous results in place */
       } finally {
         setLoading(false);
       }
@@ -218,7 +218,7 @@ export function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Search lessons, notes, projects — or jump to a page"
+            placeholder="Search lessons, notes, projects, or jump to a page"
             aria-label="Search"
             aria-controls="palette-results"
           />

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   CalendarDays,
   Dumbbell,
   FolderKanban,
@@ -112,10 +111,6 @@ export default async function DashboardPage() {
             </div>
             <span className="btn btn-primary btn-lg shrink-0 self-start sm:self-auto">
               {next.lesson.gateDone > 0 ? "Resume lesson" : "Start lesson"}
-              <ArrowRight
-                size={16}
-                className="transition-transform duration-200 group-hover:translate-x-0.5"
-              />
             </span>
           </div>
         </Link>
@@ -193,7 +188,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <Link href="/analytics" className="btn btn-ghost btn-sm">
-              Details <ArrowRight size={13} />
+              Details
             </Link>
           </div>
 
@@ -272,8 +267,8 @@ export default async function DashboardPage() {
                 </IconTile>
                 <h2 className="title-card">Recent notes</h2>
               </div>
-              <Link href="/notes" className="btn-icon btn-icon-sm" aria-label="All notes">
-                <ArrowRight size={14} />
+              <Link href="/notes" className="btn btn-ghost btn-sm" aria-label="All notes">
+                View all
               </Link>
             </div>
             {notes.length === 0 ? (
@@ -304,7 +299,7 @@ export default async function DashboardPage() {
             )}
           </section>
 
-          {/* Quick actions — four places you actually go, not a menu dump */}
+          {/* Quick actions, four places you actually go, not a menu dump */}
           <section className="card p-4">
             <h2 className="title-card">Quick actions</h2>
             <div className="mt-3 grid grid-cols-2 gap-2">

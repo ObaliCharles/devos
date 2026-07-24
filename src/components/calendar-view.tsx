@@ -27,7 +27,7 @@ type Item = {
 
 /**
  * The month shown is driven by the URL (?y=&m=), so paging is plain navigation
- * and the server refetches — no client-side date fetching, and a month is a
+ * and the server refetches, no client-side date fetching, and a month is a
  * shareable link. Only user-created events can be ticked or deleted; the items
  * pulled in from elsewhere (milestones, interviews, reviews) link back to
  * where they actually live.
@@ -105,7 +105,7 @@ export function CalendarView({
   }, [items]);
 
   // A full 6×7 grid including leading/trailing days, so the calendar never
-  // changes height between months — nothing below it jumps on navigation.
+  // changes height between months, nothing below it jumps on navigation.
   const cells = useMemo(() => {
     const out: { date: Date; inMonth: boolean }[] = [];
     const lead = first.getDay();

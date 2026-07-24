@@ -23,7 +23,7 @@ export function extractLinks(body: string): ParsedLink[] {
   return [...seen.values()];
 }
 
-/** Just the target titles, lowercased — the shape the backlink sync wants. */
+/** Just the target titles, lowercased, the shape the backlink sync wants. */
 export function extractTargets(body: string): string[] {
   return extractLinks(body).map((l) => l.target.toLowerCase());
 }

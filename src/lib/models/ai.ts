@@ -1,7 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 /* ===========================================================================
-   AI (Chapter 8) — the intelligence layer.
+   AI (Chapter 8), the intelligence layer.
 
    `AiUsage` is not an analytics nicety. BACKLOG calls rate limiting "urgent
    before launch" because one loop in a client component can cost real money,
@@ -53,7 +53,7 @@ AiMessageSchema.index({ conversation: 1, createdAt: 1 });
 
 /**
  * What the assistant is allowed to remember. Chapter 8 insists the user can
- * see and edit it, which is the only version of this feature that is honest —
+ * see and edit it, which is the only version of this feature that is honest, 
  * so every row is a plain editable fact, not an opaque embedding.
  */
 const AiMemorySchema = new Schema(

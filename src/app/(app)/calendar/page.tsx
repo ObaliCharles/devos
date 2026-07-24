@@ -26,7 +26,7 @@ export default async function CalendarPage({
       <PageHeader
         eyebrow="Plan"
         title="Calendar"
-        description="Your schedule, plus every deadline that already lives in the app — project milestones, interviews, and reviews coming due."
+        description="Your schedule, plus every deadline already in the app: project milestones, interviews, and reviews coming due."
       />
       <CalendarView items={items} year={year} month={month} />
     </div>

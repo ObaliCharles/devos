@@ -3,7 +3,7 @@ import { CalendarEvent, Interview, Milestone, Review } from "../models";
 
 /**
  * The calendar pulls from several places at once: explicit events the user
- * created, plus deadlines that already exist elsewhere — milestones, scheduled
+ * created, plus deadlines that already exist elsewhere, milestones, scheduled
  * interviews, and reviews coming due. A deadline you have to copy into a second
  * place is a deadline you will miss, so they are read, not duplicated.
  */

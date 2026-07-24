@@ -43,8 +43,8 @@ export async function getAdminUsers() {
   const users = await User.find().sort({ createdAt: -1 }).limit(200).lean();
   return users.map((u) => ({
     id: String(u._id),
-    name: String(u.name ?? "—"),
-    email: String(u.email ?? "—"),
+    name: String(u.name ?? ", "),
+    email: String(u.email ?? ", "),
     role: String(u.role ?? "user"),
     xp: Number(u.xp ?? 0),
     streak: Number(u.currentStreak ?? 0),
@@ -52,7 +52,7 @@ export async function getAdminUsers() {
   }));
 }
 
-/** The content tree for the roadmap builder — phases, skills and lesson counts. */
+/** The content tree for the roadmap builder, phases, skills and lesson counts. */
 export async function getAdminContent() {
   await connectDB();
   const roadmap = await Roadmap.findOne().lean<{ _id: unknown; title: string } | null>();

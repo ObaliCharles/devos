@@ -157,8 +157,8 @@ export async function deleteEvent(id: string) {
 
 /**
  * Re-evaluate every badge against the user's current counts and unlock any
- * newly earned. Idempotent — the unique index means an already-unlocked badge
- * is a no-op — so it is safe to call on any page load in the module.
+ * newly earned. Idempotent, the unique index means an already-unlocked badge
+ * is a no-op, so it is safe to call on any page load in the module.
  */
 export async function syncAchievements() {
   await connectDB();

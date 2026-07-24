@@ -62,7 +62,7 @@ export async function deleteConversation(id: string) {
 
 /**
  * Chapter 8 insists the user can see and edit what the AI remembers. So memory
- * is plain editable rows, never an opaque embedding — the whole page is a CRUD
+ * is plain editable rows, never an opaque embedding, the whole page is a CRUD
  * over these.
  */
 export async function saveMemory(input: { id?: string; key: string; value: string; kind?: string; pinned?: boolean }) {

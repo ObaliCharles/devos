@@ -7,7 +7,7 @@ import { deleteEndpoint, deleteSchemaDesign, saveEndpoint, saveSchemaDesign } fr
 import { EmptyState } from "./ui";
 
 /**
- * The database and API pages. Both are documentation tools, not generators —
+ * The database and API pages. Both are documentation tools, not generators, 
  * the value is that the design lives next to the project instead of in a
  * drawing you made once and never opened again.
  *
@@ -111,7 +111,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
       <div className="flex items-center justify-between">
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           Design the collections before you write them. ARCHITECTURE.md is right
-          that the model is step one — the pages are step four.
+          that the model is step one, the pages are step four.
         </p>
         <button className="btn btn-primary shrink-0" onClick={() => setEditing(blank())}>
           <Plus size={15} /> Collection

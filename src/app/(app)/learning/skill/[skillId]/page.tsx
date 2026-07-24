@@ -129,7 +129,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
       </ol>
 
       {/* The link that makes learning and building one product rather than two.
-          A skill is not finished when the lessons are mastered — it is finished
+          A skill is not finished when the lessons are mastered, it is finished
           when you have built something with it. */}
       <section className="section-stack">
         <div className="flex items-center justify-between gap-4">
@@ -145,7 +145,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
         {projects.length === 0 ? (
           <div className="well p-4">
             <p className="text-body text-[13.5px]">
-              Nothing yet. Mastering the lessons proves you can follow along — building a project
+              Nothing yet. Mastering the lessons proves you can follow along, building a project
               proves you can do it without one. Start a project and link it to this skill.
             </p>
             <Link href="/projects/new" className="btn btn-secondary btn-sm mt-4">

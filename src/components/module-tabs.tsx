@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
  * Sub-navigation for modules whose pages share a header (Career, Analytics,
  * Admin, a project). Underline tabs rather than a segmented control: a
  * segmented control implies "filter this view", an underline implies
- * "different page" — and these are different pages.
+ * "different page", and these are different pages.
  *
  * The active tab is derived from the path, so it works with plain
  * server-rendered navigation and survives a hard refresh.

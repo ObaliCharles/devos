@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { connectDB } from "@/lib/db";
@@ -142,8 +142,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
                 <p className="eyebrow eyebrow-accent">Next lesson</p>
                 <p className="mt-1 truncate text-[15px] font-medium">{nextLesson.title}</p>
               </div>
-              <ArrowRight size={17} className="shrink-0" style={{ color: "var(--text-faint)" }} />
-            </Link>
+              </Link>
           )}
         </div>
 

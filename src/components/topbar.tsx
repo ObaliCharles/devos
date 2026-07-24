@@ -5,11 +5,12 @@ import { UserButton } from "@clerk/nextjs";
 import { Bell, Flame, Moon, Search, Sun, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { CommandPalette } from "./command-palette";
+import { LogoTile } from "./brand";
 
 /**
  * The top bar is deliberately thin: 56px, one row, no page title. The page
  * owns its own header, so repeating it here would only cost vertical space.
- * What lives here is everything that is true on every route — search, the two
+ * What lives here is everything that is true on every route, search, the two
  * streak signals, notifications, theme, account.
  */
 export function Topbar({
@@ -34,7 +35,7 @@ export function Topbar({
       try {
         localStorage.setItem("dos-theme", next);
       } catch {
-        /* private mode — the theme just will not persist */
+        /* private mode, the theme just will not persist */
       }
       return next;
     });
@@ -47,14 +48,9 @@ export function Topbar({
       className="glass sticky top-0 z-30 flex shrink-0 items-center gap-3 border-b px-4 sm:px-5"
       style={{ height: "var(--topbar-h)", borderColor: "var(--border)" }}
     >
-      {/* Brand — only on phones, where the sidebar is not on screen */}
-      <Link href="/dashboard" className="flex items-center gap-2 md:hidden" aria-label="Home">
-        <span
-          className="grid h-[26px] w-[26px] place-items-center rounded-[var(--radius-tile)] text-[13px] font-bold"
-          style={{ background: "var(--primary)", color: "var(--primary-ink)" }}
-        >
-          D
-        </span>
+      {/* Brand, only on phones, where the sidebar is not on screen */}
+      <Link href="/dashboard" className="flex items-center md:hidden" aria-label="Home">
+        <LogoTile size={28} />
       </Link>
 
       {/* ------------------------------------------------------- Search */}

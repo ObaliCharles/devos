@@ -1,12 +1,12 @@
 import { Schema, model, models, type InferSchemaType } from "mongoose";
 
 /* ===========================================================================
-   CONTENT — authored once, shared by every user.
+   CONTENT, authored once, shared by every user.
    Roadmap > Phase > Skill > Topic > Lesson
 
    Topic is optional. A lesson with no topic hangs directly off its skill,
    which is how every v0.1 lesson was seeded and still works. That keeps the
-   level from becoming a forced click for skills that do not need it — see
+   level from becoming a forced click for skills that do not need it, see
    DECISIONS 005.
    ======================================================================== */
 
@@ -40,7 +40,7 @@ const SkillSchema = new Schema(
     phase: { type: Schema.Types.ObjectId, ref: "Phase", required: true, index: true },
     order: { type: Number, required: true },
     title: { type: String, required: true },
-    /** Short answer to "why does this exist" — shown on the skill hero. */
+    /** Short answer to "why does this exist", shown on the skill hero. */
     why: String,
     difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"], default: "beginner" },
     estimatedHours: Number,

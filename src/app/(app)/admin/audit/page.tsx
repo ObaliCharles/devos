@@ -10,7 +10,7 @@ export default async function AdminAuditPage() {
   const log = await getAuditLog();
 
   if (log.length === 0) {
-    return <EmptyState title="Nothing logged yet" body="Admin actions — role changes, content edits, flag toggles — appear here with who did them and when." />;
+    return <EmptyState title="Nothing logged yet" body="Admin actions, role changes, content edits, flag toggles, appear here with who did them and when." />;
   }
 
   return (

@@ -15,7 +15,7 @@ const yesterday = () => dayKeyOffset(-1);
  * a micro-optimisation. On a first sign-in the layout and every server
  * component on the page resolve in parallel; with find-then-insert they all
  * miss, all insert, and every one but the winner gets a duplicate-key error on
- * the unique clerkId index — so the very first page load after signing up
+ * the unique clerkId index, so the very first page load after signing up
  * crashes. `findOneAndUpdate` with upsert lets the database settle the race.
  */
 export async function getCurrentUser() {

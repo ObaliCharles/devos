@@ -107,7 +107,7 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
         <EmptyState
           icon={<Code2 size={30} />}
           title="No snippets yet"
-          body="The bit of code you rewrite from memory every project — the Mongo connection, the auth middleware, the error handler. Save it once."
+          body="The bit of code you rewrite from memory every project, the Mongo connection, the auth middleware, the error handler. Save it once."
           action={<button className="btn btn-primary" onClick={() => setEditing(blank())}><Plus size={15} /> New snippet</button>}
         />
       ) : (

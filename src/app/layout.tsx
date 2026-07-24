@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: "DeveloperOS",
     template: "%s · DeveloperOS",
   },
-  description: "Learn, build, practise and grow — in one workspace.",
+  description: "Learn, build, practise and grow in one workspace.",
 };
 
 export const viewport: Viewport = {

@@ -17,7 +17,7 @@ import { ACHIEVEMENTS, earnedKeys, type AchievementMetric } from "../achievement
 import { levelFromXp } from "../user";
 
 /**
- * Analytics reads across the collections every other module already writes —
+ * Analytics reads across the collections every other module already writes, 
  * it stores nothing of its own (see the note on productivity.ts). Each function
  * is an aggregation, kept to a small fixed number of queries.
  */

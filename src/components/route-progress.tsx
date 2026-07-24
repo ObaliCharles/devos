@@ -9,7 +9,7 @@ import { usePathname, useSearchParams } from "next/navigation";
  *
  * Next's App Router does not expose navigation-start events, so the trigger is
  * a capture-phase click on any internal link: that fires the instant you press,
- * which is the whole point — the bar has to appear before the server responds,
+ * which is the whole point, the bar has to appear before the server responds,
  * or it is confirming something you already know. The bar then eases towards
  * 90% on a decaying curve and never reaches the end on its own; only the new
  * pathname landing completes it. A progress bar that fills to 100% and waits
@@ -56,7 +56,7 @@ export function RouteProgress() {
 
       const url = new URL(anchor.href, window.location.href);
       if (url.origin !== window.location.origin) return;
-      // Same page, or only the hash changed — nothing will load.
+      // Same page, or only the hash changed, nothing will load.
       if (url.pathname === window.location.pathname && url.search === window.location.search) {
         return;
       }
@@ -73,7 +73,7 @@ export function RouteProgress() {
     };
   }, []);
 
-  // The new route committed — run the bar to the end, then fade it out.
+  // The new route committed, run the bar to the end, then fade it out.
   useEffect(() => {
     stop();
     setProgress(100);

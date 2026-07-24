@@ -2,14 +2,14 @@
 @plugin "@tailwindcss/typography";
 
 /* ===========================================================================
-   DeveloperOS — Design System
+   DeveloperOS, Design System
    ---------------------------------------------------------------------------
    One file governs the visual identity of every route. Rules of the system:
 
    1. Nothing hard-codes a colour. Everything reads a token.
    2. Every dimension is a multiple of 4, and preferably of 8.
    3. Elevation comes from layered surfaces first, shadow second.
-   4. Motion is 150–220ms, ease-out, and only ever confirms an interaction.
+   4. Motion is 150-220ms, ease-out, and only ever confirms an interaction.
    5. Dark is primary. Light is a complete, first-class override.
    ======================================================================== */
 
@@ -19,7 +19,7 @@
   --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-var), ui-monospace, "SF Mono", monospace;
 
-  /* ---- Radii — one step per component scale, never ad hoc ----
+  /* ---- Radii, one step per component scale, never ad hoc ----
      Tight on purpose. Large radii read as consumer-app friendly; a tool people
      work in all day wants corners that stay out of the way. */
   --radius-xs: 4px;
@@ -49,7 +49,7 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---- Shell geometry — the numbers every layout snaps to ---- */
+  /* ---- Shell geometry, the numbers every layout snaps to ---- */
   --topbar-h: 56px;
   --sidebar-w: 244px;
   --sidebar-w-collapsed: 68px;
@@ -93,7 +93,7 @@
   --info-faint: rgb(86 160 248 / 0.13);
   --neutral-faint: rgb(255 255 255 / 0.06);
 
-  /* Elevation — restrained, layered, never a dark halo */
+  /* Elevation, restrained, layered, never a dark halo */
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.32);
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -6px rgb(0 0 0 / 0.45);
   --shadow-md: 0 4px 14px -6px rgb(0 0 0 / 0.5), 0 12px 32px -14px rgb(0 0 0 / 0.55);
@@ -195,7 +195,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Ambient light source — a hint of atmosphere, never a visible gradient band */
+/* Ambient light source, a hint of atmosphere, never a visible gradient band */
 body::before {
   content: "";
   position: fixed;
@@ -260,7 +260,7 @@ samp {
   border: 0;
 }
 
-/* Scrollbars — thin, on-brand, and invisible until content overflows */
+/* Scrollbars, thin, on-brand, and invisible until content overflows */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
@@ -295,14 +295,14 @@ samp {
   /* ======================================================== Layout scaffold */
 
   /* The single source of truth for page width and gutter. Used once, in the
-     app shell — pages never set their own max-width or horizontal padding. */
+     app shell, pages never set their own max-width or horizontal padding. */
   .page-container {
     width: 100%;
     max-width: var(--page-max);
     margin-inline: auto;
     padding-inline: var(--page-pad);
   }
-  /* Available for a block that genuinely reads better at a tighter measure —
+  /* Available for a block that genuinely reads better at a tighter measure , 
      a long-form article body, not a whole route. Pages themselves all run to
      the shell width so the left edge never moves between routes. */
   .measure-reading {
@@ -323,7 +323,7 @@ samp {
     gap: var(--space-5);
   }
 
-  /* A page that fills the viewport instead of growing the document — chat is
+  /* A page that fills the viewport instead of growing the document, chat is
      the one case. It sizes itself to exactly the room inside the shell gutter
      (the container adds page-top top and bottom), so the outer <main> never
      scrolls; only the regions inside it that opt into overflow do. Mobile
@@ -465,7 +465,7 @@ samp {
     background: var(--primary-press);
   }
 
-  /* Soft surface, not an outline — outlined pills read as cheap */
+  /* Soft surface, not an outline, outlined pills read as cheap */
   .btn-secondary {
     background: var(--surface-2);
     color: var(--text);
@@ -697,7 +697,7 @@ samp {
 
   /* ================================================================== Badges */
 
-  /* Filled and tonal. No outlines — a badge is a colour-coded label, not a
+  /* Filled and tonal. No outlines, a badge is a colour-coded label, not a
      button, and a border makes it compete with real controls. */
   .badge {
     display: inline-flex;
@@ -752,7 +752,7 @@ samp {
     border-radius: var(--radius-control);
   }
 
-  /* A selectable chip — multi-select filters, skill pickers, presets. Filled
+  /* A selectable chip, multi-select filters, skill pickers, presets. Filled
      and tonal like a badge, but sized and cursored like a control, because
      unlike a badge you can actually press it. */
   .chip {
@@ -871,7 +871,7 @@ samp {
   /* ================================================================= Icon tile */
 
   /* The rounded, tinted square that carries an icon. One size ladder so icons
-     never dominate — 36/40 outer, 16/18 glyph. */
+     never dominate, 36/40 outer, 16/18 glyph. */
   .icon-tile {
     display: grid;
     place-items: center;
@@ -956,7 +956,7 @@ samp {
     );
   }
 
-  /* Segmented step meter — for "3 of 5 requirements" style gates */
+  /* Segmented step meter, for "3 of 5 requirements" style gates */
   .steps {
     display: flex;
     gap: 4px;
@@ -975,7 +975,7 @@ samp {
 
   /* =================================================================== Tabs */
 
-  /* Segmented control — a single tab implementation for the whole product */
+  /* Segmented control, a single tab implementation for the whole product */
   .segmented {
     display: flex;
     gap: 2px;
@@ -1017,7 +1017,7 @@ samp {
     box-shadow: var(--shadow-sm);
   }
 
-  /* Underline tabs — for page-level module navigation */
+  /* Underline tabs, for page-level module navigation */
   .underlines {
     display: flex;
     gap: 2px;
@@ -1339,7 +1339,7 @@ samp {
   }
 }
 
-/* Entrance animations are CSS, not JS — they cost nothing and let the
+/* Entrance animations are CSS, not JS, they cost nothing and let the
    components that use them stay server-rendered. */
 .rise {
   animation: rise 380ms var(--ease) both;

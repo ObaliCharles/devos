@@ -1,12 +1,12 @@
 import { Schema, model, models } from "mongoose";
 
 /* ===========================================================================
-   PROJECTS (Chapter 5) — where learning becomes something that exists.
+   PROJECTS (Chapter 5), where learning becomes something that exists.
 
    The field that justifies this module is `skills` on Project. Trello does
    boards better and Jira does tickets better; neither knows that the thing you
    are building is the thing you just learned. Everything else here is
-   table stakes — that link is the product.
+   table stakes, that link is the product.
    ======================================================================== */
 
 const StackSchema = new Schema(
@@ -27,7 +27,7 @@ const ProjectSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     title: { type: String, required: true },
     description: String,
-    /** The problem it solves, who it is for — the overview page's substance. */
+    /** The problem it solves, who it is for, the overview page's substance. */
     goal: String,
     category: {
       type: String,
@@ -47,7 +47,7 @@ const ProjectSchema = new Schema(
 
     /**
      * The skills this project practises. This is what lets the roadmap say
-     * "you have learned JWT — here is where you used it", and what makes the
+     * "you have learned JWT, here is where you used it", and what makes the
      * portfolio in Chapter 9 more than a list of repos.
      */
     skills: [{ type: Schema.Types.ObjectId, ref: "Skill", index: true }],
@@ -175,11 +175,11 @@ const ApiEndpointSchema = new Schema(
     group: String,
     description: String,
     auth: { type: Boolean, default: true },
-    /** Raw JSON strings — the point is documentation, not validation. */
+    /** Raw JSON strings, the point is documentation, not validation. */
     headers: String,
     requestBody: String,
     responseBody: String,
-    /** Not `errors` — reserved by Mongoose for validation errors. */
+    /** Not `errors`, reserved by Mongoose for validation errors. */
     errorResponses: String,
     order: { type: Number, default: 0 },
   },

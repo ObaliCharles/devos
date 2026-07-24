@@ -8,7 +8,7 @@ import { levelFromXp } from "./user";
  * link to ChatGPT: the model answers with the workspace in front of it.
  *
  * Everything here is the user's own data, fetched with their id. Memory is the
- * editable facts they have let the assistant keep — see the memory page.
+ * editable facts they have let the assistant keep, see the memory page.
  */
 
 export type Context = {
@@ -29,7 +29,7 @@ export async function buildSystemContext(user: UserLike, ctx: Context): Promise<
   parts.push(
     `You are the assistant inside DeveloperOS, a workspace where ${user.name ?? "the user"} ` +
       `learns to build software. They are level ${level.level} (${level.title}). Be concrete, ` +
-      `use code, and never hand over a finished solution to an exercise or challenge — explain ` +
+      `use code, and never hand over a finished solution to an exercise or challenge, explain ` +
       `well enough that they can write it themselves.`
   );
 
@@ -61,13 +61,13 @@ export async function buildSystemContext(user: UserLike, ctx: Context): Promise<
     const stack = Object.values(p.stack ?? {}).flat().filter(Boolean).join(", ");
     parts.push(
       `They are working on the project "${p.title}"` +
-        (p.goal ? ` — ${p.goal}` : p.description ? ` — ${p.description}` : "") +
+        (p.goal ? `, ${p.goal}` : p.description ? `, ${p.description}` : "") +
         (stack ? `. Stack: ${stack}.` : ".")
     );
   }
   if (note) {
     const n = note as { title?: string; body?: string };
-    parts.push(`They have this note open — "${n.title}":\n${String(n.body ?? "").slice(0, 3000)}`);
+    parts.push(`They have this note open, "${n.title}":\n${String(n.body ?? "").slice(0, 3000)}`);
   }
   if (challenge) {
     const c = challenge as { title?: string; prompt?: string };

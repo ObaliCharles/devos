@@ -115,8 +115,8 @@ export function HelpCenter({ tickets }: { tickets: Record<string, unknown>[] }) 
   const [kind, setKind] = useState("question");
 
   const faqs = [
-    { q: "Why can't I mark a lesson complete?", a: "The mastery gate needs all five requirements — read, note, exercise, quiz at 80%, review. The check is server-side; there is no way around it, by design." },
-    { q: "How does the AI know about my work?", a: "The assistant reads your editable memory plus whatever you have open — lesson, project or note. You control the memory on the AI → Memory page." },
+    { q: "Why can't I mark a lesson complete?", a: "The mastery gate needs all five requirements, read, note, exercise, quiz at 80%, review. The check is server-side; there is no way around it, by design." },
+    { q: "How does the AI know about my work?", a: "The assistant reads your editable memory plus whatever you have open, lesson, project or note. You control the memory on the AI → Memory page." },
     { q: "Is my code execution safe?", a: "Challenges run in a sandboxed VM with a timeout. It is real execution for a single user; a multi-tenant launch would move it to a container." },
     { q: "Where is my data?", a: "In your database. Export all of it from Settings, or delete your account and everything with it." },
   ];

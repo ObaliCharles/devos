@@ -91,7 +91,7 @@ export function ResumeEditor({ resume, projectTitles }: { resume: ResumeData; pr
             placeholder="TypeScript, React, Node, MongoDB, … (comma separated)"
             aria-label="Skills"
           />
-          <p className="mt-1.5 text-xs" style={{ color: "var(--text-faint)" }}>{form.skills.length} skills — 8+ matches most job descriptions.</p>
+          <p className="mt-1.5 text-xs" style={{ color: "var(--text-faint)" }}>{form.skills.length} skills, 8+ matches most job descriptions.</p>
         </section>
 
         <ListSection

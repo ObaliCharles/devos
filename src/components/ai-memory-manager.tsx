@@ -65,7 +65,7 @@ export function AiMemoryManager({ memory }: { memory: MemoryItem[] }) {
       {memory.length === 0 && !adding ? (
         <EmptyState
           title="Nothing remembered yet"
-          body="As you use the assistant it will note things worth keeping — your goal, your stack, what you find hard. You can add facts here directly too."
+          body="As you use the assistant it will note things worth keeping, your goal, your stack, what you find hard. You can add facts here directly too."
           action={<button className="btn btn-primary" onClick={() => setAdding(true)}><Plus size={15} /> Add a memory</button>}
         />
       ) : (

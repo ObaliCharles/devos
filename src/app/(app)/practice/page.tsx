@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check, Dumbbell, Target, Timer, Zap } from "lucide-react";
+import { Check, Dumbbell, Target, Timer, Zap } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getChallenges, getPracticeStats } from "@/lib/queries";
 import { Badge, EmptyState, PageHeader, StatTile, type Tone } from "@/components/ui";
@@ -82,8 +82,8 @@ export default async function PracticePage() {
           body="Run npm run seed to load the starter challenge set, then refresh this page."
           action={
             <Link href="/learning" className="btn btn-primary">
-              Go to the roadmap <ArrowRight size={15} />
-            </Link>
+              Go to the roadmap
+              </Link>
           }
         />
       ) : (

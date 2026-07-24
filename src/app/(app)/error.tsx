@@ -31,7 +31,7 @@ export default function AppError({
         // message is stripped before it reaches the browser.
         error.digest
           ? `The server hit an error while rendering. Reference ${error.digest}.`
-          : "The server hit an error while rendering this page. Trying again often works — the database connection is the usual culprit."
+          : "The server hit an error while rendering this page. Trying again often works, the database connection is the usual culprit."
       }
       actions={
         <>

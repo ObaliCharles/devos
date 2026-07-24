@@ -49,7 +49,7 @@ export default async function ChallengesPage({
       />
 
       <div className="section-stack">
-        {/* A segmented control, not a row of outlined pills — this filters the
+        {/* A segmented control, not a row of outlined pills, this filters the
             list in place, so it should look like a control, not a link. */}
         <nav className="segmented w-fit" aria-label="Filter challenges">
           {FILTERS.map((f) => (

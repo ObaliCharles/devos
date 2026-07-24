@@ -8,7 +8,7 @@ import { countDueReviews, countUnreadNotifications } from "@/lib/queries";
 
 /**
  * The app shell. This is the only place in the product that decides how wide a
- * page is and how much gutter it gets — pages render their content and nothing
+ * page is and how much gutter it gets, pages render their content and nothing
  * else. Before this, two dozen pages each set their own `max-w-*` and padding
  * inside a container that already had padding, which is why nothing lined up
  * from one route to the next.

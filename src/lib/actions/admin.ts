@@ -7,7 +7,7 @@ import { requireAdmin } from "../user";
 
 /**
  * Admin mutations. Every one that changes another user or the shared content
- * writes an AuditLog row first — DECISIONS 007 is explicit that admin power
+ * writes an AuditLog row first, DECISIONS 007 is explicit that admin power
  * without a trail is exactly the kind of silent bypass the product refuses.
  */
 async function audit(actorId: unknown, action: string, target?: string, meta?: unknown) {
@@ -23,7 +23,7 @@ export async function setUserRole(userId: string, role: "user" | "admin") {
   const target = await User.findById(userId);
   if (!target) return { ok: false as const };
 
-  // Guard against demoting the last admin — locking everyone out of /admin is
+  // Guard against demoting the last admin, locking everyone out of /admin is
   // not a recoverable mistake from inside the app.
   if (target.role === "admin" && role === "user") {
     const admins = await User.countDocuments({ role: "admin" });

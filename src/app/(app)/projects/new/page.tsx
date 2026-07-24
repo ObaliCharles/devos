@@ -10,7 +10,7 @@ export default async function NewProjectPage() {
   await requireUser();
   await connectDB();
 
-  // Two queries, not one per phase — the same rule the roadmap tree follows.
+  // Two queries, not one per phase, the same rule the roadmap tree follows.
   const [skills, phases] = await Promise.all([
     Skill.find().sort({ order: 1 }).select("title phase").lean(),
     Phase.find().sort({ order: 1 }).select("title").lean(),

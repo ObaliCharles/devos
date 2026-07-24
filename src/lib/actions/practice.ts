@@ -8,7 +8,7 @@ import { Challenge, ChallengeAttempt, ChallengeProgress, DailyChallenge, TimeEnt
 import { addXp, recordActivity, requireUser } from "../user";
 
 /**
- * Run the visible tests without recording anything. This is the "Run" button —
+ * Run the visible tests without recording anything. This is the "Run" button, 
  * fast feedback while you work, no XP, no progress. The hidden tests are held
  * back for Submit, so you cannot pass by hard-coding the visible cases.
  */
@@ -26,7 +26,7 @@ export async function runCode(challengeId: string, code: string): Promise<RunOut
 }
 
 /**
- * Run every test, record the attempt, and — if all pass — mark it solved and
+ * Run every test, record the attempt, and, if all pass, mark it solved and
  * award XP once. This is the graded path; unlike the lesson exercise gate,
  * "did it" here is decided by the machine, not the learner.
  */
@@ -116,7 +116,7 @@ export async function toggleChallengeBookmark(challengeId: string) {
 
 /**
  * Pick (or recall) today's challenge for this user. Fixed per day so it does
- * not reshuffle on reload — the same reasoning as the daily note.
+ * not reshuffle on reload, the same reasoning as the daily note.
  */
 export async function pickDailyChallenge() {
   await connectDB();

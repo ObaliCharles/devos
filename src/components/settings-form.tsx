@@ -127,7 +127,7 @@ export function SettingsForm({ name, email, prefs }: { name: string; email: stri
       <section className="card p-5" style={{ borderColor: "var(--danger)" }}>
         <p className="eyebrow" style={{ color: "var(--danger)" }}>Delete account</p>
         <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
-          Permanently deletes your account and everything you own — notes, projects, progress, everything. Shared content stays. Type <strong>DELETE</strong> to confirm.
+          Permanently deletes your account and everything you own, notes, projects, progress, everything. Shared content stays. Type <strong>DELETE</strong> to confirm.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <input className="input max-w-xs" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="DELETE" aria-label="Type DELETE to confirm" />

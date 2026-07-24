@@ -10,7 +10,7 @@ export async function getConversations(userId: unknown) {
     .lean();
 
   // The last reply, as a one-line preview under each title. Fetched as a
-  // single grouped query rather than one per conversation — the list is short,
+  // single grouped query rather than one per conversation, the list is short,
   // but N+1 in a sidebar is still N+1.
   const ids = rows.map((c) => c._id);
   const latest = await AiMessage.aggregate<{ _id: unknown; content: string }>([

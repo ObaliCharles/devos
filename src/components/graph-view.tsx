@@ -11,7 +11,7 @@ type Edge = { source: string; target: string };
 /**
  * The knowledge graph, laid out without a physics library. A real force
  * simulation is lovely and is exactly the kind of dependency DECISIONS 004
- * says to defer until it earns its place — for a few hundred notes a
+ * says to defer until it earns its place, for a few hundred notes a
  * deterministic layout reads fine and ships nothing extra.
  *
  * Nodes are placed by a simple rule: the most-connected notes near the centre,

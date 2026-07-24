@@ -3,7 +3,7 @@ import { Challenge, ChallengeAttempt, ChallengeProgress } from "../models";
 
 /**
  * Reads for the Practice module. The challenge list folds each user's solved
- * state in, the same way the roadmap folds in lesson progress — one query for
+ * state in, the same way the roadmap folds in lesson progress, one query for
  * challenges, one for the user's progress, joined in memory.
  */
 

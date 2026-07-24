@@ -1,7 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 /* ===========================================================================
-   PRACTICE (Chapter 7) — where knowledge becomes skill.
+   PRACTICE (Chapter 7), where knowledge becomes skill.
 
    Test cases are stored as expression/expected pairs rather than a test file,
    because the runner has to evaluate them somewhere sandboxed. See
@@ -68,7 +68,7 @@ const ChallengeAttemptSchema = new Schema(
 );
 ChallengeAttemptSchema.index({ user: 1, challenge: 1, createdAt: -1 });
 
-/** One row per user+challenge — the "solved" state the browse page filters on. */
+/** One row per user+challenge, the "solved" state the browse page filters on. */
 const ChallengeProgressSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },

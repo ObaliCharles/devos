@@ -19,7 +19,7 @@ export default async function ResumeListPage() {
       </div>
 
       {resumes.length === 0 ? (
-        <EmptyState icon={<FileText size={30} />} title="No resume yet" body="Start one — it pre-fills your name and email, and pulls your projects in." action={<NewResumeButton />} />
+        <EmptyState icon={<FileText size={30} />} title="No resume yet" body="Start one, it pre-fills your name and email, and pulls your projects in." action={<NewResumeButton />} />
       ) : (
         <ul className="flex flex-col gap-2">
           {resumes.map((r) => (

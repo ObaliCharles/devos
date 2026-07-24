@@ -12,7 +12,7 @@
  * 1. Every action starts with `const user = await requireUser()` and scopes
  *    every write to `user._id`. There is no other path to a user id.
  * 2. Never spread caller input into `$set`. Arguments arrive as JSON and the
- *    TypeScript annotation is gone by then — whitelist the fields you mean, or
+ *    TypeScript annotation is gone by then, whitelist the fields you mean, or
  *    a caller will set `user` and take someone else's row.
  * 3. Anything the product promises is enforced here, not in the component.
  *    The client disables the button as a courtesy; the server refuses as a

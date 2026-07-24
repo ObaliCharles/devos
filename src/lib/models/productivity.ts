@@ -5,13 +5,13 @@ import { Schema, model, models } from "mongoose";
 
    Analytics reads; it does not store its own copies. Every chart in the module
    is an aggregation over StudySession, TimeEntry, LessonProgress, Task and
-   ChallengeAttempt — the collections that were already being written by the
+   ChallengeAttempt, the collections that were already being written by the
    modules that own them. A separate "analytics" collection would only be a
    second source of truth to keep in sync.
    ======================================================================== */
 
 /**
- * Where time actually went. `minutes` is measured, not assumed — this is what
+ * Where time actually went. `minutes` is measured, not assumed, this is what
  * replaced masterLesson's flat 30-minute credit.
  */
 const TimeEntrySchema = new Schema(
@@ -65,7 +65,7 @@ const GoalSchema = new Schema(
     },
     target: { type: Number, required: true },
     period: { type: String, enum: ["day", "week", "month", "quarter", "year"], default: "week" },
-    /** Only used when metric is "custom" — then progress is user-reported. */
+    /** Only used when metric is "custom", then progress is user-reported. */
     manualProgress: { type: Number, default: 0 },
     startAt: { type: Date, default: Date.now },
     dueAt: Date,

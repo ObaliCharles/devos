@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
   Bot,
   Check,
   Copy,
@@ -37,10 +36,10 @@ type Attachment = { name: string; size: number; text: string | null };
 /**
  * The chat workspace: the thread holds the centre, the conversation list sits
  * on the right. Both are height-constrained by the page shell, so the thread
- * scrolls its own messages and the rail scrolls its own list — the page itself
+ * scrolls its own messages and the rail scrolls its own list, the page itself
  * never moves.
  *
- * Streaming is a plain fetch reading the SSE body — no client SDK — so the API
+ * Streaming is a plain fetch reading the SSE body, no client SDK, so the API
  * key never leaves the server and the daily cap is always enforced there
  * rather than trusted from the browser.
  */
@@ -73,7 +72,7 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "history", label: "History" },
 ];
 
-// Only inline files we can actually read as text — for a coding tutor, that is
+// Only inline files we can actually read as text, for a coding tutor, that is
 // the useful case. A binary is noted by name so the assistant knows it exists.
 const TEXT_EXT =
   /\.(txt|md|markdown|json|jsonc|ya?ml|toml|csv|tsv|log|env|ini|conf|js|jsx|ts|tsx|mjs|cjs|py|rb|go|rs|java|kt|c|h|cpp|cc|hpp|cs|php|swift|sql|sh|bash|zsh|html?|css|scss|less|vue|svelte|xml|graphql|gql|prisma|dockerfile|gitignore)$/i;
@@ -115,7 +114,7 @@ export function AiChat({
 
   // Which conversation the local `messages` belong to, and whether a send is
   // in flight. Together these stop a background server refresh from resetting
-  // the thread out from under an answer that is still streaming — the bug that
+  // the thread out from under an answer that is still streaming, the bug that
   // made new conversations look like they never replied.
   const shownId = useRef<string | null>(active?.id ?? null);
   const busy = useRef(false);
@@ -165,7 +164,7 @@ export function AiChat({
     const blocks = attachments.map((a) =>
       a.text !== null
         ? `\n\nAttached file \`${a.name}\`:\n\`\`\`\n${a.text}\n\`\`\``
-        : `\n\n[Attached file \`${a.name}\` (${fmtSize(a.size)}) — binary, contents not included]`,
+        : `\n\n[Attached file \`${a.name}\` (${fmtSize(a.size)}), binary, contents not included]`,
     );
     return `${body}${blocks.join("")}`;
   }
@@ -178,7 +177,7 @@ export function AiChat({
 
     busy.current = true;
 
-    // Create the conversation if there isn't one, but keep the id local — do
+    // Create the conversation if there isn't one, but keep the id local, do
     // NOT navigate yet. Navigating mid-send re-renders the server component,
     // which used to reset the thread and drop the reply.
     let convoId = active?.id ?? shownId.current;
@@ -538,8 +537,8 @@ export function AiChat({
 
         {conversations.length > 0 && (
           <Link href="/ai" className="btn btn-secondary btn-block btn-sm shrink-0">
-            View all conversations <ArrowRight size={14} />
-          </Link>
+            View all conversations
+            </Link>
         )}
       </aside>
     </div>

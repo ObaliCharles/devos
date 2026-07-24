@@ -70,7 +70,7 @@ export async function updatePreferences(prefs: Record<string, unknown>) {
 
 /**
  * Export everything the user owns as one JSON blob. This is the honest half of
- * "your data is yours" — the other half is the delete below. Returns a string
+ * "your data is yours", the other half is the delete below. Returns a string
  * the client turns into a download.
  */
 export async function exportData() {
@@ -101,7 +101,7 @@ export async function exportData() {
 /**
  * Delete every trace of the user's own data. Content (lessons, challenges) is
  * shared and stays; everything keyed to this user goes, including the User row.
- * Irreversible on purpose — the settings page gates it behind typing DELETE.
+ * Irreversible on purpose, the settings page gates it behind typing DELETE.
  */
 export async function deleteAccount(confirm: string) {
   if (confirm !== "DELETE") return { ok: false as const };

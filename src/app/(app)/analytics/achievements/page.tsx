@@ -17,7 +17,7 @@ export default async function AchievementsPage() {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-        {unlocked.length} of {achievements.length} unlocked. Badges are earned from real work — mastering lessons, solving challenges, shipping projects.
+        {unlocked.length} of {achievements.length} unlocked. Badges are earned from real work, mastering lessons, solving challenges, shipping projects.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

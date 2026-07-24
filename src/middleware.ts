@@ -8,7 +8,7 @@ const isApi = createRouteMatcher(["/api(.*)"]);
  * Auth gate for everything that is not the landing page or an auth screen.
  *
  * The two arms matter. A signed-out person opening /dashboard should land on
- * the sign-in page with a way back to where they were going — `auth.protect()`
+ * the sign-in page with a way back to where they were going, `auth.protect()`
  * on its own answers 404 when it cannot tell a document request from a data
  * request, which is how a missing session ends up looking like a missing page.
  * A signed-out request to /api should get a 401, because redirecting an XHR to
@@ -18,7 +18,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (isPublic(req)) return;
 
   if (isApi(req)) {
-    // Explicitly 401 rather than `auth.protect()`, which answers 404 — a
+    // Explicitly 401 rather than `auth.protect()`, which answers 404, a
     // status that tells a fetch caller the endpoint is gone when the real
     // problem is that the session is.
     const { userId } = await auth();

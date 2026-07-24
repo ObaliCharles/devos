@@ -2,7 +2,7 @@ import { connectDB } from "../db";
 import { Challenge, Lesson, Note, Project, Snippet } from "../models";
 
 /**
- * Universal search — the thing behind CTRL+K. It queries the collections a
+ * Universal search, the thing behind CTRL+K. It queries the collections a
  * developer actually reaches for and returns a flat, ranked-ish list with the
  * href to jump to. Regex-based and capped per type; when the content outgrows
  * that, the Mongo text indexes (already defined) or Atlas Search take over

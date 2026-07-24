@@ -12,7 +12,7 @@ import {
 
 /**
  * Job readiness: one number the whole module points at. It is a weighted read
- * across the things a hiring manager actually looks at — resume quality (from
+ * across the things a hiring manager actually looks at, resume quality (from
  * the ATS score), whether a portfolio is published, how many projects are
  * deployed, and certificates. Nothing here is invented; every input is a real
  * count of the user's own work.

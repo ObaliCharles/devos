@@ -5,7 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
  *
  * Anthropic is the intended provider. Groq is the fallback, because an
  * Anthropic key without billing attached returns a hard error on every request
- * — which makes the whole AI surface untestable. Rather than stub the feature
+ *, which makes the whole AI surface untestable. Rather than stub the feature
  * out, a failed Claude call retries once against Groq's OpenAI-compatible
  * endpoint and the app keeps working.
  *
@@ -113,7 +113,7 @@ export async function streamChat({
     } catch (err) {
       if (emitted || !hasGroq() || !shouldFailOver(err)) throw err;
       errors.push(`anthropic: ${describe(err)}`);
-      console.warn("[ai] Anthropic failed, falling back to Groq —", describe(err));
+      console.warn("[ai] Anthropic failed, falling back to Groq, ", describe(err));
     }
   }
 
@@ -273,7 +273,7 @@ export async function completeChat({
       };
     } catch (err) {
       if (!hasGroq() || !shouldFailOver(err)) throw err;
-      console.warn("[ai] Anthropic failed, falling back to Groq —", describe(err));
+      console.warn("[ai] Anthropic failed, falling back to Groq, ", describe(err));
     }
   }
 

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Check, CheckCheck, Eye, X } from "lucide-react";
+import { BookOpen, Check, CheckCheck, Eye, X } from "lucide-react";
 import { gradeReview } from "@/lib/actions";
 import { intervalLabel } from "@/lib/srs";
 
@@ -16,7 +16,7 @@ export type ReviewCard = {
 
 /**
  * Active recall, one card at a time. The interaction is deliberately two-step
- * — try to answer, then reveal — because grading yourself before attempting
+ *, try to answer, then reveal, because grading yourself before attempting
  * the recall is the one way to make spaced repetition useless.
  */
 export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
@@ -60,8 +60,8 @@ export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
           <Link href="/dashboard" className="btn btn-primary">
-            Back to dashboard <ArrowRight size={15} />
-          </Link>
+            Back to dashboard
+            </Link>
           <Link href="/learning" className="btn btn-ghost">
             <BookOpen size={15} /> Learn something new
           </Link>
@@ -80,7 +80,7 @@ export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
 
   return (
     <div>
-      {/* Position in the session — always visible, never in the way */}
+      {/* Position in the session, always visible, never in the way */}
       <div className="mb-4 flex items-center gap-3">
         <div className="progress progress-sm">
           <div
@@ -100,7 +100,7 @@ export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
         {!revealed ? (
           <div className="mt-8">
             <p className="text-body text-[13.5px]">
-              Say the answer out loud first. Then check yourself — recalling before you look is
+              Say the answer out loud first. Then check yourself, recalling before you look is
               the part that makes this work.
             </p>
             <button className="btn btn-secondary mt-5" onClick={() => setRevealed(true)}>

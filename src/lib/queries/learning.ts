@@ -40,7 +40,7 @@ const GATE_KEYS = ["read", "noted", "exercised", "quizzed", "reviewed"] as const
 /**
  * One call that builds the whole tree with progress folded in. It is four
  * queries regardless of how big the roadmap gets, which matters more than
- * elegance here — the dashboard and every learning page depend on it.
+ * elegance here, the dashboard and every learning page depend on it.
  */
 export async function getRoadmap(userId: unknown) {
   await connectDB();
@@ -152,7 +152,7 @@ export async function countDueReviews(userId: unknown) {
 }
 
 /**
- * Search lessons by title and body (BACKLOG Tier 0). Regex over both for now —
+ * Search lessons by title and body (BACKLOG Tier 0). Regex over both for now, 
  * the Lesson text index is defined for when relevance starts to matter, and
  * swapping to `$text` is a one-line change here.
  */

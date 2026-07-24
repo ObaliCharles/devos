@@ -13,7 +13,7 @@ cache._mongoose ??= { conn: null, promise: null };
 export async function connectDB() {
   // Read at call time, not at import time. Next loads .env before any app code
   // so either works there, but a plain script imports modules first and reads
-  // its .env second — and then this file has already cached `undefined`.
+  // its .env second, and then this file has already cached `undefined`.
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {

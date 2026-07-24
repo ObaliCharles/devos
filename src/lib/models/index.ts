@@ -1,7 +1,7 @@
 /**
  * Every collection in DeveloperOS, grouped by the module that owns it.
  *
- * This file is the barrel — import from `@/lib/models` and you get all of it,
+ * This file is the barrel, import from `@/lib/models` and you get all of it,
  * which is what every query, action and page already does. The schemas live in
  * the domain files next to this one because sixty collections in one file is a
  * file nobody reads.
@@ -29,7 +29,7 @@
  *    it. Authorisation is a filter, and a filter without an index is a scan.
  * 2. Content (Roadmap → Lesson, Challenge, platform Resources and AiPrompts)
  *    is global unless it carries an `owner`. That is the seam multi-tenancy
- *    goes through — see DECISIONS 008.
+ *    goes through, see DECISIONS 008.
  */
 
 export * from "./core";

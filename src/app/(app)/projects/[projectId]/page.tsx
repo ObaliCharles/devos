@@ -52,7 +52,7 @@ export default async function ProjectOverviewPage({
               <Link href={`/projects/${projectId}/milestones`} style={{ color: "var(--primary)" }}>
                 Add the first one
               </Link>{" "}
-              — they are what turn a long project into a sequence of finishable ones.
+            , they are what turn a long project into a sequence of finishable ones.
             </p>
           ) : (
             <ol className="mt-4 flex flex-col gap-2.5">

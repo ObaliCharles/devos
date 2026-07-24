@@ -36,7 +36,7 @@ const AUTOSAVE_MS = 3000;
 
 /**
  * Three panes: filters, the note list, the editor. That split is the reason
- * a second brain stays usable past fifty notes — narrowing (collection, tag,
+ * a second brain stays usable past fifty notes, narrowing (collection, tag,
  * text) and reading are separate motions, and collapsing them into one list
  * turns finding a note into scrolling for it.
  */
@@ -122,7 +122,7 @@ export function KnowledgeWorkspace({
     };
   }, [notes, flush]);
 
-  // A version snapshot when leaving the note or the page — coarse enough that
+  // A version snapshot when leaving the note or the page, coarse enough that
   // history stays readable instead of one row per keystroke burst.
   const switchNote = (id: string | null) => {
     flush(true);
@@ -401,7 +401,7 @@ export function KnowledgeWorkspace({
         <EmptyState
           icon={<Link2 size={22} />}
           title="Your second brain"
-          body="Write a note, then link to another with [[double brackets]] — the connection shows up on both sides and the graph builds itself. Notes you take inside a lesson land here too."
+          body="Write a note, then link to another with [[double brackets]], the connection shows up on both sides and the graph builds itself. Notes you take inside a lesson land here too."
           action={
             <button className="btn btn-primary" onClick={newNote}>
               <Plus size={15} /> New note

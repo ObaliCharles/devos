@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Award, Briefcase, FileText, Globe } from "lucide-react";
+import { Award, Briefcase, FileText, Globe, Route } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getCareerReadiness } from "@/lib/queries";
 import { IconTile, Ring, StatTile } from "@/components/ui";
@@ -100,18 +100,18 @@ export default async function CareerOverviewPage() {
       {/* ------------------------------------------------------------ Path */}
       <section className="card flex items-start gap-4 p-4 sm:p-5">
         <IconTile tone="primary" size="lg">
-          <ArrowRight size={19} />
+          <Route size={19} />
         </IconTile>
         <div className="min-w-0">
           <p className="eyebrow">The path</p>
           <p className="text-body mt-2 max-w-[70ch] text-[14px]">
-            Learn → build → showcase → apply → interview → hired. Your projects already live in this
-            workspace, which is why your portfolio and resume can be built from them rather than
-            from scratch. Deploy two projects, publish a portfolio, and get your resume past 70% —
-            the rest is applying.
+            Learn, build, showcase, apply, interview, hired. Your projects already live in this
+            workspace, so your portfolio and resume can be built from them rather than from scratch.
+            Deploy two projects, publish a portfolio, and get your resume past 70%. The rest is
+            applying.
           </p>
           <Link href="/projects" className="btn btn-secondary mt-4">
-            Go to projects <ArrowRight size={14} />
+            Go to projects
           </Link>
         </div>
       </section>

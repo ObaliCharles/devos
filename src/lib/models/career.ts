@@ -1,7 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 /* ===========================================================================
-   CAREER (Chapter 9) — learning → building → showcasing → hired.
+   CAREER (Chapter 9), learning → building → showcasing → hired.
 
    Portfolio and Resume both read from Project rather than storing their own
    copy of it. A portfolio that has drifted out of sync with the work it
@@ -49,7 +49,7 @@ const ResumeSchema = new Schema(
         { _id: false }
       ),
     ],
-    /** References into Projects — never a second copy of the project data. */
+    /** References into Projects, never a second copy of the project data. */
     projects: [{ type: Schema.Types.ObjectId, ref: "Project" }],
     certificates: [{ type: Schema.Types.ObjectId, ref: "Certificate" }],
     achievements: [String],

@@ -90,7 +90,7 @@ export default async function ProjectLayout({
         }
       />
 
-      {/* The skills a project practises are links back into the roadmap — this
+      {/* The skills a project practises are links back into the roadmap, this
           is what keeps learning and building from becoming two products. */}
       {skills.length > 0 && (
         <div className="-mt-2 flex flex-wrap items-center gap-1.5">

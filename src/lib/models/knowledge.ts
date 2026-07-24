@@ -1,7 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 /* ===========================================================================
-   KNOWLEDGE (Chapter 6) — the second brain.
+   KNOWLEDGE (Chapter 6), the second brain.
 
    `Note` is the same collection v0.1 shipped, extended. Existing notes stay
    valid: every field added here has a default, and `kind` defaults to "note",
@@ -17,7 +17,7 @@ const NoteSchema = new Schema(
     lesson: { type: Schema.Types.ObjectId, ref: "Lesson", index: true },
     project: { type: Schema.Types.ObjectId, ref: "Project", index: true },
     /**
-     * Not `collection` — that is a reserved Mongoose pathname, and a document's
+     * Not `collection`, that is a reserved Mongoose pathname, and a document's
      * `.collection` is its Mongoose collection handle. Naming the field that
      * would compile, warn once, and then quietly hand back the wrong object.
      */
@@ -25,7 +25,7 @@ const NoteSchema = new Schema(
     tags: [String],
 
     kind: { type: String, enum: ["note", "daily", "weekly", "monthly", "template"], default: "note" },
-    /** YYYY-MM-DD for daily notes — one per day, enforced below. */
+    /** YYYY-MM-DD for daily notes, one per day, enforced below. */
     day: String,
 
     favorite: { type: Boolean, default: false },
@@ -43,7 +43,7 @@ NoteSchema.index({ title: "text", body: "text" });
 
 /**
  * One row per save. Chapter 6 wants restore and compare, and the cheapest
- * honest way to get both is to keep the whole body — notes are small, and a
+ * honest way to get both is to keep the whole body, notes are small, and a
  * diff algorithm you have to debug is worse than a few extra kilobytes.
  */
 const NoteVersionSchema = new Schema(
@@ -106,7 +106,7 @@ const SnippetSchema = new Schema(
 );
 SnippetSchema.index({ user: 1, updatedAt: -1 });
 // language_override: without it MongoDB reads the `language` field ("typescript")
-// as the text-search language and rejects the insert — 17262. Point the override
+// as the text-search language and rejects the insert, 17262. Point the override
 // at a field that does not exist so every document uses the default.
 SnippetSchema.index(
   { title: "text", code: "text", description: "text" },
@@ -115,7 +115,7 @@ SnippetSchema.index(
 
 /**
  * Flashcards run on the same ladder as lesson reviews (lib/srs.ts) rather than
- * a second algorithm — one spaced-repetition implementation, two callers.
+ * a second algorithm, one spaced-repetition implementation, two callers.
  */
 const FlashcardSchema = new Schema(
   {

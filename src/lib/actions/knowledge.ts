@@ -14,7 +14,7 @@ import { recomputeNotedGate } from "./learning";
 /**
  * Rebuilds the backlink rows for one note from its body. Called on every save.
  * Storing links as their own rows is what lets "referenced by" be an indexed
- * query rather than a regex scan of every note the user owns — the difference
+ * query rather than a regex scan of every note the user owns, the difference
  * between a graph view that opens and one that times out.
  *
  * Targets resolve by title, case-insensitively. A link to a note that does not
@@ -47,7 +47,7 @@ async function syncBacklinks(userId: unknown, noteId: unknown, body: string) {
     })),
     { ordered: false }
   ).catch(() => {
-    // A duplicate (same from+text) is harmless — the unique index is only there
+    // A duplicate (same from+text) is harmless, the unique index is only there
     // to stop the same link being counted twice.
   });
 }
@@ -108,7 +108,7 @@ export async function createNote(input: {
 
 /**
  * The autosave target. Chapter 6 wants a snapshot per save and a save every
- * few seconds — but a version row on every keystroke-batch would be thousands
+ * few seconds, but a version row on every keystroke-batch would be thousands
  * of near-identical rows a day. So a snapshot is only cut when the body has
  * meaningfully moved on from the last one, which keeps history useful and the
  * collection small.
@@ -131,7 +131,7 @@ export async function updateNote(
 
   let bodyChanged = false;
   if (typeof input.body === "string" && input.body !== note.body) {
-    // Snapshot the version we are about to overwrite, not the new one — so
+    // Snapshot the version we are about to overwrite, not the new one, so
     // "restore" goes back to what was there before this save.
     if (input.snapshot && note.body.trim()) {
       await NoteVersion.create({ note: note._id, user: user._id, title: oldTitle, body: note.body });
@@ -165,7 +165,7 @@ export async function deleteNote(id: string) {
   const note = await Note.findOne({ _id: id, user: user._id });
   if (!note) return;
 
-  // Trash first, delete on the second try. 30 days of grace, per Chapter 6 —
+  // Trash first, delete on the second try. 30 days of grace, per Chapter 6, 
   // except a note that is already in the trash is gone for good.
   if (!note.trashedAt) {
     note.trashedAt = new Date();
@@ -233,7 +233,7 @@ export async function restoreVersion(noteId: string, versionId: string) {
   revalidatePath("/notes");
 }
 
-/** Ensure today's daily note exists and return its id — the "Daily note" button. */
+/** Ensure today's daily note exists and return its id, the "Daily note" button. */
 export async function openDailyNote() {
   await connectDB();
   const user = await requireUser();

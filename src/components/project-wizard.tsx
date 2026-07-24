@@ -312,7 +312,7 @@ export function ProjectWizard({ skills }: { skills: SkillOption[] }) {
               <p className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
                 This is the part no other tool has. Linking a project to the
                 skills it exercises is what lets your roadmap show where the
-                theory actually got used — and what fills your portfolio later.
+                theory actually got used, and what fills your portfolio later.
               </p>
             </div>
 

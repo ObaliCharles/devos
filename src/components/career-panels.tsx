@@ -57,7 +57,7 @@ export function ApplicationsBoard({ applications }: { applications: Record<strin
       </div>
 
       {applications.length === 0 ? (
-        <EmptyState title="No applications tracked" body="Add roles as you find them — even wishlist ones. Watching the pipeline fill is how you keep momentum." />
+        <EmptyState title="No applications tracked" body="Add roles as you find them, even wishlist ones. Watching the pipeline fill is how you keep momentum." />
       ) : (
         <div className="-mx-6 flex gap-3 overflow-x-auto px-5 pb-2">
           {active.map((status) => {
@@ -171,7 +171,7 @@ export function CertificatesPanel({ certificates }: { certificates: Record<strin
       </div>
 
       {certificates.length === 0 ? (
-        <EmptyState title="No certificates" body="Courses, bootcamps, cloud certs — anything with a credential. They lift your readiness score and your resume." />
+        <EmptyState title="No certificates" body="Courses, bootcamps, cloud certs, anything with a credential. They lift your readiness score and your resume." />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {certificates.map((c) => (
@@ -333,7 +333,7 @@ export function PortfolioEditor({ portfolio, projects }: { portfolio: Record<str
               </span>
             </li>
           ))}
-          {projects.length === 0 && <li className="text-sm" style={{ color: "var(--text-faint)" }}>No projects yet — build one, mark it public, and it appears here.</li>}
+          {projects.length === 0 && <li className="text-sm" style={{ color: "var(--text-faint)" }}>No projects yet, build one, mark it public, and it appears here.</li>}
         </ul>
       </section>
     </div>

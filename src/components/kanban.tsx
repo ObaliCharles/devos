@@ -33,7 +33,7 @@ const PRIORITIES = ["low", "medium", "high", "critical"];
 
 /**
  * Drag and drop with the HTML5 API rather than a library. DECISIONS 004 says
- * Framer Motion earns its place at drag-and-drop Kanban — that is true for
+ * Framer Motion earns its place at drag-and-drop Kanban, that is true for
  * animated reordering, and this is not that: a card moves between columns and
  * the server decides the order. Adding a 40 kB dependency for a dragstart
  * handler would be the thing that decision warns about.

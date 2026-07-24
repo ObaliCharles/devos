@@ -32,7 +32,7 @@ export async function createResume(input: { title?: string }) {
 }
 
 /**
- * The resume editor saves the whole document at once — it is one form, and a
+ * The resume editor saves the whole document at once, it is one form, and a
  * per-field action would be a dozen round trips. The ATS score is recomputed
  * on every save so it never drifts from what is written.
  */

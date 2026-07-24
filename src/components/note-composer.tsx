@@ -17,7 +17,7 @@ export function NoteComposer({
   existingCount: number;
 }) {
   const router = useRouter();
-  const [title, setTitle] = useState(`${lessonTitle} — my notes`);
+  const [title, setTitle] = useState(`${lessonTitle}, my notes`);
   const [body, setBody] = useState("");
   const [saved, setSaved] = useState(existingCount);
   const [pending, start] = useTransition();
@@ -30,7 +30,7 @@ export function NoteComposer({
       setBody("");
       setSaved((n) => n + 1);
       // Saving a note satisfies a gate requirement, and the gate is a sibling
-      // component — only the server knows they are connected.
+      // component, only the server knows they are connected.
       router.refresh();
     });
   }
@@ -56,7 +56,7 @@ export function NoteComposer({
         </button>
         <span className="text-xs" style={{ color: "var(--text-faint)" }}>
           {short
-            ? `${MIN_CHARS - body.trim().length} more characters — a one-word note teaches you nothing`
+            ? `${MIN_CHARS - body.trim().length} more characters, a one-word note teaches you nothing`
             : `${body.trim().length} characters`}
         </span>
         {saved > 0 && (

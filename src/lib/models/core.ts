@@ -1,7 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 /* ===========================================================================
-   CORE — identity, and the cross-cutting collections every module writes to.
+   CORE, identity, and the cross-cutting collections every module writes to.
    ======================================================================== */
 
 const UserSchema = new Schema(
@@ -24,7 +24,7 @@ const UserSchema = new Schema(
     preferences: {
       theme: { type: String, enum: ["dark", "light"], default: "dark" },
       locale: { type: String, default: "en" },
-      /** IANA name. Empty means "use the server's zone" — see lib/day.ts. */
+      /** IANA name. Empty means "use the server's zone", see lib/day.ts. */
       timezone: { type: String, default: "" },
       reminderHour: { type: Number, default: 19 },
       emailDigest: { type: Boolean, default: false },
@@ -59,7 +59,7 @@ const StudySessionSchema = new Schema(
 StudySessionSchema.index({ user: 1, day: 1 }, { unique: true });
 
 /**
- * Every module can raise one. `href` is what makes it useful — a notification
+ * Every module can raise one. `href` is what makes it useful, a notification
  * you cannot act on is just noise.
  */
 const NotificationSchema = new Schema(
@@ -135,7 +135,7 @@ const SupportTicketSchema = new Schema(
 
 /**
  * Admin-only. DECISIONS 007 says a gate with a silent bypass is worse than no
- * gate — so anything an admin does that touches another user's data lands here.
+ * gate, so anything an admin does that touches another user's data lands here.
  */
 const AuditLogSchema = new Schema(
   {

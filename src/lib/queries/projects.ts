@@ -14,7 +14,7 @@ import {
 
 /**
  * Reads for the Projects module. Every function takes `userId` and filters on
- * it — the caller is not trusted to have done that, per ARCHITECTURE.md.
+ * it, the caller is not trusted to have done that, per ARCHITECTURE.md.
  */
 
 export type ProjectCard = {
@@ -108,7 +108,7 @@ export type ProjectDoc = {
   minutesSpent?: number;
 };
 
-/** The project workspace header — one read, used by every sub-page. */
+/** The project workspace header, one read, used by every sub-page. */
 export async function getProject(userId: unknown, projectId: string) {
   await connectDB();
   const project = await Project.findOne({ _id: projectId, user: userId })

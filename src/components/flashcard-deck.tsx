@@ -14,7 +14,7 @@ export type FlashcardItem = {
 };
 
 /**
- * Flashcards ride the same spaced-repetition ladder as lessons (lib/srs.ts) —
+ * Flashcards ride the same spaced-repetition ladder as lessons (lib/srs.ts), 
  * the study session pulls only what is due, and grading it right pushes it out,
  * wrong pulls it back. One SRS implementation, two callers.
  */
@@ -76,8 +76,8 @@ export function FlashcardDeck({
             <p className="eyebrow">New flashcard</p>
             <button onClick={() => setAdding(false)} aria-label="Cancel" style={{ color: "var(--text-muted)" }}><X size={16} /></button>
           </div>
-          <textarea className="input mt-3 min-h-[60px] resize-y" value={front} onChange={(e) => setFront(e.target.value)} placeholder="Front — the question or prompt" aria-label="Front" />
-          <textarea className="input mt-2 min-h-[60px] resize-y" value={back} onChange={(e) => setBack(e.target.value)} placeholder="Back — the answer" aria-label="Back" />
+          <textarea className="input mt-3 min-h-[60px] resize-y" value={front} onChange={(e) => setFront(e.target.value)} placeholder="Front, the question or prompt" aria-label="Front" />
+          <textarea className="input mt-2 min-h-[60px] resize-y" value={back} onChange={(e) => setBack(e.target.value)} placeholder="Back, the answer" aria-label="Back" />
           <button className="btn btn-primary mt-3" onClick={add} disabled={pending || !front.trim() || !back.trim()}>Add card</button>
         </div>
       )}

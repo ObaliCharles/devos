@@ -9,7 +9,7 @@ import type { ComponentProps, ReactNode } from "react";
  *  1. No component here declares "use client" and none of them animate with
  *     JavaScript. Entrances are CSS classes from globals.css, so a page built
  *     out of these primitives stays a Server Component and ships no JS for its
- *     layout. Framer Motion is reserved for things that genuinely need it —
+ *     layout. Framer Motion is reserved for things that genuinely need it, 
  *     shared layout transitions in the sidebar, gesture-driven UI.
  *  2. No hex values. Every colour is a token, which is what makes the light
  *     theme a one-line switch rather than an audit.
@@ -20,8 +20,8 @@ import type { ComponentProps, ReactNode } from "react";
 export type Tone = "neutral" | "primary" | "success" | "warning" | "danger" | "info";
 
 /**
- * Every page header in the product. Fixed anatomy — eyebrow, title, optional
- * description, optional meta strip, actions pinned right — so the eye lands in
+ * Every page header in the product. Fixed anatomy, eyebrow, title, optional
+ * description, optional meta strip, actions pinned right, so the eye lands in
  * the same place on every route. Capped so the hero never eats more than
  * ~150px of vertical space before real content starts.
  */
@@ -66,7 +66,9 @@ export function PageHeader({
         {meta && <div className="mt-4 flex flex-wrap items-center gap-3">{meta}</div>}
       </div>
       {actions && (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 pt-1">{actions}</div>
+        <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:pt-1">
+          {actions}
+        </div>
       )}
     </header>
   );
@@ -204,7 +206,7 @@ export function ProgressBar({
   );
 }
 
-/** Discrete progress — reads as "3 of 5 done" at a glance, unlike a bar. */
+/** Discrete progress, reads as "3 of 5 done" at a glance, unlike a bar. */
 export function Steps({ done, total, label }: { done: number; total: number; label?: string }) {
   return (
     <div
@@ -222,7 +224,7 @@ export function Steps({ done, total, label }: { done: number; total: number; lab
   );
 }
 
-/** A labelled horizontal meter — usage caps, budgets, quotas. */
+/** A labelled horizontal meter, usage caps, budgets, quotas. */
 export function Meter({
   label,
   value,
@@ -325,7 +327,6 @@ export function StatTile({
   sub,
   icon,
   tone = "neutral",
-  trend,
   href,
 }: {
   label: string;
@@ -333,6 +334,7 @@ export function StatTile({
   sub?: string;
   icon?: ReactNode;
   tone?: Tone;
+  /** Accepted for source compatibility; no longer rendered as an arrow. */
   trend?: "up" | "down" | "flat";
   href?: string;
 }) {
@@ -344,30 +346,12 @@ export function StatTile({
         </p>
         {icon && <IconTile tone={tone}>{icon}</IconTile>}
       </div>
-      <div className="mt-3 flex items-end gap-1.5">
-        <p className="num text-[26px] font-semibold leading-none">{value}</p>
-        {trend && (
-          <span
-            className="mb-0.5 text-[12px] font-semibold"
-            style={{
-              color:
-                trend === "up"
-                  ? "var(--success)"
-                  : trend === "down"
-                    ? "var(--danger)"
-                    : "var(--text-faint)",
-            }}
-            aria-hidden
-          >
-            {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}
-          </span>
-        )}
-      </div>
+      <p className="num mt-3 text-[26px] font-semibold leading-none">{value}</p>
       {sub && <p className="text-meta mt-1.5">{sub}</p>}
     </>
   );
 
-  const className = "card p-4 sm:p-4";
+  const className = "card p-4";
   return href ? (
     <Link href={href} className={`${className} card-link block`}>
       {body}
@@ -412,7 +396,7 @@ export function EmptyState({
       <div className="max-w-sm">
         {icon && (
           <div className="relative mx-auto mb-6 grid h-16 w-16 place-items-center">
-            {/* A soft halo instead of a flat grey square — the mark should feel
+            {/* A soft halo instead of a flat grey square, the mark should feel
                 deliberate, not like a missing image. */}
             <span
               className="absolute inset-0 rounded-[var(--radius-dialog)]"
@@ -555,7 +539,7 @@ export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
 
 /* ------------------------------------------------------------------ Buttons */
 
-/** A link styled as a button — the shape used for most primary actions. */
+/** A link styled as a button, the shape used for most primary actions. */
 export function ButtonLink({
   href,
   variant = "secondary",

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Check, Lock, Search } from "lucide-react";
+import { BookOpen, Check, ChevronRight, Lock, Search } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getRoadmap, searchLessons } from "@/lib/queries";
 import { Badge, EmptyState, PageHeader, ProgressBar, SearchField, type Tone } from "@/components/ui";
@@ -45,7 +45,7 @@ export default async function LearningPage({
         title={roadmap.title}
         description={roadmap.summary}
         meta={
-          <div className="flex w-full max-w-xl items-center gap-3">
+          <div className="flex w-full items-center gap-3 sm:max-w-md">
             <ProgressBar
               value={roadmap.masteredLessons}
               total={roadmap.totalLessons}
@@ -54,10 +54,16 @@ export default async function LearningPage({
             <span className="num shrink-0 text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
               {roadmap.masteredLessons}/{roadmap.totalLessons}
             </span>
-            <span className="badge badge-primary shrink-0">{progressPct}%</span>
           </div>
         }
-        actions={<SearchField action="/learning" defaultValue={q} placeholder="Search lessons…" className="w-[240px]" />}
+        actions={
+          <SearchField
+            action="/learning"
+            defaultValue={q}
+            placeholder="Search lessons…"
+            className="w-full sm:w-[220px]"
+          />
+        }
       />
 
       {/* ------------------------------------------------------- Search results */}
@@ -82,7 +88,6 @@ export default async function LearningPage({
                   >
                     <BookOpen size={15} style={{ color: "var(--text-faint)" }} />
                     <span className="min-w-0 flex-1 truncate">{r.title}</span>
-                    <ArrowRight size={14} style={{ color: "var(--text-faint)" }} />
                   </Link>
                 </li>
               ))}
@@ -148,7 +153,7 @@ export default async function LearningPage({
                           </span>
                         ) : (
                           <span className="icon-tile h-8 w-8 transition-colors group-hover:bg-[var(--primary-faint)] group-hover:text-[var(--primary)]">
-                            <ArrowRight size={14} />
+                            <ChevronRight size={15} />
                           </span>
                         )}
                       </div>

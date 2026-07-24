@@ -240,8 +240,8 @@ export async function createTask(input: {
 }
 
 /**
- * A drag-and-drop drop. `order` is fractional — the midpoint between the two
- * neighbours — so moving one card is one write instead of renumbering the
+ * A drag-and-drop drop. `order` is fractional, the midpoint between the two
+ * neighbours, so moving one card is one write instead of renumbering the
  * column.
  */
 export async function moveTask(taskId: string, status: string, beforeOrder?: number, afterOrder?: number) {

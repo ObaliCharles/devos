@@ -62,7 +62,7 @@ function countTags(notes: NoteListItem[]) {
   return [...counts.entries()].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count);
 }
 
-/** "Referenced by" for one note — one indexed query, thanks to the Backlink rows. */
+/** "Referenced by" for one note, one indexed query, thanks to the Backlink rows. */
 export async function getBacklinks(userId: unknown, noteId: string) {
   await connectDB();
   const rows = await Backlink.find({ user: userId, to: noteId })
@@ -84,7 +84,7 @@ export async function getBacklinks(userId: unknown, noteId: string) {
 
 /**
  * The graph. Nodes are notes, edges are resolved backlinks. Built in two
- * queries and joined in memory — the same discipline getRoadmap follows, so a
+ * queries and joined in memory, the same discipline getRoadmap follows, so a
  * few hundred notes stay one fast render rather than one query per edge.
  */
 export async function getKnowledgeGraph(userId: unknown) {

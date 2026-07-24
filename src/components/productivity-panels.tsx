@@ -60,7 +60,7 @@ export function GoalsPanel({ goals }: { goals: Record<string, unknown>[] }) {
       </div>
 
       {goals.length === 0 ? (
-        <EmptyState title="No goals set" body="A goal is measured automatically from what you do — study minutes, lessons mastered, challenges solved. Set one and it tracks itself." />
+        <EmptyState title="No goals set" body="A goal is measured automatically from what you do, study minutes, lessons mastered, challenges solved. Set one and it tracks itself." />
       ) : (
         <ul className="flex flex-col gap-3">
           {goals.map((g) => {
@@ -171,7 +171,7 @@ export function FocusPanel({ today }: { today: { minutes: number; count: number;
     tick.current = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
-          // Session complete — log it once.
+          // Session complete, log it once.
           setRunning(false);
           setLogged(true);
           run(() => logFocusSession({ minutes, intent }));

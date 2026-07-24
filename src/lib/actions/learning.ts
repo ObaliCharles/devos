@@ -11,7 +11,7 @@ import { grade, nextDue } from "../srs";
 const PASS_MARK = 0.8;
 
 /**
- * A heartbeat from the open lesson page — called every 30 seconds while the tab
+ * A heartbeat from the open lesson page, called every 30 seconds while the tab
  * is focused. This is what replaced masterLesson's flat 30-minute credit
  * (BACKLOG Tier 0): time on a lesson is now measured, not assumed. Capped per
  * beat so a stuck timer cannot inflate it.
@@ -26,7 +26,7 @@ export async function trackLessonTime(lessonId: string, seconds: number) {
   progress.lastOpenedAt = new Date();
   await progress.save();
 
-  // One TimeEntry per lesson per day, incremented — not one per beat, which
+  // One TimeEntry per lesson per day, incremented, not one per beat, which
   // would be 120 rows an hour. Analytics reads these; keep them coarse.
   await TimeEntry.updateOne(
     { user: user._id, kind: "lesson", lesson: lessonId, day: dayKey() },
@@ -54,13 +54,13 @@ async function progressFor(userId: unknown, lessonId: string) {
 }
 
 /**
- * `noted` is never trusted from the stored flag — it is counted from the notes
+ * `noted` is never trusted from the stored flag, it is counted from the notes
  * themselves. Otherwise writing one note and deleting it would leave the gate
  * permanently open, and "you cannot mark it done until you can do it" would be
  * a claim the database quietly stops enforcing.
  */
 async function syncNotedGate(userId: unknown, lessonId: string, progress: { gate: { noted: boolean } }) {
-  // Trashed notes do not count — a note you have thrown away is not a note you
+  // Trashed notes do not count, a note you have thrown away is not a note you
   // have written, so trashing your only lesson note reopens the gate.
   const notes = await Note.countDocuments({ user: userId, lesson: lessonId, trashedAt: null });
   progress.gate.noted = notes > 0;
@@ -105,7 +105,7 @@ export async function submitQuiz(lessonId: string, correct: number, total: numbe
   const { progress } = await progressFor(user._id, lessonId);
 
   const score = total === 0 ? 0 : correct / total;
-  // Keep the best attempt, not the latest — retrying should never cost you a
+  // Keep the best attempt, not the latest, retrying should never cost you a
   // gate you have already cleared.
   progress.quizScore = Math.max(progress.quizScore ?? 0, Math.round(score * 100));
   progress.gate.quizzed ||= score >= PASS_MARK;
@@ -120,7 +120,7 @@ export async function submitQuiz(lessonId: string, correct: number, total: numbe
 
 /**
  * The gate itself. Refuses to mark a lesson mastered unless every requirement
- * is met — this check is server-side on purpose, because the whole product
+ * is met, this check is server-side on purpose, because the whole product
  * claim rests on it being real.
  */
 export async function masterLesson(lessonId: string) {
@@ -150,7 +150,7 @@ export async function masterLesson(lessonId: string) {
   );
 
   await addXp(user._id, lesson.xp ?? 50);
-  // Credit the lesson as completed, but do NOT re-credit time — the minutes were
+  // Credit the lesson as completed, but do NOT re-credit time, the minutes were
   // already tracked by the heartbeat while the page was open. Only the
   // completion count is new here.
   await recordActivity(user._id, { lessonsCompleted: 1 });

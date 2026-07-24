@@ -85,7 +85,7 @@ export function AiPromptLibrary({ prompts }: { prompts: PromptItem[] }) {
         <EmptyState
           icon={<Wand2 size={30} />}
           title="No prompts yet"
-          body="Save the prompts you reach for again and again — a code review checklist, a way of asking for an explanation. Copy one into any chat."
+          body="Save the prompts you reach for again and again, a code review checklist, a way of asking for an explanation. Copy one into any chat."
           action={<button className="btn btn-primary" onClick={() => setEditing(blank())}><Plus size={15} /> New prompt</button>}
         />
       ) : (

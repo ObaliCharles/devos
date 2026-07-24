@@ -7,13 +7,13 @@ import vm from "node:vm";
  * Node's built-in `vm` with a wall-clock timeout, not Judge0 and not a
  * container. What that buys, and what it does not:
  *
- *   + Real execution. The code actually runs and is actually graded — the
+ *   + Real execution. The code actually runs and is actually graded, the
  *     `exercised` gate's weakness (self-reported) does not exist here.
  *   + `timeout` interrupts synchronous runaway code, which is what these
  *     challenges are: pure functions over inputs. `while(true){}` is killed.
  *   - `vm` is isolation, not a security sandbox. A determined attacker can
  *     escape it. That is acceptable for a single-user tool and is NOT
- *     acceptable the moment this is multi-tenant — at which point this function
+ *     acceptable the moment this is multi-tenant, at which point this function
  *     is the one thing that must move to Judge0 or a gVisor/Firecracker box.
  *     This boundary is deliberately the only place code execution happens, so
  *     that swap is one file. See DECISIONS.
