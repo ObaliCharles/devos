@@ -15,6 +15,7 @@ import {
   Zap } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import {
+  countDueReviews,
   findNextLesson,
   getAchievements,
   getActivityStrip,
@@ -34,6 +35,7 @@ import { CurriculumBuilder } from "@/components/learn/curriculum-builder";
 import { RoadmapCard } from "@/components/learn/roadmap-card";
 import { Discover } from "@/components/learn/discover";
 import { LearnMobile } from "@/components/learn/learn-mobile";
+import { LearnTop } from "@/components/learn/learn-top";
 import { Heatmap } from "@/components/heatmap";
 import { Ring } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
@@ -58,7 +60,7 @@ export default async function LearningPage() {
 
   // One coordinated read across the learning, analytics, project and career
   // modules. Each is defensive so a missing collection never blanks the page.
-  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress] =
+  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress, dueCount] =
     await Promise.all([
       getRoadmap(user._id).catch(() => null),
       listRoadmaps(user._id).catch(() => []),
@@ -68,9 +70,34 @@ export default async function LearningPage() {
       getProjectStats(user._id).catch(() => null),
       getCertificates(user._id).catch(() => []),
       getCatalogProgressMap(user._id, COURSES.map((c) => c.slug)).catch(() => ({})),
+      countDueReviews(user._id).catch(() => 0),
     ]);
 
   const next = findNextLesson(roadmap);
+
+  /* The path rail: one node per skill, in order, with the brand mark inferred
+     from the skill and phase titles. Locked phases stay locked. */
+  const pathSteps =
+    roadmap?.phases.flatMap((phase) =>
+      phase.skills.map((skill) => {
+        const total = skill.lessons.length;
+        const done = skill.lessons.filter((l) => l.state === "mastered").length;
+        const current = next ? skill.id === next.skill.id : false;
+        return {
+          id: skill.id,
+          title: skill.title,
+          tech: inferTech(skill.title, phase.title),
+          state: phase.locked
+            ? ("locked" as const)
+            : done === total && total > 0
+              ? ("done" as const)
+              : current
+                ? ("current" as const)
+                : ("todo" as const),
+          pct: total > 0 ? Math.round((done / total) * 100) : 0,
+        };
+      }),
+    ) ?? [];
   const configured = isConfigured();
 
   const activePct =
@@ -123,45 +150,35 @@ export default async function LearningPage() {
 
       {/* =========================================================== DESKTOP */}
       <div className="page-body hidden pb-6 lg:flex">
-      {/* =========================================================== 1. Hero */}
-      <section className="rise">
-        <h1 className="title-page">
-          Become the developer you want.
-        </h1>
-        <p className="mt-2 flex items-center gap-2 text-[13px] font-medium">
-          {["Learn", "Build", "Master", "Ship"].map((w, i) => (
-            <span key={w} className="flex items-center gap-2">
-              {i > 0 && (
-                <span className="h-1 w-1 rounded-full" style={{ background: "var(--primary)" }} />
-              )}
-              <span style={{ color: "var(--text-muted)" }}>{w}</span>
-            </span>
-          ))}
-        </p>
-        <div className="mt-5">
-          <RoadmapSearch />
-        </div>
-      </section>
-
-      {/* ============================================ 2. Continue + mission
-          The two things a returning learner needs before anything else: the
-          one lesson to open, and where that sits in the path. Everything
-          below this fold is browsing. */}
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
-        <ContinueLearning
-          hasPath={Boolean(roadmap)}
-          title={roadmap?.title ?? "Start a learning path"}
-          pct={activePct}
-          next={next}
-        />
-        <Mission
-          roadmapTitle={roadmap?.title}
-          pct={activePct}
-          next={next}
-          streak={streak}
-          remaining={totalLessons - lessonsMastered}
-        />
-      </section>
+      {/* ================================================= 1. The top block
+          Greeting, Continue Learning + Today's Goal, the path stepper and the
+          next step — built to the reference layout. */}
+      <LearnTop
+        name={user.name?.split(" ")[0] || "Developer"}
+        pathTitle={roadmap?.title ?? "No path yet"}
+        pathPct={activePct}
+        steps={pathSteps}
+        next={
+          next
+            ? {
+                id: next.lesson.id,
+                title: next.lesson.title,
+                minutes: next.lesson.estimatedMinutes,
+                skillTitle: next.skill.title,
+                phaseTitle: next.phase.title,
+                lessonIndex: next.skill.lessons.findIndex((l) => l.id === next.lesson.id) + 1,
+                lessonTotal: next.skill.lessons.length,
+                skillPct: Math.round(
+                  (next.skill.lessons.filter((l) => l.state === "mastered").length /
+                    Math.max(1, next.skill.lessons.length)) * 100,
+                ),
+                tech: inferTech(next.skill.title, next.phase.title, next.lesson.title),
+              }
+            : null
+        }
+        dueCount={dueCount}
+        openProjects={projectStats?.active ?? 0}
+      />
 
       {/* ========================================== 3. Popular roadmaps */}
       <section className="section-stack">

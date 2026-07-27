@@ -35,6 +35,8 @@ type NextLesson = {
   lessonIndex: number;
   lessonTotal: number;
   skillPct: number;
+  /** Brand mark key, inferred from the skill and phase titles by the page. */
+  tech: string | null;
 } | null;
 
 export function LearnTop({
