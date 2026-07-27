@@ -63,7 +63,7 @@ export default async function RoadmapPage() {
         <div className="flex flex-wrap items-center gap-2">
           <p className="eyebrow eyebrow-accent">Your roadmap</p>
           {roadmap.origin === "ai" && (
-            <Badge tone="primary">
+            <Badge>
               <Sparkles size={10} /> AI generated
             </Badge>
           )}

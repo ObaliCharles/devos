@@ -111,7 +111,7 @@ export default async function AiPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         {TOOLS.map((t) => (
           <Link key={t.href} href={t.href} className="card card-link group flex flex-col p-4">
-            <IconTile tone="primary">
+            <IconTile>
               <t.icon size={17} />
             </IconTile>
             <h2 className="title-card mt-4">{t.title}</h2>
@@ -125,7 +125,7 @@ export default async function AiPage() {
           href={`/learning/lesson/${next.lesson.id}`}
           className="card card-link flex items-center gap-4 p-4"
         >
-          <IconTile tone="info">
+          <IconTile>
             <BookText size={17} />
           </IconTile>
           <div className="min-w-0 flex-1">

@@ -67,6 +67,17 @@ export type Module = {
   lessons: Lesson[];
 };
 
+/**
+ * An external thing worth reading. Kept as a flat list rather than a typed
+ * union because the useful distinction to a learner is "the official docs vs a
+ * tutorial vs the source", which is exactly what `kind` says.
+ */
+export type Resource = {
+  label: string;
+  url: string;
+  kind: "docs" | "repo" | "article" | "video" | "spec" | "tool";
+};
+
 export type Course = {
   slug: string;
   title: string;
@@ -88,6 +99,26 @@ export type Course = {
   modules: Module[];
   /** Free-text keywords for search. */
   tags: string[];
+
+  /* ---- What a course needs before it can claim to be a course ------------
+     All optional so no existing entry breaks, but every one of the three
+     foundation courses fills them in. A course page that cannot answer "what
+     do I need first" and "where do I read the real thing" is a syllabus, not
+     a course. */
+
+  /** Course slugs that should be done first. Rendered as links, so a wrong
+   *  slug is visible immediately rather than silently dropping the section. */
+  prerequisites?: string[];
+  /** Plain-language assumptions that are not themselves courses here. */
+  assumes?: string[];
+  /** The canonical documentation. Every lesson should be checkable against it. */
+  officialDocs?: string;
+  /** A starter or reference repository for the build. */
+  repo?: string;
+  /** Further reading, credited properly. */
+  resources?: Resource[];
+  /** What completing this contributes toward, by CERTIFICATIONS slug. */
+  certification?: string;
 };
 
 /** Derived: total lessons across a course's modules. */
@@ -142,6 +173,16 @@ export const COURSES: Course[] = [
     youWillBuild: "A command-line task manager that reads and writes real files.",
     hours: 12,
     tags: ["python", "programming", "beginner", "cli", "scripting"],
+    assumes: ["You can use a terminal well enough to change directory and run a command."],
+    officialDocs: "https://docs.python.org/3/tutorial/",
+    repo: "https://github.com/Asabeneh/30-Days-Of-Python",
+    certification: "pcep-python",
+    resources: [
+      { label: "The Python Tutorial", url: "https://docs.python.org/3/tutorial/", kind: "docs" },
+      { label: "30 Days Of Python", url: "https://github.com/Asabeneh/30-Days-Of-Python", kind: "repo" },
+      { label: "Real Python", url: "https://realpython.com/", kind: "article" },
+      { label: "PEP 8 — Style Guide for Python Code", url: "https://peps.python.org/pep-0008/", kind: "spec" },
+    ],
     modules: [
       {
         title: "Getting started",
@@ -199,6 +240,15 @@ export const COURSES: Course[] = [
     youWillBuild: "A live-search country browser that fetches real API data and remembers your list across refreshes.",
     hours: 14,
     tags: ["javascript", "js", "frontend", "web", "dom", "async", "beginner"],
+    assumes: ["You can open your browser's developer tools and find the console."],
+    officialDocs: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+    repo: "https://github.com/Asabeneh/30-Days-Of-JavaScript",
+    resources: [
+      { label: "MDN — JavaScript", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript", kind: "docs" },
+      { label: "javascript.info — The Modern JavaScript Tutorial", url: "https://javascript.info/", kind: "article" },
+      { label: "30 Days Of JavaScript", url: "https://github.com/Asabeneh/30-Days-Of-JavaScript", kind: "repo" },
+      { label: "ECMAScript Language Specification", url: "https://tc39.es/ecma262/", kind: "spec" },
+    ],
     modules: [
       {
         title: "The language",
@@ -258,6 +308,14 @@ export const COURSES: Course[] = [
     youWillBuild: "A repository with a protected main branch, a CI workflow, and a history you are not embarrassed by.",
     hours: 9,
     tags: ["git", "github", "version control", "collaboration", "ci", "workflow"],
+    assumes: ["You have a terminal and a GitHub account. Neither needs to be set up yet."],
+    officialDocs: "https://git-scm.com/doc",
+    resources: [
+      { label: "Pro Git (free, complete)", url: "https://git-scm.com/book/en/v2", kind: "docs" },
+      { label: "GitHub Skills — interactive courses", url: "https://skills.github.com/", kind: "tool" },
+      { label: "Understanding the GitHub flow", url: "https://docs.github.com/en/get-started/using-github/github-flow", kind: "article" },
+      { label: "GitHub Actions documentation", url: "https://docs.github.com/en/actions", kind: "docs" },
+    ],
     modules: [
       {
         title: "The model",
@@ -648,6 +706,8 @@ export type CatalogProject = {
   slug: string;
   title: string;
   icon: string;
+  /** Brand mark key, same registry the courses use. */
+  tech?: string;
   accent: Accent;
   level: Level;
   track: string;
@@ -655,15 +715,189 @@ export type CatalogProject = {
   outcome: string;
   hours: number;
   tags: string[];
+
+  /* ---- What makes a project reviewable rather than a suggestion ---------- */
+
+  /** Course slugs that teach what this build assumes. */
+  prerequisites?: string[];
+  /** The concrete skills you exercise. Shown as chips, used for matching. */
+  skills?: string[];
+  /** A starter repository, so nobody begins with an empty directory. */
+  repo?: string;
+  /** Reference material for the build. */
+  resources?: Resource[];
+  /**
+   * The rubric. This is the difference between "build a REST API" and a brief
+   * you can actually be assessed against — each row is a binary you can check
+   * yourself, in the order a reviewer would look at them.
+   */
+  rubric?: { criterion: string; weight: number }[];
+  /** What a finished submission consists of. */
+  submission?: string[];
 };
 
 export const PROJECTS: CatalogProject[] = [
-  { slug: "cli-task-manager", title: "CLI Task Manager", icon: "Code2", accent: "info", level: "Beginner", track: "Development", tagline: "A command-line to-do app in Python.", outcome: "Persist tasks to disk and manage them from the terminal.", hours: 4, tags: ["python", "cli"] },
-  { slug: "rest-api", title: "REST API Service", icon: "Server", accent: "primary", level: "Intermediate", track: "Development", tagline: "A secured JSON API over a database.", outcome: "Design, build and secure endpoints for a real domain.", hours: 8, tags: ["backend", "api", "sql"] },
-  { slug: "ai-assistant", title: "AI Chat Assistant", icon: "BrainCircuit", accent: "primary", level: "Intermediate", track: "Data Science", tagline: "A RAG assistant over your own docs.", outcome: "Answer questions grounded in a document set.", hours: 10, tags: ["ai", "llm", "rag"] },
-  { slug: "docker-compose-app", title: "Dockerized Web App", icon: "Cloud", accent: "info", level: "Intermediate", track: "Cloud", tagline: "Web + database with Docker Compose.", outcome: "Run a multi-container app anywhere with one command.", hours: 6, tags: ["docker", "devops"] },
-  { slug: "react-dashboard", title: "React Dashboard", icon: "Smartphone", accent: "info", level: "Intermediate", track: "Development", tagline: "A live, data-driven UI.", outcome: "Fetch, display and update data in a modern UI.", hours: 8, tags: ["react", "frontend"] },
-  { slug: "harden-web-app", title: "Harden a Web App", icon: "ShieldCheck", accent: "success", level: "Intermediate", track: "Security", tagline: "Fix a deliberately vulnerable app.", outcome: "Find and patch the OWASP top vulnerabilities.", hours: 6, tags: ["security", "web"] },
+  {
+    slug: "cli-task-manager",
+    title: "CLI Task Manager",
+    icon: "Code2",
+    tech: "python",
+    accent: "info",
+    level: "Beginner",
+    track: "Development",
+    tagline: "A command-line to-do app in Python.",
+    outcome: "Persist tasks to disk and manage them from the terminal.",
+    hours: 4,
+    tags: ["python", "cli"],
+    prerequisites: ["python-essentials"],
+    skills: ["File I/O", "JSON", "argparse", "Error handling", "Data modelling"],
+    resources: [
+      { label: "argparse — Parser for command-line options", url: "https://docs.python.org/3/library/argparse.html", kind: "docs" },
+      { label: "json — JSON encoder and decoder", url: "https://docs.python.org/3/library/json.html", kind: "docs" },
+    ],
+    rubric: [
+      { criterion: "Add, list, complete and delete tasks from the command line", weight: 30 },
+      { criterion: "Tasks survive restarting the program", weight: 25 },
+      { criterion: "A corrupt or missing data file is handled without a traceback", weight: 20 },
+      { criterion: "Commands and flags are discoverable through --help", weight: 15 },
+      { criterion: "Logic is in functions, not one long script body", weight: 10 },
+    ],
+    submission: ["A repository link", "The command you run to start it", "A short note on what you would fix given another hour"],
+  },
+  {
+    slug: "rest-api",
+    title: "REST API Service",
+    icon: "Server",
+    tech: "nodedotjs",
+    accent: "primary",
+    level: "Intermediate",
+    track: "Development",
+    tagline: "A secured JSON API over a database.",
+    outcome: "Design, build and secure endpoints for a real domain.",
+    hours: 8,
+    tags: ["backend", "api", "sql"],
+    prerequisites: ["javascript-essentials", "apis-and-databases"],
+    skills: ["REST design", "Validation", "Authentication", "SQL", "Error handling"],
+    resources: [
+      { label: "MDN — HTTP response status codes", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status", kind: "docs" },
+      { label: "OWASP API Security Top 10", url: "https://owasp.org/API-Security/editions/2023/en/0x11-t10/", kind: "spec" },
+    ],
+    rubric: [
+      { criterion: "Full CRUD over at least one resource, with correct status codes", weight: 25 },
+      { criterion: "Input is validated and rejected with a useful message, not a 500", weight: 20 },
+      { criterion: "Endpoints that change data require authentication", weight: 20 },
+      { criterion: "Secrets are read from the environment, never committed", weight: 20 },
+      { criterion: "A README that gets a stranger running it in under five minutes", weight: 15 },
+    ],
+    submission: ["A repository link", "Example requests for each endpoint", "How you would rate-limit it if it went public"],
+  },
+  {
+    slug: "ai-assistant",
+    title: "AI Chat Assistant",
+    icon: "BrainCircuit",
+    accent: "primary",
+    level: "Intermediate",
+    track: "Data Science",
+    tagline: "A RAG assistant over your own docs.",
+    outcome: "Answer questions grounded in a document set.",
+    hours: 10,
+    tags: ["ai", "llm", "rag"],
+    prerequisites: ["python-essentials", "build-with-llms"],
+    skills: ["Embeddings", "Chunking", "Vector search", "Prompt design", "Citation"],
+    resources: [
+      { label: "Anthropic — Build with Claude", url: "https://docs.anthropic.com/en/docs/build-with-claude/overview", kind: "docs" },
+      { label: "Contextual retrieval", url: "https://www.anthropic.com/news/contextual-retrieval", kind: "article" },
+    ],
+    rubric: [
+      { criterion: "Answers cite the source passage they came from", weight: 30 },
+      { criterion: "A question the documents cannot answer gets \"I do not know\", not a guess", weight: 25 },
+      { criterion: "Documents are chunked deliberately, and you can explain the size you chose", weight: 20 },
+      { criterion: "Retrieval quality is measured against a handful of known Q&A pairs", weight: 15 },
+      { criterion: "API keys are never in the repository", weight: 10 },
+    ],
+    submission: ["A repository link", "Five example questions with the answers it gave", "Your chunking strategy and why"],
+  },
+  {
+    slug: "docker-compose-app",
+    title: "Dockerized Web App",
+    icon: "Cloud",
+    tech: "docker",
+    accent: "info",
+    level: "Intermediate",
+    track: "Cloud",
+    tagline: "Web + database with Docker Compose.",
+    outcome: "Run a multi-container app anywhere with one command.",
+    hours: 6,
+    tags: ["docker", "devops"],
+    prerequisites: ["docker-fundamentals"],
+    skills: ["Dockerfile", "Compose", "Volumes", "Networking", "Environment config"],
+    resources: [
+      { label: "Docker Compose overview", url: "https://docs.docker.com/compose/", kind: "docs" },
+      { label: "Dockerfile best practices", url: "https://docs.docker.com/build/building/best-practices/", kind: "docs" },
+    ],
+    rubric: [
+      { criterion: "docker compose up brings the whole stack up on a clean machine", weight: 30 },
+      { criterion: "Database data survives docker compose down and up again", weight: 25 },
+      { criterion: "The image uses a multi-stage build and does not ship build tools", weight: 20 },
+      { criterion: "Configuration comes from environment variables, not baked-in values", weight: 15 },
+      { criterion: "The app waits for the database instead of crash-looping", weight: 10 },
+    ],
+    submission: ["A repository link", "The output of docker compose up on a fresh clone", "Your final image size"],
+  },
+  {
+    slug: "react-dashboard",
+    title: "React Dashboard",
+    icon: "Smartphone",
+    tech: "react",
+    accent: "info",
+    level: "Intermediate",
+    track: "Development",
+    tagline: "A live, data-driven UI.",
+    outcome: "Fetch, display and update data in a modern UI.",
+    hours: 8,
+    tags: ["react", "frontend"],
+    prerequisites: ["javascript-essentials", "react-essentials"],
+    skills: ["Components", "State", "Data fetching", "Loading states", "Accessibility"],
+    resources: [
+      { label: "React — Thinking in React", url: "https://react.dev/learn/thinking-in-react", kind: "docs" },
+      { label: "WAI-ARIA Authoring Practices", url: "https://www.w3.org/WAI/ARIA/apg/", kind: "spec" },
+    ],
+    rubric: [
+      { criterion: "Real data is fetched and rendered, not hardcoded", weight: 25 },
+      { criterion: "Loading, empty and error states all exist and are distinguishable", weight: 25 },
+      { criterion: "Every control is reachable and operable by keyboard alone", weight: 20 },
+      { criterion: "State lives at the right level — no prop drilling past two layers", weight: 15 },
+      { criterion: "It is usable at 375px wide", weight: 15 },
+    ],
+    submission: ["A repository link", "A deployed URL", "A screenshot of each of the three states"],
+  },
+  {
+    slug: "harden-web-app",
+    title: "Harden a Web App",
+    icon: "ShieldCheck",
+    accent: "success",
+    level: "Intermediate",
+    track: "Security",
+    tagline: "Fix a deliberately vulnerable app.",
+    outcome: "Find and patch the OWASP top vulnerabilities.",
+    hours: 6,
+    tags: ["security", "web"],
+    prerequisites: ["web-security-basics"],
+    skills: ["Threat modelling", "Input validation", "Auth", "Dependency auditing", "Secure headers"],
+    repo: "https://github.com/juice-shop/juice-shop",
+    resources: [
+      { label: "OWASP Top Ten", url: "https://owasp.org/www-project-top-ten/", kind: "spec" },
+      { label: "OWASP Juice Shop", url: "https://owasp.org/www-project-juice-shop/", kind: "tool" },
+    ],
+    rubric: [
+      { criterion: "At least five distinct vulnerabilities found and documented", weight: 30 },
+      { criterion: "Each fix is a commit that explains the vulnerability class", weight: 25 },
+      { criterion: "A test or request proving the exploit no longer works", weight: 20 },
+      { criterion: "Dependencies audited and the risky ones upgraded", weight: 15 },
+      { criterion: "Security headers set and verified", weight: 10 },
+    ],
+    submission: ["A repository link", "A short report per vulnerability: what, where, impact, fix", "Before and after proof for one of them"],
+  },
 ];
 
 /* --------------------------------------------------------- Certifications --

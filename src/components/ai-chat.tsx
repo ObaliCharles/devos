@@ -349,7 +349,7 @@ export function AiChat({
           {empty ? (
             <div className="grid h-full place-items-center py-8 text-center">
               <div className="max-w-md">
-                <span className="icon-tile icon-tile-lg icon-tile-primary mx-auto">
+                <span className="icon-tile icon-tile-lg mx-auto">
                   <Sparkles size={20} />
                 </span>
                 <p className="mt-4 text-[17px] font-semibold tracking-tight">

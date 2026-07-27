@@ -166,7 +166,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
 
           <section className="card p-4">
             <div className="flex items-center gap-3">
-              <IconTile tone="primary">
+              <IconTile>
                 <Sparkles size={16} />
               </IconTile>
               <div>

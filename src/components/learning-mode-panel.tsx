@@ -28,7 +28,7 @@ export function LearningModePanel({
         className="flex w-full items-center gap-3 rounded-[var(--radius-card)] border p-3 text-left"
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
-        <span className="icon-tile icon-tile-primary">
+        <span className="icon-tile">
           <Layers size={16} />
         </span>
         <span className="min-w-0 flex-1">

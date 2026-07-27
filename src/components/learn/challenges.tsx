@@ -45,7 +45,7 @@ export function Challenges({ challenges }: { challenges: Challenge[] }) {
     .filter((g) => g.items.length > 0);
 
   return (
-    <section className="card p-5 sm:p-6">
+    <section className="card p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="title-section">Practice</h2>
         <p className="text-meta num">

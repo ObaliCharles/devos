@@ -105,7 +105,7 @@ export function MilestonesPanel({
                 style={{
                   background: m.status === "done" ? "var(--success)" : "transparent",
                   borderColor: m.status === "done" ? "var(--success)" : "var(--border-strong)",
-                  color: "#04140d",
+                  color: "var(--success-ink)",
                 }}
               >
                 {m.status === "done" && <Check size={13} strokeWidth={3} />}

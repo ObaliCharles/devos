@@ -143,7 +143,7 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
       {/* ------------------------------------------------------- The builder */}
       <div className="panel p-5">
         <div className="flex items-center gap-2.5">
-          <span className="icon-tile icon-tile-primary">
+          <span className="icon-tile">
             <Wand2 size={16} />
           </span>
           <div className="min-w-0">

@@ -36,28 +36,24 @@ export default async function AnalyticsOverviewPage() {
           value={level.level}
           sub={`${level.title} · ${level.need - level.into} XP to next`}
           icon={<TrendingUp size={17} />}
-          tone="primary"
         />
         <StatTile
           label="Total time"
           value={`${data.totalHours}h`}
           sub="tracked across everything"
           icon={<Clock size={17} />}
-          tone="info"
         />
         <StatTile
           label="Lessons mastered"
           value={data.lessonsMastered}
           sub="past the gate"
           icon={<BookOpen size={17} />}
-          tone="success"
         />
         <StatTile
           label="Challenges solved"
           value={data.challengesSolved}
           sub="tests passing"
           icon={<Target size={17} />}
-          tone="warning"
         />
       </section>
 

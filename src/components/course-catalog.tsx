@@ -92,7 +92,7 @@ export function CourseCatalog({ phases }: { phases: Phase[] }) {
           }
         />
       ) : (
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-6">
           {filtered.map((phase) => (
             <section key={phase.id} aria-labelledby={`cat-${phase.id}`}>
               {/* ---- category header ---- */}
@@ -151,7 +151,7 @@ function CourseCard({ skill, locked }: { skill: Skill; locked: boolean }) {
               <Lock size={14} />
             </span>
           ) : complete ? (
-            <span className="icon-tile icon-tile-success h-8 w-8">
+            <span className="icon-tile h-8 w-8">
               <Check size={15} strokeWidth={2.6} />
             </span>
           ) : (

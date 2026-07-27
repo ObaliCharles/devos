@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
+// /verify is public by design: a certificate only means something if the person
+// checking it — a recruiter, a client — can check it without an account here.
+const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/verify(.*)"]);
 const isApi = createRouteMatcher(["/api(.*)"]);
 
 /**

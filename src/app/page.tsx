@@ -246,7 +246,7 @@ export default function Landing() {
         <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
           {JOURNEYS.map((j, i) => (
             <Reveal key={j.title} index={i} className="card flex flex-col p-5">
-              <span className="icon-tile icon-tile-lg icon-tile-primary">
+              <span className="icon-tile icon-tile-lg">
                 <j.icon size={20} />
               </span>
               <h3 className="title-card mt-4">{j.title}</h3>
@@ -319,7 +319,7 @@ export default function Landing() {
             <ul className="mt-8 flex flex-col gap-5">
               {SHOWCASE.map((s, i) => (
                 <Reveal as="li" key={s.title} index={i} className="flex gap-4">
-                  <span className="icon-tile icon-tile-primary shrink-0">
+                  <span className="icon-tile shrink-0">
                     <s.icon size={17} />
                   </span>
                   <div>
@@ -427,7 +427,7 @@ function DashboardPreview() {
           </div>
 
           <div className="mt-4 flex flex-col gap-2.5">
-            <MissionRow title="Current Mission" sub="Complete Python Fundamentals" meta="Lesson 12 of 28" pct={30} tone="primary" />
+            <MissionRow title="Current Mission" sub="Complete Python Fundamentals" meta="Lesson 12 of 28" pct={30} />
             <MissionRow title="Next Milestone" sub="Build your first API" meta="0/5 tasks completed" />
             <MissionRow title="Final Goal" sub="Build a production-ready AI application" meta="" />
           </div>

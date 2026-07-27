@@ -10,11 +10,9 @@ import {
   FolderGit2,
   Play,
   RotateCcw,
-  Sparkles,
   Target,
   Trophy,
-  Zap,
-} from "lucide-react";
+  Zap } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import {
   findNextLesson,
@@ -25,8 +23,7 @@ import {
   getProjectStats,
   getRoadmap,
   getUserCounts,
-  listRoadmaps,
-} from "@/lib/queries";
+  listRoadmaps } from "@/lib/queries";
 import { COURSES } from "@/lib/catalog";
 import { isConfigured } from "@/lib/ai";
 import { ROADMAP_META } from "@/lib/learn-content";
@@ -94,8 +91,7 @@ export default async function LearningPage() {
   // number to show; the rest read 0 until followed.
   const mobileRoadmaps = roadmaps.map((r) => ({
     ...r,
-    pct: r.active ? activePct : 0,
-  }));
+    pct: r.active ? activePct : 0 }));
 
   return (
     <>
@@ -128,11 +124,11 @@ export default async function LearningPage() {
       {/* =========================================================== DESKTOP */}
       <div className="page-body hidden pb-6 lg:flex">
       {/* =========================================================== 1. Hero */}
-      <section className="rise pt-2 text-center sm:pt-6">
-        <h1 className="mx-auto whitespace-nowrap text-[clamp(26px,7vw,52px)] font-bold leading-[1.05] tracking-[-0.035em]">
+      <section className="rise">
+        <h1 className="title-page">
           Become the developer you want.
         </h1>
-        <p className="mt-4 flex items-center justify-center gap-2 text-[14px] font-medium sm:text-[15px]">
+        <p className="mt-2 flex items-center gap-2 text-[13px] font-medium">
           {["Learn", "Build", "Master", "Ship"].map((w, i) => (
             <span key={w} className="flex items-center gap-2">
               {i > 0 && (
@@ -142,12 +138,15 @@ export default async function LearningPage() {
             </span>
           ))}
         </p>
-        <div className="mt-8">
+        <div className="mt-5">
           <RoadmapSearch />
         </div>
       </section>
 
-      {/* ================================================ 2. Continue + how */}
+      {/* ============================================ 2. Continue + mission
+          The two things a returning learner needs before anything else: the
+          one lesson to open, and where that sits in the path. Everything
+          below this fold is browsing. */}
       <section className="grid gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
         <ContinueLearning
           hasPath={Boolean(roadmap)}
@@ -155,7 +154,13 @@ export default async function LearningPage() {
           pct={activePct}
           next={next}
         />
-        <HowToLearn />
+        <Mission
+          roadmapTitle={roadmap?.title}
+          pct={activePct}
+          next={next}
+          streak={streak}
+          remaining={totalLessons - lessonsMastered}
+        />
       </section>
 
       {/* ========================================== 3. Popular roadmaps */}
@@ -173,7 +178,7 @@ export default async function LearningPage() {
             </Reveal>
           ))}
           {roadmaps.length === 0 && (
-            <div className="card col-span-full p-6 text-center">
+            <div className="card col-span-full p-5 text-center">
               <p className="text-[14px] font-medium">No paths loaded yet</p>
               <p className="text-body mt-1 text-[13px]">
                 Generate one with the builder below, or run the seed script to load the curated
@@ -192,15 +197,6 @@ export default async function LearningPage() {
         />
         <CurriculumBuilder configured={configured} />
       </section>
-
-      {/* ================================================== 5. Your mission */}
-      <Mission
-        roadmapTitle={roadmap?.title}
-        pct={activePct}
-        next={next}
-        streak={streak}
-        remaining={totalLessons - lessonsMastered}
-      />
 
       {/* ===================================================== 6. Discover */}
       <section id="discover" className="section-stack scroll-mt-4">
@@ -239,8 +235,7 @@ function SectionTitle({
   title,
   sub,
   href,
-  hrefLabel,
-}: {
+  hrefLabel }: {
   title: string;
   sub?: string;
   href?: string;
@@ -273,8 +268,7 @@ function ContinueLearning({
   hasPath,
   title,
   pct,
-  next,
-}: {
+  next }: {
   hasPath: boolean;
   title: string;
   pct: number;
@@ -338,77 +332,7 @@ function ContinueLearning({
 
 /* ============================================================ How to learn */
 
-function HowToLearn() {
-  return (
-    <div className="panel p-5">
-      <p className="eyebrow">How would you like to learn?</p>
-      <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-        <LearnOption
-          icon={<BookOpen size={18} />}
-          tone="primary"
-          title="Official Roadmaps"
-          body="Curated learning experiences with projects, certificates and milestones. Open your active path to see every phase."
-          cta="View my roadmap"
-          href="/learning/roadmap"
-        />
-        <div className="flex items-center justify-center">
-          <span
-            className="grid h-8 w-8 place-items-center rounded-full text-[11px] font-semibold sm:h-9 sm:w-9"
-            style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}
-          >
-            OR
-          </span>
-        </div>
-        <LearnOption
-          icon={<Sparkles size={18} />}
-          tone="info"
-          title="AI Learning Paths"
-          body="Tell AI what you want to become and it builds a personalized curriculum, real lessons and quizzes, mapped to projects."
-          cta="Generate Path"
-          href="#build"
-        />
-      </div>
-    </div>
-  );
-}
 
-function LearnOption({
-  icon,
-  tone,
-  title,
-  body,
-  cta,
-  href,
-}: {
-  icon: React.ReactNode;
-  tone: "primary" | "info";
-  title: string;
-  body: string;
-  cta: string;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="card card-link group flex flex-col p-4"
-      style={{ background: "var(--surface-2)" }}
-    >
-      <span className={`icon-tile icon-tile-${tone}`}>{icon}</span>
-      <h3 className="title-card mt-3">{title}</h3>
-      <p className="text-body mt-1.5 flex-1 text-[13px]">{body}</p>
-      <span
-        className="mt-4 flex items-center gap-1.5 text-[13px] font-medium"
-        style={{ color: `var(--${tone})` }}
-      >
-        {cta}
-        <ArrowRight
-          size={14}
-          className="transition-transform duration-200 group-hover:translate-x-0.5"
-        />
-      </span>
-    </Link>
-  );
-}
 
 /* ================================================================ Mission */
 
@@ -417,8 +341,7 @@ function Mission({
   pct,
   next,
   streak,
-  remaining,
-}: {
+  remaining }: {
   roadmapTitle?: string;
   pct: number;
   next: NextLesson;
@@ -479,9 +402,9 @@ function Mission({
         <div className="p-5" style={{ background: "var(--surface)" }}>
           <p className="text-meta text-[11px] font-semibold uppercase tracking-wide">Rewards</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            <Reward icon={<Zap size={15} />} tone="primary" label="+50 XP" />
-            <Reward icon={<Award size={15} />} tone="danger" label="Badge" />
-            <Reward icon={<Trophy size={15} />} tone="warning" label="Progress" />
+            <Reward icon={<Zap size={15} />} label="+50 XP" />
+            <Reward icon={<Award size={15} />} label="Badge" />
+            <Reward icon={<Trophy size={15} />} label="Progress" />
           </div>
 
           <p className="text-meta mt-5 text-[11px] font-semibold uppercase tracking-wide">
@@ -537,11 +460,8 @@ function Mission({
 
 function Reward({
   icon,
-  tone,
-  label,
-}: {
+  label }: {
   icon: React.ReactNode;
-  tone: "primary" | "danger" | "warning";
   label: string;
 }) {
   return (
@@ -549,7 +469,7 @@ function Reward({
       className="flex flex-col items-center gap-1.5 rounded-[var(--radius-tile)] p-2"
       style={{ background: "var(--surface-2)" }}
     >
-      <span className={`icon-tile icon-tile-${tone} h-9 w-9`}>{icon}</span>
+      <span className="icon-tile h-9 w-9">{icon}</span>
       <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
@@ -563,8 +483,7 @@ function LearningActivity({
   days,
   streak,
   xp,
-  roadmapTitle,
-}: {
+  roadmapTitle }: {
   days: { day: string; minutes: number }[];
   streak: number;
   xp: number;
@@ -638,8 +557,7 @@ type EarnedAchievement = {
 const TIER_ICON: Record<string, string> = {
   bronze: "Star",
   silver: "Zap",
-  gold: "Trophy",
-};
+  gold: "Trophy" };
 
 function Achievements({ achievements }: { achievements: EarnedAchievement[] }) {
   const shown = achievements.slice(0, 8);
@@ -665,17 +583,16 @@ function Achievements({ achievements }: { achievements: EarnedAchievement[] }) {
             style={{
               background: a.unlocked ? "var(--surface-2)" : "transparent",
               border: `1px solid ${a.unlocked ? "var(--border)" : "var(--border-faint)"}`,
-              opacity: a.unlocked ? 1 : 0.55,
-            }}
+              opacity: a.unlocked ? 1 : 0.55 }}
           >
             <span
               className={`icon-tile icon-tile-lg ${
                 a.unlocked
                   ? a.tier === "gold"
-                    ? "icon-tile-warning"
+                    ? ""
                     : a.tier === "silver"
-                      ? "icon-tile-info"
-                      : "icon-tile-primary"
+                      ? ""
+                      : ""
                   : ""
               }`}
             >
@@ -701,8 +618,7 @@ function ProgressOverview({
   lessons,
   projects,
   certs,
-  challengesSolved,
-}: {
+  challengesSolved }: {
   completedPct: number;
   lessons: [number, number];
   projects: [number, number];
@@ -778,8 +694,7 @@ function Metric({
   icon,
   value,
   label,
-  href,
-}: {
+  href }: {
   icon: React.ReactNode;
   value: string;
   label: string;

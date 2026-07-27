@@ -105,7 +105,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
               >
                 <span
                   className={`icon-tile num h-8 w-8 text-[12px] font-semibold ${
-                    isMastered ? "icon-tile-success" : ""
+                    isMastered ? "" : ""
                   }`}
                 >
                   {isMastered ? <Check size={15} strokeWidth={2.8} /> : i + 1}

@@ -49,21 +49,18 @@ export default async function PracticePage() {
           value={stats.solved}
           sub={`of ${stats.total} challenges`}
           icon={<Check size={17} />}
-          tone="success"
         />
         <StatTile
           label="Attempts"
           value={stats.attempts}
           sub="all time"
           icon={<Target size={17} />}
-          tone="info"
         />
         <StatTile
           label="Accuracy"
           value={`${stats.accuracy}%`}
           sub="passed / attempted"
           icon={<Zap size={17} />}
-          tone="warning"
           trend={stats.accuracy >= 60 ? "up" : stats.accuracy > 0 ? "flat" : undefined}
         />
         <StatTile
@@ -71,7 +68,6 @@ export default async function PracticePage() {
           value={stats.total - stats.solved}
           sub={stats.total === stats.solved ? "all done" : "to solve"}
           icon={<Dumbbell size={17} />}
-          tone="primary"
         />
       </section>
 
@@ -129,7 +125,7 @@ export default async function PracticePage() {
           {/* ------------------------------------------------- By difficulty */}
           <section className="section-stack">
             <h2 className="title-section">By difficulty</h2>
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6">
               {LEVELS.map(({ key, label, tone }) => {
                 const group = challenges.filter((c) => c.difficulty === key);
                 if (group.length === 0) return null;

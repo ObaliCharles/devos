@@ -181,6 +181,23 @@ const CertificateSchema = new Schema(
     credentialUrl: String,
     imageUrl: String,
     skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
+
+    /* ---- Verification -----------------------------------------------------
+       A certificate nobody can check is decoration. `verifyCode` is the
+       public handle: short enough to read down a phone, unique, and the only
+       thing exposed on the public verify page — never the user id, never the
+       email. Sparse so the millions of externally-issued certificates a user
+       might record by hand do not all collide on null. */
+    verifyCode: { type: String, unique: true, sparse: true, index: true },
+    /** What was actually completed, for certificates this app issued. */
+    courseSlug: String,
+    /** Issued by us, versus recorded by the user from somewhere else. */
+    issuedBy: { type: String, enum: ["developeros", "external"], default: "external" },
+    /** Denormalised so the public page never has to read the user document. */
+    recipientName: String,
+    /** Revoked certificates verify as revoked rather than as missing, which is
+     *  the difference between "this was withdrawn" and "this never existed". */
+    revokedAt: Date,
   },
   { timestamps: true }
 );

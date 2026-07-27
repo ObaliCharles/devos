@@ -130,7 +130,7 @@ export function MasteryGate({
                 style={{
                   background: checked ? "var(--success)" : "transparent",
                   borderColor: checked ? "var(--success)" : "var(--border-strong)",
-                  color: "#04140d",
+                  color: "var(--success-ink)",
                 }}
               >
                 {checked && <Check size={12} strokeWidth={3} />}

@@ -18,7 +18,7 @@ export default async function CareerOverviewPage() {
           <div className="min-w-0">
             <p className="eyebrow">Job readiness</p>
             <p
-              className="num mt-2 text-[44px] font-bold leading-none"
+              className="num mt-2 title-page font-bold leading-none"
               style={{ color: r.ready ? "var(--success)" : "var(--warning)" }}
             >
               {r.overall}%
@@ -85,7 +85,6 @@ export default async function CareerOverviewPage() {
           value={r.counts.applications}
           sub="tracked"
           icon={<Briefcase size={17} />}
-          tone="info"
         />
         <StatTile
           href="/career/certificates"
@@ -93,13 +92,12 @@ export default async function CareerOverviewPage() {
           value={r.counts.certs}
           sub="earned"
           icon={<Award size={17} />}
-          tone="primary"
         />
       </section>
 
       {/* ------------------------------------------------------------ Path */}
       <section className="card flex items-start gap-4 p-4 sm:p-5">
-        <IconTile tone="primary" size="lg">
+        <IconTile size="lg">
           <Route size={19} />
         </IconTile>
         <div className="min-w-0">

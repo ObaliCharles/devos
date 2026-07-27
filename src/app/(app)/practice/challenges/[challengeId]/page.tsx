@@ -31,7 +31,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ chal
               {challenge.difficulty}
             </Badge>
             {challenge.solved && (
-              <Badge tone="success">
+              <Badge>
                 <Check size={11} /> Solved
               </Badge>
             )}

@@ -8,15 +8,26 @@ import {
   FolderGit2,
   Layers,
   Lightbulb,
-  Target,
+  Dumbbell,
+  ExternalLink,
 } from "lucide-react";
 import { Check } from "lucide-react";
-import { getCourse, lessonCount, flatLessons } from "@/lib/catalog";
+import { CERTIFICATIONS, challengeCount, getCourse, lessonCount, flatLessons } from "@/lib/catalog";
 import { requireUser } from "@/lib/user";
 import { getCatalogProgress } from "@/lib/queries";
 import { ContentIcon } from "@/components/learn/icon";
 import { TechLogo, TECH_WITH_LOGO } from "@/components/learn/tech-logo";
 import { Reveal } from "@/components/reveal";
+
+/** What each resource kind is, in the reader's terms rather than ours. */
+const KIND_LABEL: Record<string, string> = {
+  docs: "Official docs",
+  repo: "Repository",
+  article: "Guide",
+  video: "Video",
+  spec: "Specification",
+  tool: "Tool",
+};
 
 // Reads per-user progress, so it renders per request.
 export const dynamic = "force-dynamic";
@@ -37,7 +48,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const doneSet = new Set(completed);
 
   const lessons = lessonCount(course);
+  const tasks = challengeCount(course);
   const flat = flatLessons(course);
+  // Resolved rather than rendered as slugs, so a typo in a prerequisite shows
+  // up as a missing row instead of a dead link.
+  const prereqs = (course.prerequisites ?? [])
+    .map((slug) => getCourse(slug))
+    .filter((c): c is NonNullable<typeof c> => Boolean(c));
+  const cert = course.certification
+    ? CERTIFICATIONS.find((c) => c.slug === course.certification)
+    : undefined;
   const pct = lessons > 0 ? Math.round((completed.length / lessons) * 100) : 0;
   // First lesson not yet completed — where "Start"/"Resume" should land.
   const resumeIdx = (flat.find((f) => !doneSet.has(f.index))?.index ?? 0) + 1;
@@ -110,8 +130,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       >
         <Stat icon={<Layers size={14} />} value={course.modules.length} label="Modules" />
         <Stat icon={<BookOpen size={14} />} value={lessons} label="Lessons" />
+        <Stat icon={<Dumbbell size={14} />} value={tasks || "—"} label="Practice tasks" />
         <Stat icon={<Clock size={14} />} value={`${course.hours}h`} label="Est. time" />
-        <Stat icon={<Target size={14} />} value={course.level} label="Level" />
       </div>
 
       {/* Overview + why + build */}
@@ -123,17 +143,14 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <div className="flex flex-col gap-4">
           <div className="panel p-5">
             <div className="flex items-center gap-2">
-              <Lightbulb size={16} style={{ color: "var(--warning)" }} />
+              <Lightbulb size={16} style={{ color: "var(--text-faint)" }} />
               <h3 className="title-card">Why it matters</h3>
             </div>
             <p className="text-body mt-2 text-[13.5px]">{course.whyItMatters}</p>
           </div>
-          <div
-            className="panel p-5"
-            style={{ background: "var(--primary-faint)", borderColor: "var(--primary-muted)" }}
-          >
+          <div className="panel p-5">
             <div className="flex items-center gap-2">
-              <FolderGit2 size={16} style={{ color: "var(--primary)" }} />
+              <FolderGit2 size={16} style={{ color: "var(--text-faint)" }} />
               <h3 className="title-card">You&apos;ll build</h3>
             </div>
             <p className="mt-2 text-[13.5px] font-medium">{course.youWillBuild}</p>
@@ -141,11 +158,56 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         </div>
       </section>
 
+      {/* ----------------------------------------------------- Before you start
+          A course that cannot answer "what do I need first" is a syllabus.
+          Prerequisites resolve to real catalog entries, so a wrong slug shows
+          up as a missing row rather than silently dropping the section. */}
+      {(prereqs.length > 0 || (course.assumes?.length ?? 0) > 0) && (
+        <section className="panel p-5">
+          <h2 className="title-card">Before you start</h2>
+          {prereqs.length > 0 && (
+            <ul className="mt-3 flex flex-col gap-2">
+              {prereqs.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/learning/course/${p.slug}`}
+                    className="row-link flex items-center gap-3 px-2 py-2"
+                  >
+                    {p.tech && TECH_WITH_LOGO.has(p.tech) ? (
+                      <TechLogo name={p.tech} mode="plate" size={28} />
+                    ) : (
+                      <span className="icon-tile">
+                        <ContentIcon name={p.icon} size={14} />
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13.5px] font-medium">{p.title}</span>
+                      <span className="text-meta block truncate text-[12px]">{p.tagline}</span>
+                    </span>
+                    <ArrowRight size={14} style={{ color: "var(--text-faint)" }} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          {course.assumes && course.assumes.length > 0 && (
+            <ul className="mt-3 flex flex-col gap-1.5">
+              {course.assumes.map((a) => (
+                <li key={a} className="flex gap-2.5 text-[13.5px]" style={{ color: "var(--text-muted)" }}>
+                  <Check size={14} className="mt-[3px] shrink-0" style={{ color: "var(--text-faint)" }} />
+                  {a}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {/* --------------------------------------------------------- Curriculum */}
       <section className="section-stack">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-[21px] font-bold tracking-[-0.025em]">Curriculum</h2>
+            <h2 className="title-section">Curriculum</h2>
             <p className="text-body mt-1 text-[13.5px]">
               {course.modules.length} modules · {lessons} lessons. Stuck on any of them? Ask the AI
               tutor right there.
@@ -235,6 +297,46 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           </Link>
         </div>
       </div>
+
+      {/* ------------------------------------------------------------ Reference
+          Credited properly, and opened in a new tab: sending someone away from
+          a lesson they are halfway through is a hostile default. */}
+      {(course.officialDocs || course.repo || (course.resources?.length ?? 0) > 0) && (
+        <section className="panel p-5">
+          <h2 className="title-card">Reference</h2>
+          <p className="text-body mt-1.5 text-[13px]">
+            This course is built against these. When a lesson and the official documentation
+            disagree, the documentation is right — tell us and we will fix the lesson.
+          </p>
+          <ul className="mt-4 flex flex-col">
+            {(course.resources ?? []).map((r) => (
+              <li key={r.url}>
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="row-link flex items-center gap-3 px-2 py-2.5"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13.5px] font-medium">{r.label}</span>
+                    <span className="text-meta block truncate text-[12px]">
+                      {KIND_LABEL[r.kind] ?? r.kind} · {new URL(r.url).hostname.replace(/^www\./, "")}
+                    </span>
+                  </span>
+                  <ExternalLink size={14} className="shrink-0" style={{ color: "var(--text-faint)" }} />
+                </a>
+              </li>
+            ))}
+          </ul>
+          {cert && (
+            <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
+              <p className="text-meta text-[12.5px]">Counts toward</p>
+              <p className="mt-1 text-[13.5px] font-medium">{cert.title}</p>
+              <p className="text-meta mt-0.5 text-[12.5px]">{cert.provider} · {cert.tagline}</p>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

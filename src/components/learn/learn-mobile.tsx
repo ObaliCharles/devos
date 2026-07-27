@@ -127,7 +127,7 @@ export function LearnMobile({
           }}
           className="card card-link flex items-center gap-4 p-4"
         >
-          <span className="icon-tile icon-tile-lg icon-tile-primary">
+          <span className="icon-tile icon-tile-lg">
             <TrendingUp size={20} />
           </span>
           <div className="min-w-0 flex-1">
@@ -137,7 +137,9 @@ export function LearnMobile({
             <p className="text-[15px] font-bold tracking-[-0.01em]">Build your path with AI</p>
             <p className="text-meta mt-0.5">Get a personalized roadmap in 2 minutes.</p>
           </div>
-          <span className="btn btn-primary btn-icon h-9 w-9 shrink-0">
+          {/* Decorative: the link already reads its heading, so announcing an
+              arrow here would only add noise. */}
+          <span className="btn btn-primary btn-icon h-9 w-9 shrink-0" aria-hidden>
             <ArrowRight size={16} />
           </span>
         </Link>
@@ -230,7 +232,7 @@ function Row({
 
 function Empty({ label }: { label: string }) {
   return (
-    <div className="card p-8 text-center">
+    <div className="card p-6 text-center">
       <p className="text-[14px] font-medium">Nothing here yet</p>
       <p className="text-body mt-1 text-[13px]">No {label} match your filter.</p>
     </div>
@@ -364,8 +366,8 @@ function CourseList({
 function ProjectList({ track, q }: { track: string; q: string }) {
   const filtered = PROJECTS.filter((p) => {
     const trackOk = track === "All" || p.track === track;
-    const qOk = !q || `${p.title} ${p.tagline} ${p.tags.join(" ")}`.toLowerCase().includes(q);
-    return trackOk && qOk;
+    const haystack = `${p.title} ${p.tagline} ${(p.skills ?? []).join(" ")} ${p.tags.join(" ")}`;
+    return trackOk && (!q || haystack.toLowerCase().includes(q));
   });
   if (filtered.length === 0) return <Empty label="projects" />;
   return (
@@ -375,10 +377,14 @@ function ProjectList({ track, q }: { track: string; q: string }) {
           key={p.slug}
           index={i}
           icon={p.icon}
+          tech={p.tech}
           accent={p.accent}
           title={p.title}
           meta={`${p.tagline} · ${p.hours}h · ${p.level}`}
-          href="/projects/new"
+          // The brief, not the new-project form. Every row used to land on the
+          // same empty form, which threw away the rubric and made six distinct
+          // builds indistinguishable.
+          href={`/learning/project/${p.slug}`}
         />
       ))}
     </ul>

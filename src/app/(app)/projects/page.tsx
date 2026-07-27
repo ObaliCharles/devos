@@ -50,14 +50,12 @@ export default async function ProjectsPage({
           value={stats.active}
           sub={`${stats.complete} complete`}
           icon={<FolderKanban size={17} />}
-          tone="primary"
         />
         <StatTile
           label="Tasks open"
           value={stats.tasksDue}
           sub="across all projects"
           icon={<Timer size={17} />}
-          tone="info"
         />
         <StatTile
           label="Open bugs"
@@ -71,7 +69,6 @@ export default async function ProjectsPage({
           value={`${stats.hours}h`}
           sub={`${stats.deployments} deployments`}
           icon={<Clock size={17} />}
-          tone="warning"
         />
       </section>
 

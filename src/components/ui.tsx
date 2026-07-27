@@ -59,11 +59,11 @@ export function PageHeader({
           </Link>
         )}
         {eyebrow && <p className="eyebrow eyebrow-accent">{eyebrow}</p>}
-        <h1 className={`title-page ${eyebrow ? "mt-2.5" : ""}`}>{title}</h1>
+        <h1 className={`title-page ${eyebrow ? "mt-1.5" : ""}`}>{title}</h1>
         {description && !compact && (
-          <p className="text-body mt-3 max-w-[58ch]">{description}</p>
+          <p className="text-body mt-2 max-w-[64ch] text-[13.5px]">{description}</p>
         )}
-        {meta && <div className="mt-5 flex flex-wrap items-center gap-3">{meta}</div>}
+        {meta && <div className="mt-3.5 flex flex-wrap items-center gap-2.5">{meta}</div>}
       </div>
       {actions && (
         <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:pt-1">
@@ -121,7 +121,7 @@ export function Panel({
   return (
     <section className={`panel flex flex-col ${className}`}>
       {title && (
-        <div className="flex items-center justify-between gap-4 border-b px-5 py-4">
+        <div className="flex items-center justify-between gap-4 border-b px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             {icon && <IconTile>{icon}</IconTile>}
             <div className="min-w-0">
@@ -349,19 +349,19 @@ export function StatTile({
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[12.5px] font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </p>
         {icon && <IconTile tone={tone}>{icon}</IconTile>}
       </div>
-      <p className="num mt-auto pt-4 text-[24px] font-semibold leading-none">{value}</p>
-      {sub && <p className="text-meta mt-2">{sub}</p>}
+      <p className="num mt-auto pt-3 text-[20px] font-semibold leading-none">{value}</p>
+      {sub && <p className="text-meta mt-1.5 truncate text-[12px]">{sub}</p>}
     </>
   );
 
   // flex-col + mt-auto on the value: four tiles with different amounts of
   // sub-text still align their numbers on the same baseline.
-  const className = "card flex min-h-[128px] flex-col p-5";
+  const className = "card flex min-h-[96px] flex-col p-3.5";
   return href ? (
     <Link href={href} className={`${className} card-link`}>
       {body}
@@ -400,7 +400,7 @@ export function EmptyState({
   return (
     <div
       className={`card scale-in flex flex-col items-center px-5 text-center ${
-        compact ? "py-10" : "py-16 sm:py-20"
+        compact ? "py-8" : "py-12 sm:py-16"
       }`}
     >
       <div className="max-w-sm">
@@ -410,7 +410,7 @@ export function EmptyState({
           // which put the loudest thing in the product on the page with the
           // least to say.
           <span
-            className="mx-auto mb-6 grid h-12 w-12 place-items-center rounded-[var(--radius-tile)]"
+            className="mx-auto mb-4 grid h-10 w-10 place-items-center rounded-[var(--radius-tile)]"
             style={{
               background: "var(--neutral-faint)",
               color: "var(--text-muted)",
@@ -419,10 +419,10 @@ export function EmptyState({
             {icon}
           </span>
         )}
-        <p className="text-[18px] font-semibold tracking-[-0.018em]">{title}</p>
-        <p className="text-body mx-auto mt-2 max-w-[42ch] text-[14px]">{body}</p>
+        <p className="text-[15px] font-semibold tracking-[-0.014em]">{title}</p>
+        <p className="text-body mx-auto mt-1.5 max-w-[46ch] text-[13px]">{body}</p>
         {(action || secondary) && (
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             {action}
             {secondary}
           </div>

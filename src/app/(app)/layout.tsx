@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { RouteProgress } from "@/components/route-progress";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCurrentUser, levelFromXp } from "@/lib/user";
 import { countDueReviews, countUnreadNotifications } from "@/lib/queries";
 
@@ -64,6 +65,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             className="page-container"
             style={{ paddingTop: "var(--page-top)", paddingBottom: "var(--page-top)" }}
           >
+            {/* Rendered by the shell rather than by each page, so no route can
+                forget it and none has to pass props to get it. Hides itself at
+                the top level, where the trail would only repeat the title. */}
+            <Breadcrumbs />
             {children}
           </div>
         </main>

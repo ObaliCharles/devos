@@ -112,9 +112,9 @@ export default async function DashboardPage() {
   return (
     <div className="page-body">
       {/* =============================================================== Hero */}
-      <section className="rise">
-        <h1 className="title-display">{roadmap?.title ?? "No roadmap loaded"}</h1>
-        <p className="text-body mt-3">
+      <section className="rise flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <h1 className="title-page">{roadmap?.title ?? "No roadmap loaded"}</h1>
+        <p className="text-meta">
           {next ? "Continue where you left off." : "Nothing queued on this path."}
         </p>
       </section>
@@ -124,19 +124,19 @@ export default async function DashboardPage() {
           sits on the left because it is the fastest possible answer to "what
           am I even working on" — faster than reading the title. */}
       {next ? (
-        <section className="card rise p-5 sm:p-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-8">
+        <section className="card rise p-4 sm:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
             {tech ? (
-              <TechLogo name={tech} mode="plate" size={72} className="hidden sm:grid" />
+              <TechLogo name={tech} mode="plate" size={56} className="hidden sm:grid" />
             ) : null}
 
             <div className="min-w-0 flex-1">
               <p className="eyebrow">Continue learning</p>
-              <h2 className="mt-2 text-[24px] font-semibold leading-tight tracking-[-0.026em] sm:text-[28px]">
+              <h2 className="mt-1.5 text-[19px] font-semibold leading-tight tracking-[-0.02em] sm:text-[21px]">
                 {next.lesson.title}
               </h2>
 
-              <p className="text-meta mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="text-meta mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>{next.skill.title}</span>
                 <Dot />
                 <span>{next.lesson.estimatedMinutes} min remaining</span>
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
                 )}
               </p>
 
-              <div className="mt-5 flex max-w-md items-center gap-3">
+              <div className="mt-4 flex max-w-md items-center gap-3">
                 <div className="progress flex-1">
                   <div
                     className="progress-bar"
@@ -170,7 +170,7 @@ export default async function DashboardPage() {
 
             <Link
               href={`/learning/lesson/${next.lesson.id}`}
-              className="btn btn-primary btn-lg shrink-0 self-start lg:self-auto"
+              className="btn btn-primary shrink-0 self-start lg:self-auto"
             >
               {next.lesson.gateDone > 0 ? "Resume" : "Start"}
               <ArrowRight size={16} />
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
 
       {/* ------------------------------------------------------------- Path */}
       {steps.length > 1 && (
-        <section className="card p-5 sm:p-6">
+        <section className="card p-4 sm:p-5">
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="title-section">Your path</h2>
             <Link href="/learning/roadmap" className="btn btn-ghost btn-sm">
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
 
           {/* Horizontal scroll rather than wrap: a path is a sequence, and
               wrapping it onto a second line breaks the one thing it is for. */}
-          <ol className="scrollbar-none mt-6 flex gap-2 overflow-x-auto pb-1">
+          <ol className="scrollbar-none mt-5 flex gap-2 overflow-x-auto pb-1">
             {steps.map((step, i) => (
               <PathStep key={step.id} step={step} index={i} last={i === steps.length - 1} />
             ))}
@@ -252,8 +252,8 @@ export default async function DashboardPage() {
       </section>
 
       {/* -------------------------------------------------- Activity + rail */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,1fr)]">
-        <section className="card flex flex-col p-6">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,1fr)]">
+        <section className="card flex flex-col p-4 sm:p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="title-section">Your progress</h2>
@@ -268,7 +268,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          <div className="chart mt-8 flex-1" style={{ minHeight: 148 }}>
+          <div className="chart mt-6 flex-1" style={{ minHeight: 120 }}>
             <div className="chart-grid" aria-hidden>
               <span />
               <span />
@@ -278,13 +278,13 @@ export default async function DashboardPage() {
             {strip.map((d, i) => {
               const isToday = i === strip.length - 1;
               const empty = d.minutes === 0;
-              const height = empty ? 2 : Math.max(4, (d.minutes / maxMinutes) * 144);
+              const height = empty ? 2 : Math.max(3, (d.minutes / maxMinutes) * 116);
               return (
                 <div
                   key={d.day}
                   className="chart-col tooltip"
                   data-tip={`${d.minutes} min · ${d.day.slice(5)}`}
-                  style={{ height: 148 }}
+                  style={{ height: 120 }}
                 >
                   <div
                     className={`bar ${empty ? "bar-empty" : isToday ? "bar-today" : ""}`}
@@ -305,7 +305,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* ------------------------------------------------------------ Rail */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <RailCard title="Today">
             <ul className="-mx-2 flex flex-col">
               {today.map((t) => (
@@ -394,17 +394,17 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {recommended.map((course) => (
             <Link
               key={course.slug}
               href={`/learning/course/${course.slug}`}
-              className="card card-link flex h-full flex-col p-4"
+              className="card card-link flex h-full flex-col p-3.5"
             >
-              <TechLogo name={course.tech!} mode="plate" size={40} />
-              <p className="mt-4 text-[14px] font-medium leading-snug">{course.title}</p>
+              <TechLogo name={course.tech!} mode="plate" size={34} />
+              <p className="mt-3 text-[13.5px] font-medium leading-snug">{course.title}</p>
               <p className="text-meta mt-1.5 line-clamp-2 text-[12px]">{course.tagline}</p>
-              <p className="text-meta mt-auto pt-4 text-[12px]">
+              <p className="text-meta mt-auto pt-3 text-[12px]">
                 {course.level} · {course.hours}h
               </p>
             </Link>
@@ -441,7 +441,7 @@ function PathStep({
   const complete = step.done >= step.total && step.total > 0;
 
   return (
-    <li className="flex min-w-[132px] flex-1 shrink-0 flex-col items-center gap-2.5 text-center">
+    <li className="flex min-w-[118px] flex-1 shrink-0 flex-col items-center gap-2 text-center">
       <div className="flex w-full items-center gap-2">
         {/* The connector before this node, so the line sits between nodes
             rather than hanging off the end of the last one. */}
@@ -452,7 +452,7 @@ function PathStep({
         />
 
         <span
-          className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-[12px] font-medium"
+          className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full text-[11.5px] font-medium"
           style={{
             background: complete ? "var(--primary)" : "var(--surface-2)",
             border: `1px solid ${step.current ? "var(--primary)" : complete ? "var(--primary)" : "var(--border)"}`,
@@ -518,8 +518,8 @@ function RailCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="card p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <section className="card p-3.5">
+      <div className="mb-2.5 flex items-center justify-between gap-3">
         <h2 className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
           {title}
         </h2>

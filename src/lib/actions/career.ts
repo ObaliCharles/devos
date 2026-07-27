@@ -14,6 +14,7 @@ import {
   Resume,
 } from "../models";
 import { requireUser } from "../user";
+import { generateVerifyCode } from "../certificates";
 
 /* ---------------------------------------------------------------- resumes */
 
@@ -200,6 +201,11 @@ export async function deleteInterview(id: string) {
 
 /* ------------------------------------------------------------ certificates */
 
+/**
+ * Records a certificate the user earned somewhere else. No verify code: we did
+ * not issue it, so we cannot vouch for it, and minting a DeveloperOS code for
+ * an AWS certification would be forging a credential.
+ */
 export async function createCertificate(input: {
   name: string;
   provider?: string;
@@ -217,8 +223,55 @@ export async function createCertificate(input: {
     issuedAt: input.issuedAt ? new Date(input.issuedAt) : undefined,
     credentialUrl: input.credentialUrl?.trim(),
     imageUrl: input.imageUrl?.trim(),
+    issuedBy: "external",
   });
   revalidatePath("/career/certificates");
+}
+
+/**
+ * Issues a DeveloperOS certificate for a completed course. This is the only
+ * path that mints a verify code, because it is the only one where we are the
+ * issuer and can actually stand behind the claim.
+ *
+ * Idempotent by course: finishing the same course twice does not produce two
+ * certificates with two different codes, which would make both look forged.
+ * The unique index on verifyCode is the real guard — the retry loop below only
+ * handles the astronomically unlikely collision so that a duplicate key error
+ * never surfaces to the learner as "something went wrong".
+ */
+export async function issueCourseCertificate(courseSlug: string, courseTitle: string) {
+  await connectDB();
+  const user = await requireUser();
+
+  const existing = await Certificate.findOne({
+    user: user._id,
+    courseSlug,
+    issuedBy: "developeros",
+  }).lean<{ verifyCode?: string } | null>();
+  if (existing) return { ok: true as const, code: existing.verifyCode };
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const code = generateVerifyCode();
+      await Certificate.create({
+        user: user._id,
+        name: courseTitle,
+        provider: "DeveloperOS",
+        issuedAt: new Date(),
+        issuedBy: "developeros",
+        courseSlug,
+        verifyCode: code,
+        recipientName: user.name || "A DeveloperOS learner",
+      });
+      revalidatePath("/career/certificates");
+      return { ok: true as const, code };
+    } catch (err) {
+      // 11000 is a duplicate key: another code won the race. Anything else is
+      // a real failure and should not be retried silently.
+      if ((err as { code?: number }).code !== 11000) throw err;
+    }
+  }
+  return { ok: false as const, error: "Could not issue a certificate. Please try again." };
 }
 
 export async function deleteCertificate(id: string) {

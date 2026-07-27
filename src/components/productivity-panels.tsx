@@ -128,7 +128,7 @@ export function HabitsPanel({ habits }: { habits: Record<string, unknown>[] }) {
                       disabled={pending}
                       aria-label={h.doneToday ? "Undo today" : "Mark done today"}
                       className="grid h-9 w-9 shrink-0 place-items-center rounded-full border"
-                      style={{ background: h.doneToday ? "var(--success)" : "transparent", borderColor: h.doneToday ? "var(--success)" : "var(--border-strong)", color: "#04140d" }}
+                      style={{ background: h.doneToday ? "var(--success)" : "transparent", borderColor: h.doneToday ? "var(--success)" : "var(--border-strong)", color: "var(--success-ink)" }}
                     >
                       {Boolean(h.doneToday) && <Check size={16} strokeWidth={3} />}
                     </button>

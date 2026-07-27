@@ -116,7 +116,7 @@ export function ProjectWizard({ skills }: { skills: SkillOption[] }) {
                 className="grid h-5 w-5 place-items-center rounded-full text-[11px] tabular-nums"
                 style={{
                   background: i < step ? "var(--success)" : "var(--surface-2)",
-                  color: i < step ? "#04140d" : "inherit",
+                  color: i < step ? "var(--success-ink)" : "inherit",
                 }}
               >
                 {i < step ? <Check size={11} strokeWidth={3} /> : i + 1}

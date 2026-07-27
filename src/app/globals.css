@@ -22,16 +22,20 @@
   --font-mono: var(--font-mono-var), ui-monospace, "SF Mono", monospace;
 
   /* ---- Radii ----
-     Two values carry the whole product: 12 for anything you can press or that
-     holds a single idea, 14 for a container that holds several. A mixed
-     ladder (8/16/20/24) is the single loudest tell of a template. 6px exists
-     only for micro-chrome, a kbd cap or an inline tag, where 12 would round
-     a 20px-tall object into a pill. */
+     Four values, and radius is only ever used where it earns its place. The
+     ladder is tight on purpose: an engineered interface reads as engineered
+     because its corners are restrained, and a 20-30px radius is the fastest
+     way to make a tool look like a consumer app. A badge is the one thing
+     that goes fully round, because a pill is a label and reads as one.
+       10  anything you press: buttons, inputs, nav rows, icon tiles
+       12  cards and panels
+       14  dialogs and overlays
+      999  badges                                                            */
   --radius-xs: 6px;
-  --radius-control: 12px;
-  --radius-tile: 12px;
-  --radius-card: 14px;
-  --radius-panel: 14px;
+  --radius-control: 10px;
+  --radius-tile: 10px;
+  --radius-card: 12px;
+  --radius-panel: 12px;
   --radius-dialog: 14px;
   --radius-pill: 999px;
 
@@ -59,18 +63,20 @@
   --sidebar-w: 244px;
   --sidebar-w-collapsed: 68px;
   --page-max: 1400px;
-  --page-pad: 32px;
-  --page-top: 32px;
+  --page-pad: 24px;
+  --page-top: 24px;
 }
 
 /* ------------------------------------------------------------ Dark (default) */
 :root {
+  /* Four greys and nothing else. Every surface in the product is one of
+     these, which is what makes depth read as depth rather than as noise. */
   --bg: #0b0d12;
   --bg-elevated: #0e1016;
   --surface: #11131a;
   --surface-2: #161923;
-  --surface-3: #1d212c;
-  --surface-4: #262b38;
+  --surface-3: #1b1f29;
+  --surface-4: #242936;
 
   /* Borders are white at 5-6%, never a solid grey. A tinted hairline sits on
      whatever is behind it, so a card on the page and a card on a panel read as
@@ -97,6 +103,9 @@
      stat tile is what turns a tool into an admin template. */
   --success: #4ec99a;
   --success-faint: rgb(78 201 154 / 0.12);
+  /* Ink for text sitting on a filled --success surface: white fails contrast
+     against a mint green, so the readable choice is a very dark green. */
+  --success-ink: #04140d;
   --warning: #e8b054;
   --warning-faint: rgb(232 176 84 / 0.12);
   --danger: #ef6f72;
@@ -147,6 +156,7 @@
 
   --success: #0d9668;
   --success-faint: rgb(13 150 104 / 0.1);
+  --success-ink: #ffffff;
   --warning: #b8790a;
   --warning-faint: rgb(184 121 10 / 0.11);
   --danger: #db4348;
@@ -337,20 +347,20 @@ samp {
     margin-inline: auto;
   }
 
-  /* Vertical rhythm between the header and the first section, and between
-     sections. Two values, applied everywhere, so every page shares a pulse.
-     32px between major sections, 24px inside one, both straight off the
-     8-point grid, and both a step wider than before: whitespace is what
-     creates the hierarchy here, not weight. */
+  /* Vertical rhythm between sections. 24px between major sections, 16px
+     inside one. Deliberately tighter than the 32/24 this was: whitespace is
+     how you separate things, not how you fill a screen, and a tool people
+     work in all day should fit more on a screen rather than less. Density is
+     a feature — see GitHub, Linear, Raycast. */
   .page-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-6);
   }
   .section-stack {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-4);
   }
 
   /* A page that fills the viewport instead of growing the document, chat is
@@ -435,9 +445,9 @@ samp {
     position: relative;
     display: flex;
     align-items: center;
-    height: 36px;
+    height: 32px;
     border-radius: var(--radius-control);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text-muted);
     transition:
@@ -478,11 +488,11 @@ samp {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    height: 38px;
-    padding-inline: 16px;
+    gap: 7px;
+    height: 32px;
+    padding-inline: 12px;
     border-radius: var(--radius-control);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.006em;
@@ -572,16 +582,16 @@ samp {
     border-radius: var(--radius-xs);
   }
   .btn-sm {
-    height: 32px;
-    padding-inline: 12px;
-    font-size: 13px;
+    height: 28px;
+    padding-inline: 10px;
+    font-size: 12.5px;
   }
-  /* The primary-action size: 44px tall, 12px radius. Used for the one thing a
-     page most wants you to do. */
+  /* The primary-action size. Used for the one thing a page most wants you to
+     do, and nowhere else. */
   .btn-lg {
-    height: 44px;
-    padding-inline: 22px;
-    font-size: 14.5px;
+    height: 38px;
+    padding-inline: 18px;
+    font-size: 13.5px;
     gap: 8px;
   }
   .btn-block {
@@ -637,8 +647,8 @@ samp {
   }
   .input,
   .select {
-    height: 38px;
-    padding-inline: 12px;
+    height: 32px;
+    padding-inline: 10px;
   }
   .textarea {
     min-height: 104px;
@@ -691,9 +701,9 @@ samp {
     display: flex;
     align-items: center;
     width: 100%;
-    height: 36px;
-    padding-inline: 12px;
-    gap: 9px;
+    height: 32px;
+    padding-inline: 10px;
+    gap: 8px;
     background: var(--surface-2);
     border: 1px solid var(--border-faint);
     border-radius: var(--radius-control);
@@ -765,12 +775,12 @@ samp {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    height: 22px;
-    padding-inline: 8px;
-    border-radius: var(--radius-xs);
+    height: 21px;
+    padding-inline: 9px;
+    border-radius: var(--radius-pill);
     background: var(--neutral-faint);
     border: 0;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.003em;
@@ -808,10 +818,9 @@ samp {
     color: var(--info);
   }
   .badge-lg {
-    height: 26px;
-    padding-inline: 10px;
+    height: 25px;
+    padding-inline: 11px;
     font-size: 12.5px;
-    border-radius: var(--radius-control);
   }
 
   /* A selectable chip, multi-select filters, skill pickers, presets. Filled
@@ -910,36 +919,41 @@ samp {
     color: var(--text-faint);
   }
 
-  /* The dashboard hero, and nothing else. */
-  .title-display {
-    font-size: clamp(32px, 4.2vw, 48px);
-    font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-  }
+  /* No display size. A 48px title on a working screen is a marketing hero,
+     and it buys nothing but scroll — the page already tells you where you
+     are through the nav, the breadcrumb and the title's position. Hierarchy
+     here comes from the step between sizes, not from the top of the range. */
   .title-page {
-    font-size: 34px;
+    font-size: 26px;
     font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.032em;
+    line-height: 1.2;
+    letter-spacing: -0.028em;
+  }
+  /* Kept as an alias so existing call sites do not break; it is now the same
+     size as a page title, because there is no tier above a page title. */
+  .title-display {
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.028em;
   }
   .title-section {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 600;
-    letter-spacing: -0.022em;
+    letter-spacing: -0.019em;
   }
   .title-card {
-    font-size: 16px;
+    font-size: 14.5px;
     font-weight: 600;
-    letter-spacing: -0.016em;
+    letter-spacing: -0.012em;
   }
   .text-body {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
     color: var(--text-muted);
   }
   .text-meta {
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--text-faint);
   }
   .num {
@@ -948,11 +962,12 @@ samp {
   }
 
   @media (max-width: 640px) {
-    .title-page {
-      font-size: 27px;
+    .title-page,
+    .title-display {
+      font-size: 22px;
     }
     .title-section {
-      font-size: 18px;
+      font-size: 16px;
     }
   }
 
@@ -969,16 +984,16 @@ samp {
   .icon-tile {
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
     border-radius: var(--radius-tile);
     background: var(--neutral-faint);
     color: var(--text-muted);
   }
   .icon-tile-lg {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
   .icon-tile-primary {
     color: var(--primary);
@@ -1206,7 +1221,7 @@ samp {
     border-collapse: collapse;
   }
   .table th {
-    padding: 10px 16px;
+    padding: 7px 14px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.07em;
@@ -1217,8 +1232,8 @@ samp {
     border-bottom: 1px solid var(--border);
   }
   .table td {
-    padding: 12px 16px;
-    font-size: 13.5px;
+    padding: 8px 14px;
+    font-size: 13px;
     border-bottom: 1px solid var(--border);
   }
   .table tr:last-child td {
