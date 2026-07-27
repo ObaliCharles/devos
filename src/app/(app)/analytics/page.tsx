@@ -80,7 +80,7 @@ export default async function AnalyticsOverviewPage() {
         </div>
 
         {data.timeByKind.length === 0 ? (
-          <p className="text-body mt-4 text-[13.5px]">
+          <p className="text-body mt-4 text-[14px]">
             No time tracked yet. Master a lesson, run a focus session, or log time on a project and
             the breakdown appears here.
           </p>
@@ -88,7 +88,7 @@ export default async function AnalyticsOverviewPage() {
           <ul className="mt-5 flex flex-col gap-3">
             {data.timeByKind.map((k) => (
               <li key={k.kind} className="flex items-center gap-4">
-                <span className="w-[76px] shrink-0 text-[13px] capitalize" style={{ color: "var(--text-muted)" }}>
+                <span className="w-[76px] shrink-0 text-[14px] capitalize" style={{ color: "var(--text-muted)" }}>
                   {k.kind}
                 </span>
                 <span className="progress h-[18px] flex-1 rounded-[var(--radius-xs)]" style={{ background: "var(--surface-2)" }}>
@@ -102,7 +102,7 @@ export default async function AnalyticsOverviewPage() {
                   />
                 </span>
                 <span
-                  className="num w-[52px] shrink-0 text-right text-[12.5px]"
+                  className="num w-[52px] shrink-0 text-right text-[12px]"
                   style={{ color: "var(--text-faint)" }}
                 >
                   {Math.round((k.minutes / 60) * 10) / 10}h

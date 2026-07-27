@@ -150,7 +150,7 @@ export default async function DashboardPage() {
       {/* ============================================================ Greeting */}
       <header className="rise">
         <h1 className="title-page">{greeting()}, {user.name?.split(" ")[0] || "Developer"}</h1>
-        <p className="text-body mt-1 text-[13.5px]">
+        <p className="text-body mt-1 text-[14px]">
           {next
             ? `You're ${lessonTotal - lessonIndex + 1} lesson${lessonTotal - lessonIndex + 1 === 1 ? "" : "s"} from finishing ${next.skill.title}.`
             : "Nothing queued. Pick a path to get started."}
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
       </header>
 
       {/* ========================================================= Signal row */}
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="This week">
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-label="This week">
         <Signal
           icon={<Flame size={15} />}
           label="Learning streak"
@@ -195,9 +195,9 @@ export default async function DashboardPage() {
       </section>
 
       {/* ============================ Continue · Path · Today (the main band) */}
-      <section className="grid gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)_minmax(0,0.95fr)]">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)_minmax(0,0.95fr)]">
         {/* ------------------------------------------------ Continue learning */}
-        <div className="card flex flex-col p-4">
+        <div className="card flex flex-col p-5">
           <h2 className="title-card">Continue learning</h2>
 
           {next ? (
@@ -218,13 +218,13 @@ export default async function DashboardPage() {
                 </div>
               </div>
 
-              <p className="mt-4 truncate text-[13.5px] font-medium">{next.lesson.title}</p>
+              <p className="mt-4 truncate text-[14px] font-medium">{next.lesson.title}</p>
 
               <div className="mt-2.5 flex items-center gap-2.5">
                 <div className="progress flex-1">
                   <div className="progress-bar" style={{ width: `${skillPct}%` }} />
                 </div>
-                <span className="num text-[11.5px]" style={{ color: "var(--text-faint)" }}>
+                <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
                   {skillPct}%
                 </span>
               </div>
@@ -246,14 +246,14 @@ export default async function DashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-body mt-4 text-[13px]">
+            <p className="text-body mt-4 text-[14px]">
               No lesson queued. Pick a path from Learning to start.
             </p>
           )}
         </div>
 
         {/* ------------------------------------------------------- The path */}
-        <div className="card flex flex-col p-4">
+        <div className="card flex flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="title-card">Your learning path</h2>
             <Link href="/learning/roadmap" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
@@ -264,7 +264,7 @@ export default async function DashboardPage() {
           {phases.length > 0 ? (
             <div className="mt-4 grid flex-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,150px)]">
               {/* Vertical stepper — a rail with a node per phase */}
-              <ol className="relative flex flex-col gap-3">
+              <ol className="relative flex flex-col gap-5">
                 <span
                   className="absolute bottom-3 left-[11px] top-3 w-px"
                   style={{ background: "var(--border)" }}
@@ -273,7 +273,7 @@ export default async function DashboardPage() {
                 {phases.map((p) => (
                   <li key={p.id} className="relative flex items-start gap-3">
                     <span
-                      className="relative z-[1] grid h-[23px] w-[23px] shrink-0 place-items-center rounded-full text-[10.5px] font-medium"
+                      className="relative z-[1] grid h-[23px] w-[23px] shrink-0 place-items-center rounded-full text-[12px] font-medium"
                       style={{
                         background: p.pct === 100 ? "var(--primary)" : "var(--surface-3)",
                         border: `1px solid ${p.current ? "var(--primary)" : "var(--border)"}`,
@@ -283,8 +283,8 @@ export default async function DashboardPage() {
                       {p.pct === 100 ? <Check size={11} strokeWidth={3} /> : p.locked ? <Lock size={10} /> : null}
                     </span>
                     <span className="min-w-0 flex-1 pt-0.5">
-                      <span className="block truncate text-[13px] font-medium">{p.title}</span>
-                      <span className="text-meta block text-[11.5px]">
+                      <span className="block truncate text-[14px] font-medium">{p.title}</span>
+                      <span className="text-meta block text-[12px]">
                         {p.pct === 100
                           ? "Completed"
                           : p.locked
@@ -301,16 +301,19 @@ export default async function DashboardPage() {
               {/* Next up, the reference's side panel */}
               {next && (
                 <div
-                  className="rounded-[var(--radius-tile)] p-3"
+                  // self-start: this panel holds four short lines, so letting
+                  // the grid stretch it to the stepper's full height left it
+                  // mostly empty box.
+                  className="self-start rounded-[var(--radius-tile)] p-3"
                   style={{ background: "var(--surface-2)", border: "1px solid var(--border-faint)" }}
                 >
-                  <p className="overline">Next up</p>
-                  <p className="mt-2 text-[13px] font-medium leading-snug">{next.lesson.title}</p>
-                  <p className="text-meta mt-1.5 flex items-center gap-1.5 text-[11.5px]">
+                  <p className="group-heading">Next up</p>
+                  <p className="mt-2 text-[14px] font-medium leading-snug">{next.lesson.title}</p>
+                  <p className="text-meta mt-1.5 flex items-center gap-1.5 text-[12px]">
                     <Clock size={11} /> {next.lesson.estimatedMinutes} min
                   </p>
                   {next.lesson.gateDone > 0 && (
-                    <p className="text-meta mt-2 text-[11.5px]">
+                    <p className="text-meta mt-2 text-[12px]">
                       {next.lesson.gateDone} of 5 requirements done
                     </p>
                   )}
@@ -318,12 +321,12 @@ export default async function DashboardPage() {
               )}
             </div>
           ) : (
-            <p className="text-body mt-4 text-[13px]">No path loaded yet.</p>
+            <p className="text-body mt-4 text-[14px]">No path loaded yet.</p>
           )}
         </div>
 
         {/* --------------------------------------------------- Today's tasks */}
-        <div className="card flex flex-col p-4">
+        <div className="card flex flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="title-card">Today</h2>
             <span className="text-meta num text-[12px]">{today.length} left</span>
@@ -339,10 +342,10 @@ export default async function DashboardPage() {
                     aria-hidden
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-medium">{t.label}</span>
-                    <span className="text-meta block truncate text-[11.5px]">{t.sub}</span>
+                    <span className="block truncate text-[14px] font-medium">{t.label}</span>
+                    <span className="text-meta block truncate text-[12px]">{t.sub}</span>
                   </span>
-                  <span className="num shrink-0 pt-0.5 text-[11.5px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="num shrink-0 pt-0.5 text-[12px]" style={{ color: "var(--text-faint)" }}>
                     {t.meta}
                   </span>
                 </Link>
@@ -352,17 +355,17 @@ export default async function DashboardPage() {
 
           {/* The reference's week strip. Dots are days you actually studied. */}
           <div className="mt-auto pt-4">
-            <p className="overline mb-2">This week</p>
+            <p className="group-heading mb-2">This week</p>
             <ol className="flex justify-between gap-1">
               {week.map((d, i) => {
                 const isToday = i === week.length - 1;
                 return (
                   <li key={d.day} className="flex flex-1 flex-col items-center gap-1.5">
-                    <span className="text-[10.5px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
                       {DAY_LABELS[i]}
                     </span>
                     <span
-                      className="num grid h-[26px] w-full place-items-center rounded-[7px] text-[11.5px]"
+                      className="num grid h-[26px] w-full place-items-center rounded-[7px] text-[12px]"
                       style={{
                         background: isToday ? "var(--primary)" : "transparent",
                         color: isToday ? "var(--primary-ink)" : "var(--text-muted)",
@@ -384,9 +387,9 @@ export default async function DashboardPage() {
       </section>
 
       {/* ================================ Analytics · Achievements · Certificate */}
-      <section className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* ---------------------------------------------------- Analytics */}
-        <div className="card p-4">
+        <div className="card flex flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="title-card">Learning analytics</h2>
             <Link href="/analytics" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
@@ -402,8 +405,13 @@ export default async function DashboardPage() {
           </div>
 
           {/* 14 days of real minutes. Bars, because the data is discrete daily
-              totals and a line between them implies values never measured. */}
-          <div className="chart mt-5" style={{ minHeight: 96 }}>
+              totals and a line between them implies values never measured.
+
+              The chart grows into whatever height this card inherits from the
+              taller column beside it, rather than sitting at a fixed 96px and
+              leaving the bottom third of the card empty. Bar heights are
+              percentages of the plot area for the same reason. */}
+          <div className="chart mt-5 min-h-[96px] flex-1">
             <div className="chart-grid" aria-hidden>
               <span /><span /><span /><span />
             </div>
@@ -414,25 +422,28 @@ export default async function DashboardPage() {
                   key={d.day}
                   className="chart-col tooltip"
                   data-tip={`${d.minutes} min · ${d.day.slice(5)}`}
-                  style={{ height: 96 }}
                 >
                   <div
                     className={`bar ${empty ? "bar-empty" : i === strip.length - 1 ? "bar-today" : ""}`}
-                    style={{ height: empty ? 2 : Math.max(3, (d.minutes / maxMin) * 92) }}
+                    style={
+                      empty
+                        ? { height: 2 }
+                        : { height: `${Math.max(3, (d.minutes / maxMin) * 96)}%` }
+                    }
                   />
                 </div>
               );
             })}
           </div>
-          <div className="mt-2 flex justify-between text-[11px]" style={{ color: "var(--text-faint)" }}>
+          <div className="mt-2 flex justify-between text-[12px]" style={{ color: "var(--text-faint)" }}>
             <span>{strip[0]?.day.slice(5)}</span>
             <span>Today</span>
           </div>
         </div>
 
         {/* ------------------------------------- Achievements + certificate */}
-        <div className="flex flex-col gap-3">
-          <div className="card p-4">
+        <div className="flex flex-col gap-5">
+          <div className="card p-5">
             <div className="flex items-center justify-between gap-3">
               <h2 className="title-card">Achievements</h2>
               <Link
@@ -460,21 +471,21 @@ export default async function DashboardPage() {
                     >
                       <Award size={15} />
                     </span>
-                    <span className="line-clamp-2 text-[11.5px] font-medium leading-tight">{b.title}</span>
-                    <span className="text-meta text-[10.5px]">
+                    <span className="line-clamp-2 text-[12px] font-medium leading-tight">{b.title}</span>
+                    <span className="text-meta text-[12px]">
                       {b.unlocked ? "Earned" : `${b.progress}%`}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-body mt-3 text-[13px]">
+              <p className="text-body mt-3 text-[14px]">
                 Master a lesson to earn your first one.
               </p>
             )}
           </div>
 
-          <div className="card p-4">
+          <div className="card p-5">
             <div className="flex items-center justify-between gap-3">
               <h2 className="title-card">Latest certificate</h2>
               <Link
@@ -494,8 +505,8 @@ export default async function DashboardPage() {
                   <Award size={18} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium">{latestCert.name}</p>
-                  <p className="text-meta truncate text-[11.5px]">
+                  <p className="truncate text-[14px] font-medium">{latestCert.name}</p>
+                  <p className="text-meta truncate text-[12px]">
                     {latestCert.issuedAt ? `Issued ${formatDate(latestCert.issuedAt)}` : latestCert.provider}
                   </p>
                 </div>
@@ -512,7 +523,7 @@ export default async function DashboardPage() {
                 )}
               </div>
             ) : (
-              <p className="text-body mt-3 text-[13px]">
+              <p className="text-body mt-3 text-[14px]">
                 Finish a course and one is issued with a code anyone can verify.
               </p>
             )}
@@ -524,18 +535,18 @@ export default async function DashboardPage() {
       <section className="section-stack">
         <div className="flex items-center justify-between gap-3">
           <h2 className="title-section">Recommended for you</h2>
-          <Link href="/learning" className="text-[12.5px] font-medium" style={{ color: "var(--primary)" }}>
+          <Link href="/learning" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
             View all
           </Link>
         </div>
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {recommended.map((c) => (
             <li key={c.slug}>
-              <Link href={`/learning/course/${c.slug}`} className="card card-link flex h-full flex-col p-3.5">
+              <Link href={`/learning/course/${c.slug}`} className="card card-link flex h-full flex-col p-5">
                 <TechLogo name={c.tech!} mode="plate" size={34} />
-                <p className="mt-3 text-[13.5px] font-medium leading-snug">{c.title}</p>
+                <p className="mt-3 text-[14px] font-medium leading-snug">{c.title}</p>
                 <p className="text-meta mt-1 line-clamp-2 text-[12px]">{c.tagline}</p>
-                <p className="text-meta mt-auto flex items-center gap-2 pt-3 text-[11.5px]">
+                <p className="text-meta mt-auto flex items-center gap-2 pt-3 text-[12px]">
                   <span>{c.level}</span>
                   <span aria-hidden>·</span>
                   <span>{c.hours}h</span>
@@ -593,7 +604,7 @@ function Signal({
   bar?: number;
 }) {
   return (
-    <div className="card flex items-start gap-3 p-3.5">
+    <div className="card flex items-start gap-3 p-5">
       <span
         className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
         style={{ background: "var(--neutral-faint)", color: "var(--text-muted)" }}
@@ -605,9 +616,9 @@ function Signal({
           {label}
         </p>
         <p className="mt-1 flex items-baseline gap-1">
-          <span className="num text-[20px] font-semibold leading-none">{value}</span>
+          <span className="num text-[22px] font-semibold leading-none">{value}</span>
           {unit && (
-            <span className="text-[11.5px]" style={{ color: "var(--text-faint)" }}>
+            <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
               {unit}
             </span>
           )}
@@ -617,7 +628,7 @@ function Signal({
             <div className="progress-bar" style={{ width: `${bar}%` }} />
           </div>
         )}
-        <p className="text-meta mt-1.5 truncate text-[11.5px]">{foot}</p>
+        <p className="text-meta mt-1.5 truncate text-[12px]">{foot}</p>
       </div>
     </div>
   );
@@ -627,14 +638,14 @@ function Mini({ value, unit, label }: { value: number | string; unit?: string; l
   return (
     <div>
       <p className="flex items-baseline gap-1">
-        <span className="num text-[17px] font-semibold leading-none">{value}</span>
+        <span className="num text-[16px] font-semibold leading-none">{value}</span>
         {unit && (
-          <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
+          <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
             {unit}
           </span>
         )}
       </p>
-      <p className="text-meta mt-1 truncate text-[11.5px]">{label}</p>
+      <p className="text-meta mt-1 truncate text-[12px]">{label}</p>
     </div>
   );
 }

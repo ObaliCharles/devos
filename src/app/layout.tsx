@@ -33,13 +33,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#0b0d12" },
-    { media: "(prefers-color-scheme: light)", color: "#f6f7f9" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
   ],
 };
 
 /**
- * Applies the saved theme before the first paint. Without it a light-mode user
- * gets a dark flash on every navigation. It has to be inline and in the body.
+ * Applies the saved theme before the first paint. Without it a returning
+ * dark-mode user gets a white flash on every navigation. It has to be inline
+ * and in the body.
  */
 const THEME_SCRIPT = `try{var t=localStorage.getItem("dos-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}`;
 
@@ -48,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html
         lang="en"
-        data-theme="dark"
+        data-theme="light"
         className={`${sans.variable} ${mono.variable}`}
         suppressHydrationWarning
       >

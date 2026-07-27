@@ -227,7 +227,7 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
           >
             <Sparkles size={15} /> Review path
           </button>
-          <p className="text-meta text-center text-[11.5px]">
+          <p className="text-meta text-center text-[12px]">
             You&apos;ll review and can rename it before anything is saved.
           </p>
         </div>
@@ -246,7 +246,7 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
               </label>
               <input
                 id="cb-title"
-                className="input text-[15px] font-semibold"
+                className="input text-[14px] font-semibold"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={`${preview.role} Path`}
@@ -254,7 +254,7 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
             </div>
           ) : (
             <>
-              <h3 className="mt-1.5 text-[20px] font-bold tracking-[-0.02em]">
+              <h3 className="mt-1.5 text-[22px] font-bold tracking-[-0.02em]">
                 Become {article(preview.role)} {preview.role}
               </h3>
               <p className="text-meta mt-0.5">
@@ -281,7 +281,7 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
               <li key={i} className="relative flex gap-4 pb-5 last:pb-0">
                 <div className="flex flex-col items-center">
                   <span
-                    className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold"
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[12px] font-semibold"
                     style={{
                       background: first ? "var(--primary)" : "var(--surface-3)",
                       color: first ? "var(--primary-ink)" : "var(--text-muted)",
@@ -297,9 +297,9 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
                 <div className="min-w-0 flex-1 pt-0.5">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <span className="text-meta">Month {i + 1}</span>
-                    <span className="text-[14.5px] font-semibold">{m.title}</span>
+                    <span className="text-[14px] font-semibold">{m.title}</span>
                   </div>
-                  <p className="text-body mt-0.5 text-[13px]">{m.focus}</p>
+                  <p className="text-body mt-0.5 text-[14px]">{m.focus}</p>
                   {includeProjects && m.project && (
                     <p
                       className="mt-1.5 inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-2 py-1 text-[12px] font-medium"
@@ -335,12 +335,12 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
                 <RotateCcw size={15} /> Regenerate
               </button>
               {!configured && (
-                <span className="text-meta w-full text-[11.5px]" style={{ color: "var(--warning)" }}>
+                <span className="text-meta w-full text-[12px]" style={{ color: "var(--warning)" }}>
                   Add an AI key in .env.local to write and save the path.
                 </span>
               )}
               {pending && (
-                <span className="text-meta w-full text-[11.5px]">
+                <span className="text-meta w-full text-[12px]">
                   Writing every lesson and quiz — 20–60s — then opening your path.
                 </span>
               )}
@@ -410,7 +410,7 @@ function Stat({
           {value}
         </span>
       </span>
-      <span className="text-meta mt-0.5 block text-[11.5px]">{label}</span>
+      <span className="text-meta mt-0.5 block text-[12px]">{label}</span>
     </div>
   );
 }

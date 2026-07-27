@@ -73,7 +73,7 @@ export function AiPromptLibrary({ prompts }: { prompts: PromptItem[] }) {
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          <textarea className="input mt-2 min-h-[120px] resize-y text-[13px]" value={editing.body} onChange={(e) => setEditing({ ...editing, body: e.target.value })} placeholder="The prompt text" aria-label="Prompt body" />
+          <textarea className="input mt-2 min-h-[120px] resize-y text-[14px]" value={editing.body} onChange={(e) => setEditing({ ...editing, body: e.target.value })} placeholder="The prompt text" aria-label="Prompt body" />
           <div className="mt-3 flex gap-2">
             <button className="btn btn-primary" onClick={save} disabled={pending || !editing.title.trim() || !editing.body.trim()}>Save</button>
             <button className="btn btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
@@ -95,18 +95,18 @@ export function AiPromptLibrary({ prompts }: { prompts: PromptItem[] }) {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="truncate font-semibold">{p.title}</h3>
-                  <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>{p.category}{p.mine ? "" : " · built-in"}</span>
+                  <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>{p.category}{p.mine ? "" : " · built-in"}</span>
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <button
-                    className="btn btn-ghost h-7 px-2 text-[11px]"
+                    className="btn btn-ghost h-7 px-2 text-[12px]"
                     onClick={() => { navigator.clipboard?.writeText(p.body); setCopied(p.id); setTimeout(() => setCopied(null), 1500); }}
                   >
                     <Copy size={12} /> {copied === p.id ? "Copied" : "Copy"}
                   </button>
                   {p.mine && (
                     <>
-                      <button className="btn btn-ghost h-7 px-2 text-[11px]" onClick={() => setEditing(p)}>Edit</button>
+                      <button className="btn btn-ghost h-7 px-2 text-[12px]" onClick={() => setEditing(p)}>Edit</button>
                       <button
                         className="grid h-7 w-7 place-items-center rounded-[var(--radius-card)]"
                         style={{ color: "var(--danger)" }}
@@ -119,7 +119,7 @@ export function AiPromptLibrary({ prompts }: { prompts: PromptItem[] }) {
                   )}
                 </div>
               </div>
-              <p className="mt-2 line-clamp-4 text-[13px]" style={{ color: "var(--text-muted)" }}>{p.body}</p>
+              <p className="mt-2 line-clamp-4 text-[14px]" style={{ color: "var(--text-muted)" }}>{p.body}</p>
             </div>
           ))}
         </div>

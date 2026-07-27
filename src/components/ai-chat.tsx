@@ -329,7 +329,7 @@ export function AiChat({
             <ArrowLeft size={17} />
           </Link>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-[15px] font-semibold tracking-[-0.01em]">{activeTitle}</h1>
+            <h1 className="truncate text-[14px] font-semibold tracking-[-0.01em]">{activeTitle}</h1>
           </div>
           <button
             onClick={newChat}
@@ -358,10 +358,10 @@ export function AiChat({
                 <span className="icon-tile icon-tile-lg mx-auto">
                   <Sparkles size={20} />
                 </span>
-                <p className="mt-4 text-[17px] font-semibold tracking-tight">
+                <p className="mt-4 text-[16px] font-semibold tracking-tight">
                   Ask about anything in your workspace
                 </p>
-                <p className="text-body mt-2 text-[13.5px]">
+                <p className="text-body mt-2 text-[14px]">
                   The difference from a general chatbot is context: this assistant can see your
                   lessons, projects and notes.
                 </p>
@@ -373,7 +373,7 @@ export function AiChat({
                       disabled={!configured}
                       className="card card-link p-3 text-left disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <span className="block text-[13px] font-medium">{s.title}</span>
+                      <span className="block text-[14px] font-medium">{s.title}</span>
                       <span className="text-meta mt-0.5 line-clamp-2 block">{s.prompt}</span>
                     </button>
                   ))}
@@ -391,7 +391,7 @@ export function AiChat({
 
           {error && (
             <div
-              className="mt-4 flex items-start gap-2.5 rounded-[var(--radius-tile)] p-3 text-[13px]"
+              className="mt-4 flex items-start gap-2.5 rounded-[var(--radius-tile)] p-3 text-[14px]"
               style={{ background: "var(--danger-faint)", color: "var(--danger)" }}
               role="alert"
             >
@@ -490,7 +490,7 @@ export function AiChat({
             </button>
           </div>
 
-          <p className="text-meta mt-2 text-center text-[11.5px]">
+          <p className="text-meta mt-2 text-center text-[12px]">
             AI can make mistakes. Consider checking important information.
           </p>
         </div>
@@ -550,7 +550,7 @@ export function AiChat({
         {/* Only the list scrolls; the button and tabs above stay put. */}
         {visible.length === 0 ? (
           <div className="well px-3 py-7 text-center">
-            <p className="text-[13px] font-medium">
+            <p className="text-[14px] font-medium">
               {filter === "pinned" ? "Nothing pinned" : "No conversations yet"}
             </p>
             <p className="text-meta mt-1">
@@ -585,7 +585,7 @@ export function AiChat({
                         />
                       )}
                       <span
-                        className="min-w-0 flex-1 truncate text-[13px] font-medium"
+                        className="min-w-0 flex-1 truncate text-[14px] font-medium"
                         style={{ color: isActive ? "var(--primary)" : "var(--text)" }}
                       >
                         {c.title}

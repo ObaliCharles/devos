@@ -68,7 +68,7 @@ export function Challenges({ challenges }: { challenges: Challenge[] }) {
       <div className="mt-7 flex flex-col gap-7">
         {levels.map(({ level, items }) => (
           <div key={level}>
-            <p className="overline mb-3">
+            <p className="group-heading mb-3">
               Level {level} · {LEVEL_LABEL[level]}
             </p>
             <ul className="flex flex-col gap-2">
@@ -132,7 +132,7 @@ function ChallengeRow({
             <button
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
-              className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-medium"
+              className="mt-2 inline-flex items-center gap-1 text-[12px] font-medium"
               style={{ color: "var(--text-muted)" }}
             >
               <ChevronDown
@@ -150,7 +150,7 @@ function ChallengeRow({
             <div className="mt-3 flex flex-col gap-3">
               {challenge.hint && (
                 <p
-                  className="flex items-start gap-2 text-[13px] leading-relaxed"
+                  className="flex items-start gap-2 text-[14px] leading-relaxed"
                   style={{ color: "var(--text-muted)" }}
                 >
                   <Lightbulb size={14} className="mt-[3px] shrink-0" />
@@ -170,9 +170,9 @@ function ChallengeRow({
 function Code({ label, source }: { label: string; source: string }) {
   return (
     <div>
-      <p className="overline mb-1.5">{label}</p>
+      <p className="group-heading mb-1.5">{label}</p>
       <pre
-        className="overflow-x-auto rounded-[var(--radius-tile)] p-3 text-[12.5px] leading-relaxed"
+        className="overflow-x-auto rounded-[var(--radius-tile)] p-3 text-[12px] leading-relaxed"
         style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
       >
         <code>{source}</code>

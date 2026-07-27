@@ -34,7 +34,7 @@ export function UsersTable({ users, meId }: { users: Record<string, unknown>[]; 
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)" }}>
               {["User", "Email", "Role", "XP", "Streak", ""].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide" style={{ color: "var(--text-faint)" }}>{h}</th>
+                <th key={h} className="px-4 py-3 text-left text-[12px] font-medium uppercase tracking-wide" style={{ color: "var(--text-faint)" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -44,7 +44,7 @@ export function UsersTable({ users, meId }: { users: Record<string, unknown>[]; 
                 <td className="px-4 py-3 font-medium">{String(u.name)}{String(u.id) === meId ? " (you)" : ""}</td>
                 <td className="px-4 py-3" style={{ color: "var(--text-muted)" }}>{String(u.email)}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded-full px-2 py-0.5 text-[11px]" style={{ background: u.role === "admin" ? "var(--primary-faint)" : "var(--surface-2)", color: u.role === "admin" ? "var(--primary)" : "var(--text-muted)" }}>
+                  <span className="rounded-full px-2 py-0.5 text-[12px]" style={{ background: u.role === "admin" ? "var(--primary-faint)" : "var(--surface-2)", color: u.role === "admin" ? "var(--primary)" : "var(--text-muted)" }}>
                     {String(u.role)}
                   </span>
                 </td>
@@ -163,7 +163,7 @@ export function ContentBuilder({ content }: { content: { roadmapTitle: string; p
                       <p className="text-sm font-medium">{String(skill.title)}</p>
                       <ul className="mt-1.5 flex flex-col gap-1 pl-3">
                         {lessons.map((l) => (
-                          <li key={String(l.id)} className="flex items-center justify-between text-[13px]" style={{ color: "var(--text-muted)" }}>
+                          <li key={String(l.id)} className="flex items-center justify-between text-[14px]" style={{ color: "var(--text-muted)" }}>
                             <span>{String(l.order)}. {String(l.title)}</span>
                             <button onClick={() => run(() => deleteLesson(String(l.id)))} style={{ color: "var(--danger)" }} aria-label="Delete lesson"><Trash2 size={12} /></button>
                           </li>

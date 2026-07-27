@@ -130,7 +130,7 @@ export default function Landing() {
               <Link
                 key={n.label}
                 href={n.href}
-                className="rounded-[var(--radius-control)] px-3 py-2 text-[13.5px] font-medium transition-colors"
+                className="rounded-[var(--radius-control)] px-3 py-2 text-[14px] font-medium transition-colors"
                 style={{ color: "var(--text-muted)" }}
               >
                 {n.label}
@@ -162,7 +162,7 @@ export default function Landing() {
             you build<span style={{ color: "var(--primary)" }}>.</span>
           </h1>
 
-          <p className="mt-5 flex items-center gap-2 text-[13px] font-semibold tracking-wide">
+          <p className="mt-5 flex items-center gap-2 text-[14px] font-semibold tracking-wide">
             {["LEARN", "BUILD", "MASTER", "SHIP"].map((w, i) => (
               <span key={w} className="flex items-center gap-2">
                 {i > 0 && <span className="h-1 w-1 rounded-full" style={{ background: "var(--primary)" }} />}
@@ -171,7 +171,7 @@ export default function Landing() {
             ))}
           </p>
 
-          <p className="text-body mt-6 max-w-[52ch] text-[15.5px]">
+          <p className="text-body mt-6 max-w-[52ch] text-[16px]">
             DeveloperOS guides you from your first line of code to shipping production-ready software
             through missions, projects and structured learning paths.
           </p>
@@ -227,7 +227,7 @@ export default function Landing() {
               </span>
               <div className="min-w-0 lg:mt-4">
                 <h3 className="title-card">{step.title}</h3>
-                <p className="text-body mt-1 text-[13px]">{step.body}</p>
+                <p className="text-body mt-1 text-[14px]">{step.body}</p>
               </div>
             </Reveal>
           ))}
@@ -250,12 +250,12 @@ export default function Landing() {
                 <j.icon size={20} />
               </span>
               <h3 className="title-card mt-4">{j.title}</h3>
-              <p className="text-body mt-1.5 flex-1 text-[13px]">{j.body}</p>
+              <p className="text-body mt-1.5 flex-1 text-[14px]">{j.body}</p>
               <div className="mt-4 flex gap-4">
                 {j.stats.map(([v, l]) => (
                   <div key={l}>
-                    <p className="num text-[17px] font-bold">{v}</p>
-                    <p className="text-meta text-[11px]">{l}</p>
+                    <p className="num text-[16px] font-bold">{v}</p>
+                    <p className="text-meta text-[12px]">{l}</p>
                   </div>
                 ))}
               </div>
@@ -290,7 +290,7 @@ export default function Landing() {
                 >
                   <p.icon size={22} />
                 </span>
-                <span className="text-[12px] font-medium leading-tight sm:text-[12.5px]" style={{ color: "var(--text-muted)" }}>
+                <span className="text-[12px] font-medium leading-tight sm:text-[12px]" style={{ color: "var(--text-muted)" }}>
                   {p.label}
                 </span>
               </Link>
@@ -324,7 +324,7 @@ export default function Landing() {
                   </span>
                   <div>
                     <h3 className="title-card">{s.title}</h3>
-                    <p className="text-body mt-0.5 text-[13px]">{s.body}</p>
+                    <p className="text-body mt-0.5 text-[14px]">{s.body}</p>
                   </div>
                 </Reveal>
               ))}
@@ -384,22 +384,25 @@ function DashboardPreview() {
       className="overflow-hidden rounded-[var(--radius-dialog)] border shadow-[var(--shadow-lg)]"
       style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
     >
-      <div className="grid grid-cols-[132px_minmax(0,1fr)]">
+      {/* 156px, not 132: at 12px uppercase with 0.09em tracking "CURRENT
+          JOURNEY" wrapped to two lines in the narrower rail, which read as a
+          rule across the label. The group headings never wrap now. */}
+      <div className="grid grid-cols-[156px_minmax(0,1fr)]">
         {/* Mini sidebar */}
         <div className="hidden flex-col gap-1 border-r p-3 sm:flex" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
           <div className="mb-2 flex items-center gap-2">
             <LogoTile size={20} radius="var(--radius-xs)" />
-            <span className="text-[11px] font-bold">DeveloperOS</span>
+            <span className="text-[12px] font-bold">DeveloperOS</span>
           </div>
-          <p className="overline mt-2 mb-1">Current journey</p>
+          <p className="group-heading mt-2 mb-1">Current journey</p>
           <div
             className="flex items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5"
             style={{ background: "var(--primary-faint)" }}
           >
             <BrainCircuit size={13} style={{ color: "var(--primary)" }} />
-            <span className="text-[11px] font-semibold" style={{ color: "var(--primary)" }}>AI Engineer</span>
+            <span className="text-[12px] font-semibold" style={{ color: "var(--primary)" }}>AI Engineer</span>
           </div>
-          <p className="overline mt-3 mb-1">Menu</p>
+          <p className="group-heading mt-3 mb-1">Menu</p>
           {[
             [LayoutDashboard, "Dashboard"],
             [Map, "Roadmaps"],
@@ -411,7 +414,7 @@ function DashboardPreview() {
             return (
               <div key={i as number} className="flex items-center gap-2 px-2 py-1.5">
                 <I size={12} style={{ color: "var(--text-faint)" }} />
-                <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{label as string}</span>
+                <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>{label as string}</span>
               </div>
             );
           })}
@@ -422,7 +425,7 @@ function DashboardPreview() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[14px] font-bold">Welcome back, Alex 👋</p>
-              <p className="text-meta text-[11.5px]">Let&apos;s continue your journey</p>
+              <p className="text-meta text-[12px]">Let&apos;s continue your journey</p>
             </div>
           </div>
 
@@ -452,11 +455,11 @@ function MissionRow({
 }) {
   return (
     <div className="rounded-[var(--radius-tile)] border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-      <p className="overline">{title}</p>
-      <p className="mt-1 text-[12.5px] font-semibold" style={{ color: tone ? "var(--text)" : "var(--text-muted)" }}>
+      <p className="group-heading">{title}</p>
+      <p className="mt-1 text-[12px] font-semibold" style={{ color: tone ? "var(--text)" : "var(--text-muted)" }}>
         {sub}
       </p>
-      {meta && <p className="text-meta mt-0.5 text-[10.5px]">{meta}</p>}
+      {meta && <p className="text-meta mt-0.5 text-[12px]">{meta}</p>}
       {pct !== undefined && (
         <div className="progress progress-sm mt-2">
           <div className="progress-bar" style={{ width: `${pct}%` }} />
@@ -498,8 +501,8 @@ function ProgressPreview() {
             />
           </svg>
           <span className="absolute text-center">
-            <span className="num block text-[20px] font-bold">36%</span>
-            <span className="text-meta text-[9px]">Overall</span>
+            <span className="num block text-[22px] font-bold">36%</span>
+            <span className="text-meta text-[12px]">Overall</span>
           </span>
         </div>
         <div className="grid flex-1 grid-cols-3 gap-2 text-center">
@@ -510,13 +513,13 @@ function ProgressPreview() {
           ].map(([v, l, c]) => (
             <div key={l} className="rounded-[var(--radius-tile)] p-2" style={{ background: "var(--surface-2)" }}>
               <p className="num text-[18px] font-bold" style={{ color: c }}>{v}</p>
-              <p className="text-meta text-[10px]">{l}</p>
+              <p className="text-meta text-[12px]">{l}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <p className="overline mt-5 mb-2">Recent activity</p>
+      <p className="group-heading mt-5 mb-2">Recent activity</p>
       <ul className="flex flex-col gap-2">
         {activity.map(([label, when]) => (
           <li key={label} className="flex items-center justify-between gap-3">
@@ -524,7 +527,7 @@ function ProgressPreview() {
               <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "var(--success)" }} />
               <span className="truncate text-[12px]" style={{ color: "var(--text-muted)" }}>{label}</span>
             </span>
-            <span className="text-meta shrink-0 text-[10.5px]">{when}</span>
+            <span className="text-meta shrink-0 text-[12px]">{when}</span>
           </li>
         ))}
       </ul>
@@ -545,7 +548,7 @@ function Footer() {
       <div className="mx-auto grid w-full gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)]" style={{ maxWidth: 1200 }}>
         <div>
           <Wordmark size="sm" />
-          <p className="text-body mt-4 max-w-[34ch] text-[13px]">
+          <p className="text-body mt-4 max-w-[34ch] text-[14px]">
             The operating system for developers. Learn. Build. Master. Ship.
           </p>
           <div className="mt-5 flex items-center gap-2">
@@ -566,11 +569,11 @@ function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
           {cols.map((col) => (
             <div key={col.heading}>
-              <p className="overline mb-3">{col.heading}</p>
+              <p className="group-heading mb-3">{col.heading}</p>
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l}>
-                    <Link href="/sign-in" className="text-[13px]" style={{ color: "var(--text-muted)" }}>
+                    <Link href="/sign-in" className="text-[14px]" style={{ color: "var(--text-muted)" }}>
                       {l}
                     </Link>
                   </li>
@@ -583,10 +586,10 @@ function Footer() {
 
       <div className="border-t" style={{ borderColor: "var(--border)" }}>
         <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-8" style={{ maxWidth: 1200 }}>
-          <span className="flex items-center gap-2 text-[12.5px]" style={{ color: "var(--text-faint)" }}>
+          <span className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
             <LogoTile size={18} radius="var(--radius-xs)" /> © 2026 DeveloperOS. All rights reserved.
           </span>
-          <span className="text-[12.5px]" style={{ color: "var(--text-faint)" }}>
+          <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
             Built to ship.
           </span>
         </div>

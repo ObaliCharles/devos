@@ -44,7 +44,7 @@ export function NoteComposer({
         aria-label="Note title"
       />
       <textarea
-        className="input min-h-[160px] resize-y font-[family-name:var(--font-mono)] text-[13px] leading-relaxed"
+        className="input min-h-[160px] resize-y font-[family-name:var(--font-mono)] text-[14px] leading-relaxed"
         placeholder={"What did this actually mean? Where would you use it?\nMarkdown works here."}
         value={body}
         onChange={(e) => setBody(e.target.value)}

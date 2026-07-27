@@ -23,7 +23,7 @@ export function NotificationsList({ notifications }: { notifications: Record<str
     <div className="flex flex-col gap-4">
       {anyUnread && (
         <div className="flex justify-end">
-          <button className="btn btn-ghost h-8 px-3 text-[13px]" onClick={() => run(() => markAllNotificationsRead())} disabled={pending}>
+          <button className="btn btn-ghost h-8 px-3 text-[14px]" onClick={() => run(() => markAllNotificationsRead())} disabled={pending}>
             <Check size={14} /> Mark all read
           </button>
         </div>
@@ -42,7 +42,7 @@ export function NotificationsList({ notifications }: { notifications: Record<str
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{String(n.title)}</p>
                   {n.body ? <p className="text-sm" style={{ color: "var(--text-muted)" }}>{String(n.body)}</p> : null}
-                  <p className="mt-1 text-[11px]" style={{ color: "var(--text-faint)" }}>{relativeDate(n.at as string)}</p>
+                  <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>{relativeDate(n.at as string)}</p>
                 </div>
               </div>
             );
@@ -91,7 +91,7 @@ export function ResourceLibrary({ resources }: { resources: Record<string, unkno
           {resources.map((r) => (
             <div key={String(r.id)} className="card flex items-start justify-between p-4">
               <div className="min-w-0">
-                <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>{String(r.kind)}</span>
+                <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>{String(r.kind)}</span>
                 <p className="font-medium">{String(r.title)}</p>
                 {r.url ? <a href={String(r.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs" style={{ color: "var(--primary)" }}><ExternalLink size={11} /> open</a> : null}
               </div>
@@ -157,8 +157,8 @@ export function HelpCenter({ tickets }: { tickets: Record<string, unknown>[] }) 
           <ul className="flex flex-col gap-2">
             {tickets.map((t) => (
               <li key={String(t.id)} className="card flex items-center justify-between p-3 text-sm">
-                <span>{String(t.subject)} <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>· {String(t.kind)}</span></span>
-                <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{String(t.status)}</span>
+                <span>{String(t.subject)} <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>· {String(t.kind)}</span></span>
+                <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>{String(t.status)}</span>
               </li>
             ))}
           </ul>

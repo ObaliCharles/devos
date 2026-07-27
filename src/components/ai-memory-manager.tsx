@@ -83,7 +83,7 @@ export function AiMemoryManager({ memory }: { memory: MemoryItem[] }) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{m.key}</p>
-                  <span className="rounded-full px-1.5 py-0.5 text-[10px]" style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}>
+                  <span className="rounded-full px-1.5 py-0.5 text-[12px]" style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}>
                     {m.kind}
                   </span>
                 </div>

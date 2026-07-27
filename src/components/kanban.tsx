@@ -110,7 +110,7 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
               }}
             >
               <div className="flex items-center justify-between px-1.5 py-1">
-                <h3 className="text-[13px] font-semibold">
+                <h3 className="text-[14px] font-semibold">
                   {column.label}
                   <span className="ml-2 tabular-nums" style={{ color: "var(--text-faint)" }}>
                     {items.length}
@@ -131,7 +131,7 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
                 {adding === column.key && (
                   <div className="rounded-[var(--radius-card)] border p-2" style={{ borderColor: "var(--primary)" }}>
                     <textarea
-                      className="input min-h-[56px] resize-none text-[13px]"
+                      className="input min-h-[56px] resize-none text-[14px]"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -167,9 +167,9 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
                       opacity: dragging === task.id ? 0.4 : 1,
                     }}
                   >
-                    <p className="text-[13px] leading-snug">{task.title}</p>
+                    <p className="text-[14px] leading-snug">{task.title}</p>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px]">
                       <span style={{ color: statusColor(task.priority) }}>{task.priority}</span>
                       {task.checklistTotal > 0 && (
                         <span style={{ color: "var(--text-faint)" }}>
@@ -270,7 +270,7 @@ function TaskDialog({
         </div>
 
         <textarea
-          className="input mt-3 min-h-[110px] resize-y text-[13px]"
+          className="input mt-3 min-h-[110px] resize-y text-[14px]"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What does done look like?"

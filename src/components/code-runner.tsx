@@ -105,14 +105,14 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
             </div>
             <ol className="mt-3 flex flex-col gap-2">
               {challenge.hints.slice(0, hintsShown).map((h, i) => (
-                <li key={i} className="flex gap-2 text-[13px]" style={{ color: "var(--text-muted)" }}>
+                <li key={i} className="flex gap-2 text-[14px]" style={{ color: "var(--text-muted)" }}>
                   <span style={{ color: "var(--text-faint)" }}>{i + 1}.</span> {h}
                 </li>
               ))}
             </ol>
             {hintsShown < challenge.hints.length && (
               <button
-                className="btn btn-ghost mt-3 h-8 px-3 text-[13px]"
+                className="btn btn-ghost mt-3 h-8 px-3 text-[14px]"
                 onClick={() => setHintsShown((n) => n + 1)}
               >
                 Reveal a hint
@@ -128,7 +128,7 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
           <div className="flex items-center justify-between border-b px-4 py-2.5" style={{ borderColor: "var(--border)" }}>
             <span className="eyebrow">solution.js</span>
             <button
-              className="flex items-center gap-1 text-[11px]"
+              className="flex items-center gap-1 text-[12px]"
               style={{ color: "var(--text-faint)" }}
               onClick={() => { setCode(challenge.starterCode); setOutcome(null); }}
             >
@@ -138,7 +138,7 @@ export function CodeRunner({ challenge }: { challenge: ChallengeData }) {
           {/* whitespace-pre + overflow-x-auto: the editor scrolls horizontally
               inside its own box rather than stretching the page. */}
           <textarea
-            className="block w-full resize-y overflow-auto whitespace-pre bg-transparent p-4 font-[family-name:var(--font-mono)] text-[13px] leading-relaxed outline-none"
+            className="block w-full resize-y overflow-auto whitespace-pre bg-transparent p-4 font-[family-name:var(--font-mono)] text-[14px] leading-relaxed outline-none"
             style={{ minHeight: 320, color: "var(--text)" }}
             value={code}
             onChange={(e) => setCode(e.target.value)}

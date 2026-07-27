@@ -129,12 +129,12 @@ function BrowseMode({ roadmaps }: { roadmaps: RoadmapSummary[] }) {
             )}
           </div>
 
-          {r.summary && <p className="text-body mt-2 line-clamp-2 text-[13px]">{r.summary}</p>}
+          {r.summary && <p className="text-body mt-2 line-clamp-2 text-[14px]">{r.summary}</p>}
 
           <div className="mt-auto pt-4">
             {r.active ? (
               <span
-                className="flex items-center gap-1.5 text-[13px] font-medium"
+                className="flex items-center gap-1.5 text-[14px] font-medium"
                 style={{ color: "var(--primary)" }}
               >
                 <Check size={14} /> Following this path
@@ -186,7 +186,7 @@ function GenerateMode({ configured }: { configured: boolean }) {
   if (!configured) {
     return (
       <p
-        className="rounded-[var(--radius-tile)] p-3 text-[13px]"
+        className="rounded-[var(--radius-tile)] p-3 text-[14px]"
         style={{ background: "var(--warning-faint)", color: "var(--warning)" }}
       >
         Generating a path needs an AI provider. Add ANTHROPIC_API_KEY or GROQ_API_KEY to .env.local
@@ -259,7 +259,7 @@ function GenerateMode({ configured }: { configured: boolean }) {
       <div className="lg:col-span-2">
         {error && (
           <p
-            className="mb-3 rounded-[var(--radius-tile)] p-3 text-[13px]"
+            className="mb-3 rounded-[var(--radius-tile)] p-3 text-[14px]"
             style={{ background: "var(--danger-faint)", color: "var(--danger)" }}
           >
             {error}

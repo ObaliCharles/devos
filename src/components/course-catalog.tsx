@@ -111,7 +111,7 @@ export function CourseCatalog({ phases }: { phases: Phase[] }) {
               </div>
               <h3
                 id={`cat-${phase.id}`}
-                className="mt-1.5 text-[20px] font-semibold tracking-[-0.024em]"
+                className="mt-1.5 text-[22px] font-semibold tracking-[-0.024em]"
               >
                 {phase.title}
               </h3>
@@ -162,7 +162,7 @@ function CourseCard({ skill, locked }: { skill: Skill; locked: boolean }) {
         </div>
       </div>
 
-      {skill.why && <p className="text-body mt-2 line-clamp-2 text-[13px]">{skill.why}</p>}
+      {skill.why && <p className="text-body mt-2 line-clamp-2 text-[14px]">{skill.why}</p>}
 
       <div className="mt-auto flex items-center gap-3 pt-5">
         <ProgressBar

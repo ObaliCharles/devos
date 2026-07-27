@@ -105,7 +105,7 @@ export function MobileDrawer({
           {groups.map((group, gi) => (
             <div key={group.heading ?? gi}>
               {gi > 0 && <div style={{ height: "var(--space-6)" }} aria-hidden />}
-              {group.heading && <p className="overline mb-1.5 px-2.5">{group.heading}</p>}
+              {group.heading && <p className="group-heading mb-1.5 px-2.5">{group.heading}</p>}
 
               <ul className="flex flex-col gap-[2px]">
                 {group.items.map(({ href, label, icon: Icon }) => {
@@ -160,7 +160,7 @@ export function MobileDrawer({
             >
               <span className="relative shrink-0">
                 <span
-                  className="grid h-[34px] w-[34px] place-items-center rounded-full text-[13px] font-medium"
+                  className="grid h-[34px] w-[34px] place-items-center rounded-full text-[14px] font-medium"
                   style={{
                     background: "var(--surface-3)",
                     border: "1px solid var(--border)",

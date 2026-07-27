@@ -23,7 +23,7 @@ export default async function RoadmapPage() {
       <div className="page-body">
         <Link
           href="/learning"
-          className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[13px] font-medium"
+          className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[14px] font-medium"
           style={{ color: "var(--text-muted)" }}
         >
           <ArrowLeft size={15} /> Learn
@@ -52,7 +52,7 @@ export default async function RoadmapPage() {
     <div className="page-body">
       <Link
         href="/learning"
-        className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[13px] font-medium"
+        className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[14px] font-medium"
         style={{ color: "var(--text-muted)" }}
       >
         <ArrowLeft size={15} /> Learn
@@ -78,7 +78,7 @@ export default async function RoadmapPage() {
             tone={pct === 100 ? "success" : "primary"}
             label={`${roadmap.masteredLessons} of ${roadmap.totalLessons} lessons mastered`}
           />
-          <span className="num shrink-0 text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
+          <span className="num shrink-0 text-[14px] font-medium" style={{ color: "var(--text-muted)" }}>
             {roadmap.masteredLessons}/{roadmap.totalLessons} · {pct}%
           </span>
         </div>

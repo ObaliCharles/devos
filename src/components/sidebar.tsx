@@ -116,7 +116,7 @@ export function Sidebar({
               ))}
 
             {group.heading && !collapsed && (
-              <p className="overline mb-1.5 px-2.5">{group.heading}</p>
+              <p className="group-heading mb-1.5 px-2.5">{group.heading}</p>
             )}
 
             <ul className="flex flex-col gap-[2px]">
@@ -224,7 +224,7 @@ export function Sidebar({
             {!collapsed && (
               <>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium">{user.name}</span>
+                  <span className="block truncate text-[14px] font-medium">{user.name}</span>
                   <span className="block truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
                     {user.plan}
                   </span>
@@ -246,7 +246,7 @@ export function Sidebar({
                 <span className="truncate text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
                   Level {user.level} · {user.title}
                 </span>
-                <span className="num shrink-0 text-[11px]" style={{ color: "var(--text-faint)" }}>
+                <span className="num shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
                   {user.into} / {user.need}
                 </span>
               </span>

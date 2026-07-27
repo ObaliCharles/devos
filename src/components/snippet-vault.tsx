@@ -83,7 +83,7 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
             <input className="input" value={editing.framework ?? ""} onChange={(e) => setEditing({ ...editing, framework: e.target.value })} placeholder="Framework (optional)" aria-label="Framework" />
           </div>
           <textarea
-            className="input mt-2 min-h-[180px] resize-y font-[family-name:var(--font-mono)] text-[13px]"
+            className="input mt-2 min-h-[180px] resize-y font-[family-name:var(--font-mono)] text-[14px]"
             value={editing.code}
             onChange={(e) => setEditing({ ...editing, code: e.target.value })}
             placeholder="Paste the code"
@@ -117,12 +117,12 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="truncate font-semibold">{s.title}</h3>
-                  <p className="text-[11px]" style={{ color: "var(--text-faint)" }}>
+                  <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
                     {s.language}{s.framework ? ` · ${s.framework}` : ""}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  <button className="btn btn-ghost h-7 px-2 text-[11px]" onClick={() => setEditing(s)}>Edit</button>
+                  <button className="btn btn-ghost h-7 px-2 text-[12px]" onClick={() => setEditing(s)}>Edit</button>
                   <button
                     className="grid h-7 w-7 place-items-center rounded-[var(--radius-card)]"
                     style={{ color: "var(--danger)" }}
@@ -134,7 +134,7 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
                 </div>
               </div>
 
-              {s.description && <p className="mt-1 text-[13px]" style={{ color: "var(--text-muted)" }}>{s.description}</p>}
+              {s.description && <p className="mt-1 text-[14px]" style={{ color: "var(--text-muted)" }}>{s.description}</p>}
 
               <div className="relative mt-3">
                 <pre
@@ -144,7 +144,7 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
                   <code>{s.code}</code>
                 </pre>
                 <button
-                  className="btn btn-ghost absolute right-2 top-2 h-7 px-2 text-[11px]"
+                  className="btn btn-ghost absolute right-2 top-2 h-7 px-2 text-[12px]"
                   onClick={() => {
                     navigator.clipboard?.writeText(s.code);
                     setCopied(s.id);
@@ -158,7 +158,7 @@ export function SnippetVault({ snippets }: { snippets: SnippetItem[] }) {
               {s.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {s.tags.map((t) => (
-                    <span key={t} className="rounded-full px-1.5 py-0.5 text-[10px]" style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}>
+                    <span key={t} className="rounded-full px-1.5 py-0.5 text-[12px]" style={{ background: "var(--surface-2)", color: "var(--text-faint)" }}>
                       {t}
                     </span>
                   ))}

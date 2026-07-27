@@ -82,7 +82,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
       <div className="w-full max-w-[520px]">
         <Link href="/" className="mb-8 flex items-center justify-center gap-2.5" aria-label="DeveloperOS home">
           <LogoMark size={22} />
-          <span className="text-[15px] font-semibold tracking-[-0.03em]">
+          <span className="text-[14px] font-semibold tracking-[-0.03em]">
             Developer<span style={{ color: "var(--text-faint)" }}>OS</span>
           </span>
         </Link>
@@ -116,7 +116,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
                 <Field label="Originally for" value={result.name} />
                 <Field label="Revoked" value={formatDate(result.revokedAt) ?? "—"} />
               </dl>
-              <p className="text-body mt-6 text-[13.5px]">
+              <p className="text-body mt-6 text-[14px]">
                 The code is real, but the certificate it belonged to is no longer valid. It should not be
                 accepted as proof of completion.
               </p>
@@ -133,7 +133,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
                     : "No certificate with that code."
                 }
               />
-              <p className="text-body mt-6 text-[13.5px]">
+              <p className="text-body mt-6 text-[14px]">
                 {result.status === "malformed"
                   ? "DeveloperOS codes look like DOS-A7K2-9QM4 — eight characters after the prefix. Check for a typo; the letters O, I and L are never used, so a character that looks like one is probably a 0, 1 or a different letter."
                   : "Nothing has been issued against this code. If you were given it recently, check it was copied in full."}
@@ -142,7 +142,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
           )}
         </div>
 
-        <p className="text-meta mt-6 text-center text-[12.5px]">
+        <p className="text-meta mt-6 text-center text-[12px]">
           Verification is provided by DeveloperOS. No account is required to check a certificate.
         </p>
       </div>
@@ -173,7 +173,7 @@ function Verdict({
         <p className="eyebrow" style={{ color: colour }}>
           {label}
         </p>
-        <h1 className="mt-1 text-[19px] font-semibold tracking-[-0.02em]">{headline}</h1>
+        <h1 className="mt-1 text-[22px] font-semibold tracking-[-0.02em]">{headline}</h1>
       </div>
     </div>
   );
@@ -185,10 +185,10 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
       className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-2.5"
       style={{ borderTop: "1px solid var(--border)" }}
     >
-      <dt className="text-[13px]" style={{ color: "var(--text-faint)" }}>
+      <dt className="text-[14px]" style={{ color: "var(--text-faint)" }}>
         {label}
       </dt>
-      <dd className={`text-[13.5px] font-medium ${mono ? "num" : ""}`} style={{ margin: 0 }}>
+      <dd className={`text-[14px] font-medium ${mono ? "num" : ""}`} style={{ margin: 0 }}>
         {value}
       </dd>
     </div>

@@ -182,7 +182,7 @@ export function BugsPanel({ projectId, bugs }: { projectId: string; bugs: BugIte
             aria-label="Bug title"
           />
           <textarea
-            className="input min-h-[70px] resize-y text-[13px]"
+            className="input min-h-[70px] resize-y text-[14px]"
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
             placeholder="Steps to reproduce. Write them now while you remember."
@@ -229,11 +229,11 @@ export function BugsPanel({ projectId, bugs }: { projectId: string; bugs: BugIte
                         <div className="min-w-0">
                           <p className="font-medium">{b.title}</p>
                           {b.steps && (
-                            <p className="mt-1 whitespace-pre-wrap text-[13px]" style={{ color: "var(--text-muted)" }}>
+                            <p className="mt-1 whitespace-pre-wrap text-[14px]" style={{ color: "var(--text-muted)" }}>
                               {b.steps}
                             </p>
                           )}
-                          <p className="mt-2 text-[11px]" style={{ color: "var(--text-faint)" }}>
+                          <p className="mt-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
                             <span style={{ color: statusColor(b.severity) }}>{b.severity}</span>
                             {" · logged "}{relativeDate(b.createdAt)}
                           </p>
@@ -375,7 +375,7 @@ export function DeploymentsPanel({
                   {d.url.replace(/^https?:\/\//, "")}
                 </a>
               )}
-              <span className="ml-auto text-[11px]" style={{ color: "var(--text-faint)" }}>
+              <span className="ml-auto text-[12px]" style={{ color: "var(--text-faint)" }}>
                 {formatDate(d.deployedAt)}
               </span>
             </li>

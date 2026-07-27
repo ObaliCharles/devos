@@ -105,7 +105,7 @@ export function ProjectWizard({ skills }: { skills: SkillOption[] }) {
               type="button"
               onClick={() => i < step && setStep(i)}
               disabled={i > step}
-              className="flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] transition-colors disabled:cursor-default"
+              className="flex items-center gap-2 rounded-full px-3 py-1.5 text-[14px] transition-colors disabled:cursor-default"
               style={{
                 background: i === step ? "var(--primary-faint)" : "transparent",
                 color: i === step ? "var(--primary)" : i < step ? "var(--text)" : "var(--text-faint)",
@@ -113,7 +113,7 @@ export function ProjectWizard({ skills }: { skills: SkillOption[] }) {
               }}
             >
               <span
-                className="grid h-5 w-5 place-items-center rounded-full text-[11px] tabular-nums"
+                className="grid h-5 w-5 place-items-center rounded-full text-[12px] tabular-nums"
                 style={{
                   background: i < step ? "var(--success)" : "var(--surface-2)",
                   color: i < step ? "var(--success-ink)" : "inherit",

@@ -49,7 +49,7 @@ export function StatusScreen({
 
         <p className="eyebrow eyebrow-accent">{eyebrow}</p>
         <h1 className="mt-2 text-[22px] font-bold tracking-[-0.03em]">{title}</h1>
-        <p className="text-body mx-auto mt-2 max-w-[44ch] text-[13.5px]">{body}</p>
+        <p className="text-body mx-auto mt-2 max-w-[44ch] text-[14px]">{body}</p>
 
         {actions && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">{actions}</div>

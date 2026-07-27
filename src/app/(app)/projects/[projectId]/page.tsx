@@ -31,7 +31,7 @@ export default async function ProjectOverviewPage({
         {project.goal && (
           <section className="card p-5">
             <p className="eyebrow">The point of this</p>
-            <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+            <p className="mt-3 text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
               {String(project.goal)}
             </p>
           </section>
@@ -77,7 +77,7 @@ export default async function ProjectOverviewPage({
                     {String(m.title)}
                   </span>
                   {m.dueAt && (
-                    <span className="shrink-0 text-[11px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
                       {relativeDate(m.dueAt as Date)}
                     </span>
                   )}
@@ -110,7 +110,7 @@ export default async function ProjectOverviewPage({
               {overview.activity.map((a) => (
                 <li key={String(a._id)} className="flex items-baseline justify-between gap-3 text-sm">
                   <span style={{ color: "var(--text-muted)" }}>{String(a.message)}</span>
-                  <span className="shrink-0 text-[11px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
                     {relativeDate(a.createdAt as Date)}
                   </span>
                 </li>
@@ -126,7 +126,7 @@ export default async function ProjectOverviewPage({
             <p className="eyebrow">Stack</p>
             <dl className="mt-3 flex flex-col gap-2.5">
               {stackEntries.map(([group, values]) => (
-                <div key={group} className="flex gap-3 text-[13px]">
+                <div key={group} className="flex gap-3 text-[14px]">
                   <dt className="w-20 shrink-0 capitalize" style={{ color: "var(--text-faint)" }}>{group}</dt>
                   <dd style={{ color: "var(--text-muted)" }}>{values.join(", ")}</dd>
                 </div>

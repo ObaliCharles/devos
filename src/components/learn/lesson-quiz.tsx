@@ -53,7 +53,7 @@ function Item({ q, number }: { q: Question; number?: number }) {
               key={ci}
               onClick={() => setPicked(ci)}
               disabled={answered && correct}
-              className="flex items-center gap-2.5 rounded-[var(--radius-tile)] border px-3.5 py-2.5 text-left text-[13.5px] transition-colors"
+              className="flex items-center gap-2.5 rounded-[var(--radius-tile)] border px-3.5 py-2.5 text-left text-[14px] transition-colors"
               style={{ background: bg, borderColor: border, color }}
             >
               <span className="flex-1">{choice}</span>
@@ -64,7 +64,7 @@ function Item({ q, number }: { q: Question; number?: number }) {
         })}
       </div>
       {answered && (
-        <p className="mt-2 text-[12.5px] font-medium" style={{ color: correct ? "var(--success)" : "var(--danger)" }}>
+        <p className="mt-2 text-[12px] font-medium" style={{ color: correct ? "var(--success)" : "var(--danger)" }}>
           {correct ? "Correct — nicely done." : "Not quite. Try again, or ask the AI tutor above."}
         </p>
       )}

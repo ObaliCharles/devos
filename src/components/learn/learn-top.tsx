@@ -60,19 +60,19 @@ export function LearnTop({
   const estimate = next ? remainingInSkill * next.minutes : 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {/* ------------------------------------------------------------ Greeting */}
       <header className="rise">
         <h1 className="title-page">
           {greeting()}, {name}
         </h1>
-        <p className="text-body mt-1 text-[13.5px]">Ready to build your future?</p>
+        <p className="text-body mt-1 text-[14px]">Ready to build your future?</p>
       </header>
 
       {/* ------------------------------- Continue Learning | Today's Goal ---- */}
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
         {/* Continue Learning */}
-        <div className="card p-4 sm:p-5">
+        <div className="card p-5 sm:p-5">
           <h2 className="title-card">Continue learning</h2>
 
           {next ? (
@@ -86,10 +86,10 @@ export function LearnTop({
               )}
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[15px] font-semibold tracking-[-0.014em]">
+                <p className="truncate text-[14px] font-semibold tracking-[-0.014em]">
                   {next.skillTitle}
                 </p>
-                <p className="text-meta mt-1 truncate text-[12.5px]">{next.title}</p>
+                <p className="text-meta mt-1 truncate text-[12px]">{next.title}</p>
 
                 <div className="mt-3 flex items-center gap-2.5">
                   <div className="progress flex-1">
@@ -113,14 +113,14 @@ export function LearnTop({
               </Link>
             </div>
           ) : (
-            <p className="text-body mt-4 text-[13px]">
+            <p className="text-body mt-4 text-[14px]">
               Nothing in progress. Pick a path below to start one.
             </p>
           )}
         </div>
 
         {/* Today's Goal — three rows, each a real thing the app can check off */}
-        <div className="card p-4 sm:p-5">
+        <div className="card p-5 sm:p-5">
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="title-card">Today&apos;s goal</h2>
             <Link href="/dashboard" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
@@ -157,11 +157,11 @@ export function LearnTop({
 
       {/* --------------------------------------------------- Your Learning Path */}
       {steps.length > 0 && (
-        <section className="card p-4 sm:p-5">
+        <section className="card p-5 sm:p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <div className="flex flex-wrap items-baseline gap-2.5">
               <h2 className="title-card">Your learning path</h2>
-              <span className="text-[12.5px] font-medium" style={{ color: "var(--primary)" }}>
+              <span className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
                 {pathTitle}
               </span>
               <span className="text-meta num text-[12px]">{pathPct}% completed</span>
@@ -219,7 +219,7 @@ export function LearnTop({
                   ) : s.state === "done" ? (
                     <Check size={18} style={{ color: "var(--primary)" }} />
                   ) : (
-                    <span className="num text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    <span className="num text-[14px] font-medium" style={{ color: "var(--text-muted)" }}>
                       {i + 1}
                     </span>
                   )}
@@ -228,7 +228,7 @@ export function LearnTop({
                 <span className="w-full">
                   <span className="block truncate text-[12px] font-medium">{s.title}</span>
                   <span
-                    className="block truncate text-[11px]"
+                    className="block truncate text-[12px]"
                     style={{
                       color: s.state === "current" ? "var(--primary)" : "var(--text-faint)",
                     }}
@@ -253,7 +253,7 @@ export function LearnTop({
           is the single most interactive thing on the page, so it gets it. */}
       {next && (
         <section
-          className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5"
+          className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-5"
           style={{ background: "var(--primary-faint)", borderColor: "var(--primary-muted)" }}
         >
           <span
@@ -271,7 +271,7 @@ export function LearnTop({
               {remainingInSkill === 1 ? "lesson" : "lessons"} from finishing{" "}
               <strong className="font-semibold">{next.skillTitle}</strong>.
             </p>
-            <p className="text-meta mt-1 text-[12.5px]">
+            <p className="text-meta mt-1 text-[12px]">
               Estimated time: {estimate < 60 ? `${estimate} minutes` : `${Math.round(estimate / 6) / 10} hours`}.
             </p>
           </div>
@@ -304,9 +304,9 @@ function GoalRow({
         <span className="min-w-0 flex-1">
           <span className="flex items-baseline gap-1.5">
             <span className="num text-[16px] font-semibold leading-none">{value}</span>
-            <span className="truncate text-[13px]">{label}</span>
+            <span className="truncate text-[14px]">{label}</span>
           </span>
-          <span className="text-meta mt-0.5 block truncate text-[11.5px]">{meta}</span>
+          <span className="text-meta mt-0.5 block truncate text-[12px]">{meta}</span>
         </span>
       </Link>
     </li>

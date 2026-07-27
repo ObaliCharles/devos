@@ -144,7 +144,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
 
         {projects.length === 0 ? (
           <div className="well p-4">
-            <p className="text-body text-[13.5px]">
+            <p className="text-body text-[14px]">
               Nothing yet. Mastering the lessons proves you can follow along, building a project
               proves you can do it without one. Start a project and link it to this skill.
             </p>

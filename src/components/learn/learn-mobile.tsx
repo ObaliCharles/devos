@@ -73,7 +73,7 @@ export function LearnMobile({
       <label className="search h-11">
         <Search size={16} style={{ color: "var(--text-faint)" }} />
         <input
-          className="search-input text-[14.5px]"
+          className="search-input text-[14px]"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search ${tab.toLowerCase()}…`}
@@ -131,10 +131,10 @@ export function LearnMobile({
             <TrendingUp size={20} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[12.5px] font-semibold" style={{ color: "var(--primary)" }}>
+            <p className="text-[12px] font-semibold" style={{ color: "var(--primary)" }}>
               Not sure where to start?
             </p>
-            <p className="text-[15px] font-bold tracking-[-0.01em]">Build your path with AI</p>
+            <p className="text-[14px] font-bold tracking-[-0.01em]">Build your path with AI</p>
             <p className="text-meta mt-0.5">Get a personalized roadmap in 2 minutes.</p>
           </div>
           {/* Decorative: the link already reads its heading, so announcing an
@@ -187,7 +187,7 @@ function Row({
       )}
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="truncate text-[14.5px] font-semibold">{title}</span>
+          <span className="truncate text-[14px] font-semibold">{title}</span>
           {badge && (
             <span className="badge badge-primary shrink-0">
               <Sparkles size={9} /> {badge}
@@ -200,7 +200,7 @@ function Row({
             <span className="progress progress-sm flex-1">
               <span className="progress-bar" style={{ width: `${pct}%` }} />
             </span>
-            <span className="num text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+            <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
               {pct}%
             </span>
           </span>
@@ -234,7 +234,7 @@ function Empty({ label }: { label: string }) {
   return (
     <div className="card p-6 text-center">
       <p className="text-[14px] font-medium">Nothing here yet</p>
-      <p className="text-body mt-1 text-[13px]">No {label} match your filter.</p>
+      <p className="text-body mt-1 text-[14px]">No {label} match your filter.</p>
     </div>
   );
 }

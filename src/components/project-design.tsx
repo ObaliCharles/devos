@@ -254,7 +254,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                   <div className="min-w-0">
                     <h3 className="font-semibold">{s.name}</h3>
                     {s.description && (
-                      <p className="mt-0.5 text-[13px]" style={{ color: "var(--text-muted)" }}>{s.description}</p>
+                      <p className="mt-0.5 text-[14px]" style={{ color: "var(--text-muted)" }}>{s.description}</p>
                     )}
                   </div>
                   <div className="flex shrink-0 gap-1">
@@ -275,7 +275,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                   </div>
                 </div>
 
-                <table className="mt-4 w-full text-[13px]">
+                <table className="mt-4 w-full text-[14px]">
                   <tbody>
                     {s.fields.map((f) => (
                       <tr key={f.name} style={{ borderTop: "1px solid var(--border)" }}>
@@ -283,7 +283,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                         <td className="py-1.5 pr-3" style={{ color: "var(--text-muted)" }}>
                           {f.type}{f.ref ? ` → ${f.ref}` : ""}
                         </td>
-                        <td className="py-1.5 text-[11px]" style={{ color: "var(--text-faint)" }}>
+                        <td className="py-1.5 text-[12px]" style={{ color: "var(--text-faint)" }}>
                           {[f.required && "required", f.unique && "unique", f.indexed && "index"]
                             .filter(Boolean)
                             .join(" · ")}
@@ -311,7 +311,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                       <code>{code}</code>
                     </pre>
                     <button
-                      className="btn btn-ghost absolute right-2 top-2 h-7 px-2 text-[11px]"
+                      className="btn btn-ghost absolute right-2 top-2 h-7 px-2 text-[12px]"
                       onClick={() => {
                         navigator.clipboard?.writeText(code);
                         setCopied(s.id);
@@ -447,7 +447,7 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
             />
           </div>
 
-          <label className="mt-3 flex items-center gap-2 text-[13px]" style={{ color: "var(--text-muted)" }}>
+          <label className="mt-3 flex items-center gap-2 text-[14px]" style={{ color: "var(--text-muted)" }}>
             <input
               type="checkbox"
               checked={editing.auth}
@@ -485,16 +485,16 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
                           {e.method}
                         </span>
                         <button
-                          className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)] text-[13px]"
+                          className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)] text-[14px]"
                           onClick={() => setExpanded(expanded === e.id ? null : e.id)}
                         >
                           {e.path}
                         </button>
                         {!e.auth && (
-                          <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>public</span>
+                          <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>public</span>
                         )}
                         <button
-                          className="btn btn-ghost h-7 px-2 text-[11px]"
+                          className="btn btn-ghost h-7 px-2 text-[12px]"
                           onClick={() => setEditing(e)}
                         >
                           Edit
@@ -510,7 +510,7 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
                       </div>
 
                       {e.description && (
-                        <p className="mt-1.5 text-[13px]" style={{ color: "var(--text-muted)" }}>{e.description}</p>
+                        <p className="mt-1.5 text-[14px]" style={{ color: "var(--text-muted)" }}>{e.description}</p>
                       )}
 
                       {expanded === e.id && (e.requestBody || e.responseBody) && (

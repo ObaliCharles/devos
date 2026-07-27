@@ -68,7 +68,7 @@ export function Topbar({
         aria-label="Search anything (Command K)"
       >
         <Search size={14} className="shrink-0" style={{ color: "var(--text-faint)" }} />
-        <span className="flex-1 truncate text-[13.5px]">Search anything…</span>
+        <span className="flex-1 truncate text-[14px]">Search anything…</span>
         <kbd className="hidden sm:inline-flex">⌘K</kbd>
       </button>
 
@@ -80,7 +80,7 @@ export function Topbar({
             like a game. */}
         <div className="mr-1.5 hidden items-center gap-0.5 sm:flex">
           <span
-            className="tooltip flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] px-2.5 text-[12.5px] font-medium"
+            className="tooltip flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] px-2.5 text-[12px] font-medium"
             data-tip={streak > 0 ? `${streak} day streak` : "No streak yet"}
             style={{ color: streak > 0 ? "var(--text-muted)" : "var(--text-faint)" }}
           >
@@ -90,7 +90,7 @@ export function Topbar({
 
           <Link
             href="/analytics"
-            className="tooltip row-link flex h-8 items-center gap-1.5 px-2.5 text-[12.5px] font-medium"
+            className="tooltip row-link flex h-8 items-center gap-1.5 px-2.5 text-[12px] font-medium"
             data-tip="Experience earned"
             style={{ color: "var(--text-muted)" }}
           >

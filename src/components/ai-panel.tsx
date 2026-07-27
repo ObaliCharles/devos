@@ -43,7 +43,7 @@ export function AiPanel({ lessonId }: { lessonId: string }) {
         {PRESETS.map((p) => (
           <button
             key={p.mode}
-            className="btn btn-ghost h-8 px-3 text-[13px]"
+            className="btn btn-ghost h-8 px-3 text-[14px]"
             disabled={loading}
             onClick={() => ask(p.mode)}
           >

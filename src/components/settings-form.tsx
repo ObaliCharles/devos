@@ -61,7 +61,7 @@ export function SettingsForm({ name, email, prefs }: { name: string; email: stri
           <div>
             <label className="text-sm font-medium" htmlFor="s-email">Email</label>
             <input id="s-email" className="input mt-1.5" value={email} disabled style={{ opacity: 0.6 }} />
-            <p className="mt-1 text-[11px]" style={{ color: "var(--text-faint)" }}>Managed by your sign-in provider.</p>
+            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>Managed by your sign-in provider.</p>
           </div>
         </div>
       </section>

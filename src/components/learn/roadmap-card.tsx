@@ -63,11 +63,11 @@ export function RoadmapCard({
       </div>
 
       <h3 className="title-card mt-4">{r.title}</h3>
-      <p className="text-body mt-1 line-clamp-2 flex-1 text-[13px]">
+      <p className="text-body mt-1 line-clamp-2 flex-1 text-[14px]">
         {r.summary || "A structured path with lessons, projects and milestones."}
       </p>
 
-      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px]" style={{ color: "var(--text-muted)" }}>
+      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px]" style={{ color: "var(--text-muted)" }}>
         <li className="flex items-center gap-1.5">
           <BookOpen size={13} style={{ color: "var(--text-faint)" }} /> {r.lessons} Lessons
         </li>
@@ -80,7 +80,7 @@ export function RoadmapCard({
       <button
         onClick={follow}
         disabled={pending}
-        className="mt-4 flex items-center justify-center gap-1.5 rounded-[var(--radius-control)] py-2 text-[13px] font-medium transition-colors disabled:opacity-60"
+        className="mt-4 flex items-center justify-center gap-1.5 rounded-[var(--radius-control)] py-2 text-[14px] font-medium transition-colors disabled:opacity-60"
         style={{
           background: r.active ? "var(--surface-2)" : "var(--primary-faint)",
           color: r.active ? "var(--text)" : "var(--primary)",

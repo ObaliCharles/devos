@@ -189,7 +189,7 @@ export function CalendarView({
           {WEEKDAYS.map((d) => (
             <div
               key={d}
-              className="overline py-2 text-center"
+              className="group-heading py-2 text-center"
               style={{ color: "var(--text-faint)" }}
             >
               <span className="hidden sm:inline">{d}</span>
@@ -253,7 +253,7 @@ export function CalendarView({
                   {dayItems.slice(0, 2).map((it) => (
                     <span
                       key={it.id}
-                      className="flex items-center gap-1.5 truncate rounded-[var(--radius-xs)] px-1.5 py-[3px] text-[10.5px] font-medium"
+                      className="flex items-center gap-1.5 truncate rounded-[var(--radius-xs)] px-1.5 py-[3px] text-[12px] font-medium"
                       style={{
                         background: `color-mix(in srgb, ${KIND_COLOR[it.kind] ?? "var(--primary)"} 14%, transparent)`,
                         color: "var(--text)",
@@ -269,7 +269,7 @@ export function CalendarView({
                     </span>
                   ))}
                   {dayItems.length > 2 && (
-                    <span className="px-1.5 text-[10px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="px-1.5 text-[12px]" style={{ color: "var(--text-faint)" }}>
                       +{dayItems.length - 2} more
                     </span>
                   )}
@@ -284,7 +284,7 @@ export function CalendarView({
           {KINDS.filter((k) => k.key !== "focus").map((k) => (
             <span
               key={k.key}
-              className="flex items-center gap-1.5 text-[11.5px]"
+              className="flex items-center gap-1.5 text-[12px]"
               style={{ color: "var(--text-faint)" }}
             >
               <span className="h-2 w-2 rounded-full" style={{ background: k.color }} />
@@ -323,7 +323,7 @@ export function CalendarView({
               <span className="icon-tile mx-auto mb-3">
                 <CalendarDays size={16} />
               </span>
-              <p className="text-[13.5px] font-medium">Nothing scheduled</p>
+              <p className="text-[14px] font-medium">Nothing scheduled</p>
               <p className="text-meta mt-1">
                 Deadlines, interviews and reviews land here on their own.
               </p>
@@ -345,7 +345,7 @@ export function CalendarView({
                   />
                   <span className="min-w-0 flex-1">
                     <span
-                      className="block truncate text-[13.5px] font-medium"
+                      className="block truncate text-[14px] font-medium"
                       style={{
                         textDecoration: it.done ? "line-through" : undefined,
                         color: it.done ? "var(--text-faint)" : "var(--text)",
@@ -411,7 +411,7 @@ export function CalendarView({
                       aria-hidden
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-medium">{it.title}</span>
+                      <span className="block truncate text-[14px] font-medium">{it.title}</span>
                       <span className="text-meta block">
                         {when.toLocaleDateString(undefined, { day: "numeric", month: "short" })} ·{" "}
                         {timeOf(it.at)}

@@ -21,17 +21,12 @@
   --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-var), ui-monospace, "SF Mono", monospace;
 
-  /* ---- Radii ----
-     Four values, and radius is only ever used where it earns its place. The
-     ladder is tight on purpose: an engineered interface reads as engineered
-     because its corners are restrained, and a 20-30px radius is the fastest
-     way to make a tool look like a consumer app. A badge is the one thing
-     that goes fully round, because a pill is a label and reads as one.
-       10  anything you press: buttons, inputs, nav rows, icon tiles
-       12  cards and panels
-       14  dialogs and overlays
-      999  badges                                                            */
-  --radius-xs: 6px;
+  /* ---- §2.7 Border Radius ----
+     "DeveloperOS is engineered. Not playful." Subtle and purposeful. The spec
+     forbids 20/24/28/32 unless absolutely necessary, and nothing here needs
+     them. --radius-tile matches controls so an icon tile and the button next
+     to it share a corner. */
+  --radius-xs: 8px;
   --radius-control: 10px;
   --radius-tile: 10px;
   --radius-card: 12px;
@@ -46,7 +41,8 @@
   --dur: 180ms;
   --dur-slow: 260ms;
 
-  /* ---- 8px spacing scale ---- */
+  /* ---- §2.6 Spacing ----
+     The allowed values, and only these. "Never invent arbitrary spacing." */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -57,14 +53,17 @@
   --space-10: 40px;
   --space-12: 48px;
   --space-16: 64px;
+  --space-20: 80px;
 
-  /* ---- Shell geometry, the numbers every layout snaps to ---- */
-  --topbar-h: 56px;
-  --sidebar-w: 244px;
-  --sidebar-w-collapsed: 68px;
-  --page-max: 1400px;
-  --page-pad: 24px;
-  --page-top: 24px;
+  /* ---- §2.4 Grid System ----
+     Desktop: 1600px max, 32px content padding, 280px sidebar, 80px collapsed,
+     72px top navigation. Tablet drops to 24px margins, mobile to 16px. */
+  --topbar-h: 72px;
+  --sidebar-w: 280px;
+  --sidebar-w-collapsed: 80px;
+  --page-max: 1600px;
+  --page-pad: 32px;
+  --page-top: 32px;
 }
 
 /* ------------------------------------------------------------ Dark (default) */
@@ -131,20 +130,23 @@
 
 /* ------------------------------------------------------------------- Light */
 [data-theme="light"] {
-  --bg: #f6f7f9;
+  /* The reference ground: a barely-tinted grey page with white cards floating
+     on it. The contrast between page and card is what does the work here —
+     on a white-on-white page the cards disappear and the layout dissolves. */
+  --bg: #f7f8fa;
   --bg-elevated: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f1f2f5;
-  --surface-3: #e8eaef;
-  --surface-4: #dfe2e8;
+  --surface-2: #f4f5f7;
+  --surface-3: #eceef1;
+  --surface-4: #e2e5ea;
 
-  --border: rgb(16 20 30 / 0.08);
-  --border-strong: rgb(16 20 30 / 0.14);
-  --border-faint: rgb(16 20 30 / 0.05);
+  --border: rgb(16 20 30 / 0.07);
+  --border-strong: rgb(16 20 30 / 0.13);
+  --border-faint: rgb(16 20 30 / 0.045);
 
-  --text: #14161c;
-  --text-muted: rgb(16 20 30 / 0.62);
-  --text-faint: rgb(16 20 30 / 0.42);
+  --text: #16181d;
+  --text-muted: #5c6472;
+  --text-faint: #8b93a1;
 
   --primary: #5f4de6;
   --primary-hover: #5442dd;
@@ -165,11 +167,11 @@
   --info-faint: rgb(43 113 221 / 0.1);
   --neutral-faint: rgb(16 20 30 / 0.04);
 
-  --shadow-sm: 0 1px 2px rgb(16 20 30 / 0.04);
-  --shadow: 0 1px 2px rgb(16 20 30 / 0.04), 0 4px 10px -6px rgb(16 20 30 / 0.07);
-  --shadow-md: 0 6px 18px -10px rgb(16 20 30 / 0.1), 0 2px 6px -3px rgb(16 20 30 / 0.05);
-  --shadow-lg: 0 18px 44px -16px rgb(16 20 30 / 0.14);
-  --shadow-xl: 0 28px 64px -20px rgb(16 20 30 / 0.18);
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow-md: 0 4px 12px -2px rgb(16 24 40 / 0.08), 0 2px 6px -2px rgb(16 24 40 / 0.05);
+  --shadow-lg: 0 12px 28px -6px rgb(16 24 40 / 0.12);
+  --shadow-xl: 0 24px 56px -12px rgb(16 24 40 / 0.16);
 
   --sheen: inset 0 1px 0 rgb(255 255 255 / 0.16);
   --glow: rgb(95 77 230 / 0.035);
@@ -190,7 +192,8 @@
   :root {
     --page-pad: 16px;
     --page-top: 16px;
-    --topbar-h: 52px;
+    /* §4.4 — the mobile header is 64px, not the desktop 72px. */
+    --topbar-h: 64px;
   }
 }
 
@@ -355,12 +358,12 @@ samp {
   .page-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
   }
   .section-stack {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
   /* A page that fills the viewport instead of growing the document, chat is
@@ -389,6 +392,7 @@ samp {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
     transition:
       transform var(--dur) var(--ease-out),
       box-shadow var(--dur) var(--ease-out),
@@ -401,6 +405,7 @@ samp {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-sm);
   }
 
   /* A quieter surface for nested blocks that must not compete with .card */
@@ -417,9 +422,9 @@ samp {
     cursor: pointer;
   }
   .card-link:hover {
-    transform: translateY(-1px);
-    background: var(--surface-2);
+    transform: translateY(-2px);
     border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
   }
   .card-link:active {
     transform: translateY(0);
@@ -445,9 +450,9 @@ samp {
     position: relative;
     display: flex;
     align-items: center;
-    height: 32px;
+    height: 38px;
     border-radius: var(--radius-control);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-muted);
     transition:
@@ -488,11 +493,11 @@ samp {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    height: 32px;
-    padding-inline: 12px;
+    gap: 8px;
+    height: 38px;
+    padding-inline: 16px;
     border-radius: var(--radius-control);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.006em;
@@ -577,21 +582,21 @@ samp {
   .btn-xs {
     height: 28px;
     padding-inline: 10px;
-    font-size: 12.5px;
+    font-size: 12px;
     gap: 6px;
     border-radius: var(--radius-xs);
   }
   .btn-sm {
-    height: 28px;
-    padding-inline: 10px;
-    font-size: 12.5px;
+    height: 32px;
+    padding-inline: 12px;
+    font-size: 14px;
   }
   /* The primary-action size. Used for the one thing a page most wants you to
      do, and nowhere else. */
   .btn-lg {
-    height: 38px;
-    padding-inline: 18px;
-    font-size: 13.5px;
+    height: 44px;
+    padding-inline: 22px;
+    font-size: 14px;
     gap: 8px;
   }
   .btn-block {
@@ -637,7 +642,7 @@ samp {
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-control);
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--text);
     outline: none;
     transition:
@@ -647,8 +652,8 @@ samp {
   }
   .input,
   .select {
-    height: 32px;
-    padding-inline: 10px;
+    height: 38px;
+    padding-inline: 12px;
   }
   .textarea {
     min-height: 104px;
@@ -688,7 +693,7 @@ samp {
   .label {
     display: block;
     margin-bottom: 6px;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-muted);
   }
@@ -701,9 +706,9 @@ samp {
     display: flex;
     align-items: center;
     width: 100%;
-    height: 32px;
-    padding-inline: 10px;
-    gap: 8px;
+    height: 38px;
+    padding-inline: 14px;
+    gap: 9px;
     background: var(--surface-2);
     border: 1px solid var(--border-faint);
     border-radius: var(--radius-control);
@@ -734,7 +739,7 @@ samp {
     background: transparent;
     border: 0;
     outline: none;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--text);
   }
   .search-input::placeholder {
@@ -760,7 +765,7 @@ samp {
     background: var(--neutral-faint);
     border: 0;
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-faint);
   }
@@ -780,7 +785,7 @@ samp {
     border-radius: var(--radius-pill);
     background: var(--neutral-faint);
     border: 0;
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.003em;
@@ -820,7 +825,7 @@ samp {
   .badge-lg {
     height: 25px;
     padding-inline: 11px;
-    font-size: 12.5px;
+    font-size: 12px;
   }
 
   /* A selectable chip, multi-select filters, skill pickers, presets. Filled
@@ -835,7 +840,7 @@ samp {
     border: 0;
     border-radius: var(--radius-control);
     background: var(--surface-2);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     line-height: 1;
     color: var(--text-muted);
@@ -871,7 +876,7 @@ samp {
     height: 19px;
     padding-inline: 5px;
     border-radius: var(--radius-pill);
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     background: var(--neutral-faint);
@@ -883,18 +888,20 @@ samp {
   /* Muted by default, because most eyebrows are quiet labels inside a card.
      The accent variant is reserved for the one at the top of a page, where it
      is doing real work: naming the section you are standing in. */
-  /* ---- The type scale ----
-     Six sizes, three weights, and that is the whole system. Hierarchy is made
-     by size and space; weight is the last resort, never the first. Nothing is
-     700, because when everything is bold nothing is.
+  /* ---- §2.10 Typography ----
+     "Typography creates hierarchy. Not color. Not shadows."
 
-       48  display   the one title on the dashboard
-       34  page      every route header
-       20  section   a region of a page
-       16  card      a title inside a surface
-       15  body
-       13  metadata
-       12  caption / eyebrow                                                  */
+       48  display        the one number on a results screen
+       36  page title     every route header
+       28  section title  a region of a page
+       22  card title     a title inside a surface
+       18  heading        a sub-heading inside a card
+       16  body
+       14  caption
+       12  small metadata   <- the floor. Never smaller.
+
+     Weights stay at 600/500/400: the spec calls for hierarchy through scale
+     and space, so weight is the last lever, not the first. */
 
   .eyebrow {
     display: block;
@@ -910,9 +917,14 @@ samp {
     color: var(--text-muted);
   }
 
-  /* Group label inside sidebars and panels */
-  .overline {
-    font-size: 11px;
+  /* Group label inside sidebars and panels.
+     Named .group-heading, not .overline: Tailwind ships an `overline` utility
+     for text-decoration-line, and because utilities sit in a later cascade
+     layer than components it won, drawing a rule above every group label in
+     the product — the sidebar, the TOC, the command palette, the landing
+     page's own screenshot. A component class must never reuse a utility name. */
+  .group-heading {
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.09em;
     text-transform: uppercase;
@@ -924,36 +936,50 @@ samp {
      are through the nav, the breadcrumb and the title's position. Hierarchy
      here comes from the step between sizes, not from the top of the range. */
   .title-page {
-    font-size: 26px;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.028em;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
   }
   /* Kept as an alias so existing call sites do not break; it is now the same
      size as a page title, because there is no tier above a page title. */
   .title-display {
-    font-size: 26px;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.028em;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
   }
   .title-section {
-    font-size: 17px;
+    font-size: 28px;
     font-weight: 600;
-    letter-spacing: -0.019em;
+    line-height: 1.2;
+    letter-spacing: -0.024em;
   }
   .title-card {
-    font-size: 14.5px;
+    font-size: 22px;
     font-weight: 600;
-    letter-spacing: -0.012em;
+    line-height: 1.25;
+    letter-spacing: -0.018em;
+  }
+  /* §2.10 Heading — a sub-heading inside a card. */
+  .title-heading {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.014em;
   }
   .text-body {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
   }
   .text-meta {
-    font-size: 12.5px;
+    font-size: 14px;
+    color: var(--text-faint);
+  }
+  /* §2.10 Small metadata. The floor — nothing in the product goes below 12. */
+  .text-small {
+    font-size: 12px;
+    font-weight: 500;
     color: var(--text-faint);
   }
   .num {
@@ -962,12 +988,24 @@ samp {
   }
 
   @media (max-width: 640px) {
-    .title-page,
+    /* §4.19 — mobile reduces proportionally and preserves hierarchy. */
     .title-display {
-      font-size: 22px;
+      font-size: 32px;
+    }
+    .title-page {
+      font-size: 28px;
     }
     .title-section {
-      font-size: 16px;
+      font-size: 22px;
+    }
+    .title-card {
+      font-size: 18px;
+    }
+    .text-body {
+      font-size: 14px;
+    }
+    .text-meta {
+      font-size: 14px;
     }
   }
 
@@ -984,31 +1022,36 @@ samp {
   .icon-tile {
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     flex-shrink: 0;
     border-radius: var(--radius-tile);
     background: var(--neutral-faint);
     color: var(--text-muted);
   }
   .icon-tile-lg {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
   .icon-tile-primary {
+    background: var(--primary-faint);
     color: var(--primary);
   }
   .icon-tile-success {
+    background: var(--success-faint);
     color: var(--success);
   }
   .icon-tile-warning {
+    background: var(--warning-faint);
     color: var(--warning);
   }
   .icon-tile-danger {
+    background: var(--danger-faint);
     color: var(--danger);
   }
   .icon-tile-info {
-    color: var(--text-muted);
+    background: var(--info-faint);
+    color: var(--info);
   }
 
   /* ================================================================ Progress */
@@ -1018,17 +1061,17 @@ samp {
      3px line look like a smear. */
   .progress {
     position: relative;
-    height: 3px;
+    height: 6px;
     width: 100%;
     overflow: hidden;
     border-radius: var(--radius-pill);
     background: var(--neutral-faint);
   }
   .progress-sm {
-    height: 2px;
+    height: 4px;
   }
   .progress-lg {
-    height: 6px;
+    height: 8px;
   }
   .progress-bar {
     height: 100%;
@@ -1069,10 +1112,13 @@ samp {
      rules behind, discrete bars in front, and a tooltip that only exists on
      hover. No axes, no legend, no fill under a curve. The data is fourteen
      daily totals, so it gets fourteen bars and nothing else. */
+  /* stretch, not flex-end: the columns must inherit the plot height so a bar
+     can be sized as a percentage of it. Each column bottom-aligns its own bar,
+     which is what flex-end was doing here before. */
   .chart {
     position: relative;
     display: flex;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 4px;
   }
   /* Four rules, evenly spaced, at the threshold of visible. They give the
@@ -1098,10 +1144,13 @@ samp {
     justify-content: flex-end;
     min-width: 0;
   }
+  /* A bar is the data, not a background tint, so it does not borrow
+     --primary-soft (14% in light) — at that weight the chart read as an empty
+     card. Today stays full strength so it still separates from the rest. */
   .bar {
     width: 100%;
     border-radius: 3px;
-    background: var(--primary-soft);
+    background: var(--primary-muted);
     transition: background var(--dur) var(--ease-out);
   }
   .chart-col:hover .bar {
@@ -1141,7 +1190,7 @@ samp {
     height: 30px;
     padding-inline: 12px;
     border-radius: calc(var(--radius-tile) - 3px);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-muted);
     white-space: nowrap;
@@ -1180,7 +1229,7 @@ samp {
     gap: 6px;
     height: 40px;
     padding-inline: 12px;
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-muted);
     white-space: nowrap;
@@ -1222,7 +1271,7 @@ samp {
   }
   .table th {
     padding: 7px 14px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -1233,7 +1282,7 @@ samp {
   }
   .table td {
     padding: 8px 14px;
-    font-size: 13px;
+    font-size: 14px;
     border-bottom: 1px solid var(--border);
   }
   .table tr:last-child td {
@@ -1312,7 +1361,7 @@ samp {
     background: var(--surface-4);
     border: 1px solid var(--border-strong);
     box-shadow: var(--shadow-md);
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text);
     white-space: nowrap;
@@ -1341,7 +1390,7 @@ samp {
 /* ----------------------------------------------------------- Prose / content */
 
 .prose-doc {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.75;
   color: var(--text);
 }
@@ -1349,18 +1398,21 @@ samp {
   margin-top: 1.15rem;
 }
 .prose-doc h1 {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
+  letter-spacing: -0.024em;
   margin-top: 2.75rem;
 }
 .prose-doc h2 {
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 600;
+  letter-spacing: -0.018em;
   margin-top: 2.25rem;
 }
 .prose-doc h3 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
+  letter-spacing: -0.014em;
   margin-top: 1.75rem;
 }
 .prose-doc p {
@@ -1402,7 +1454,7 @@ samp {
   border: 1px solid var(--border-faint);
   border-radius: var(--radius-xs);
   padding: 1px 5px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
 }
 .prose-doc pre {
@@ -1411,7 +1463,7 @@ samp {
   border-radius: var(--radius-tile);
   padding: 16px 18px;
   overflow-x: auto;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.65;
 }
 .prose-doc pre code {

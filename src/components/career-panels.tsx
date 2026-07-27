@@ -64,17 +64,17 @@ export function ApplicationsBoard({ applications }: { applications: Record<strin
             const items = byStatus(status);
             return (
               <section key={status} className="flex w-[240px] shrink-0 flex-col rounded-[var(--radius-card)] border p-2.5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                <p className="px-1.5 py-1 text-[13px] font-semibold capitalize">
+                <p className="px-1.5 py-1 text-[14px] font-semibold capitalize">
                   {status} <span style={{ color: "var(--text-faint)" }}>{items.length}</span>
                 </p>
                 <div className="mt-1 flex flex-col gap-2">
                   {items.map((a) => (
                     <article key={String(a.id)} className="rounded-[var(--radius-card)] border p-2.5" style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}>
-                      <p className="text-[13px] font-medium">{String(a.position)}</p>
-                      <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{String(a.company)}</p>
+                      <p className="text-[14px] font-medium">{String(a.position)}</p>
+                      <p className="text-[12px]" style={{ color: "var(--text-muted)" }}>{String(a.company)}</p>
                       <div className="mt-2 flex items-center gap-1">
                         <select
-                          className="input h-7 flex-1 py-0 text-[11px]"
+                          className="input h-7 flex-1 py-0 text-[12px]"
                           value={String(a.status)}
                           onChange={(e) => run(() => moveApplication(String(a.id), e.target.value))}
                           aria-label="Move"
@@ -85,7 +85,7 @@ export function ApplicationsBoard({ applications }: { applications: Record<strin
                       </div>
                     </article>
                   ))}
-                  {items.length === 0 && <p className="px-1.5 py-2 text-[11px]" style={{ color: "var(--text-faint)" }}>Empty</p>}
+                  {items.length === 0 && <p className="px-1.5 py-2 text-[12px]" style={{ color: "var(--text-faint)" }}>Empty</p>}
                 </div>
               </section>
             );
@@ -217,7 +217,7 @@ export function FreelancePanel({ clients, income, totalIncome }: { clients: Reco
           <ul className="mt-3 flex flex-col gap-1.5">
             {clients.map((c) => (
               <li key={String(c.id)} className="flex items-center justify-between text-sm">
-                <span>{String(c.name)} <span className="text-[11px]" style={{ color: statusColor(String(c.status)) }}>{String(c.status)}</span></span>
+                <span>{String(c.name)} <span className="text-[12px]" style={{ color: statusColor(String(c.status)) }}>{String(c.status)}</span></span>
                 <button onClick={() => run(() => deleteClient(String(c.id)))} style={{ color: "var(--danger)" }} aria-label="Delete"><Trash2 size={12} /></button>
               </li>
             ))}
@@ -326,9 +326,9 @@ export function PortfolioEditor({ portfolio, projects }: { portfolio: Record<str
             <li key={String(pr.id)} className="flex items-center justify-between rounded-[var(--radius-card)] border p-3" style={{ borderColor: "var(--border)" }}>
               <div>
                 <p className="text-sm font-medium">{String(pr.title)}</p>
-                <p className="text-[11px]" style={{ color: "var(--text-faint)" }}>{String(pr.status)}{pr.liveUrl ? " · has live URL" : ""}</p>
+                <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>{String(pr.status)}{pr.liveUrl ? " · has live URL" : ""}</p>
               </div>
-              <span className="text-[11px]" style={{ color: pr.visibility === "public" ? "var(--success)" : "var(--text-faint)" }}>
+              <span className="text-[12px]" style={{ color: pr.visibility === "public" ? "var(--success)" : "var(--text-faint)" }}>
                 {pr.visibility === "public" ? "shown" : "private"}
               </span>
             </li>

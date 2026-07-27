@@ -88,7 +88,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
               lesson.objectives && lesson.objectives.length > 0 ? (
                 <ul className="flex w-full flex-col gap-1.5">
                   {lesson.objectives.map((o) => (
-                    <li key={o} className="flex gap-2.5 text-[13.5px] leading-relaxed">
+                    <li key={o} className="flex gap-2.5 text-[14px] leading-relaxed">
                       <span className="shrink-0" style={{ color: "var(--primary)" }} aria-hidden>→</span>
                       <span style={{ color: "var(--text-muted)" }}>{o}</span>
                     </li>
@@ -116,10 +116,10 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
               </div>
               {lesson.exercise.acceptance && lesson.exercise.acceptance.length > 0 && (
                 <>
-                  <p className="overline mt-6">Done when</p>
+                  <p className="group-heading mt-6">Done when</p>
                   <ul className="well mt-2.5 flex flex-col gap-2 p-4">
                     {lesson.exercise.acceptance.map((a) => (
-                      <li key={a} className="flex gap-2.5 text-[13.5px] leading-relaxed">
+                      <li key={a} className="flex gap-2.5 text-[14px] leading-relaxed">
                         <span className="shrink-0" style={{ color: "var(--text-faint)" }} aria-hidden>□</span>
                         <span style={{ color: "var(--text-muted)" }}>{a}</span>
                       </li>
@@ -149,7 +149,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
             >
               <div className="min-w-0">
                 <p className="eyebrow eyebrow-accent">Next lesson</p>
-                <p className="mt-1 truncate text-[15px] font-medium">{nextLesson.title}</p>
+                <p className="mt-1 truncate text-[14px] font-medium">{nextLesson.title}</p>
               </div>
               </Link>
           )}

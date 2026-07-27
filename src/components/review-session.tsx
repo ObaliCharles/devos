@@ -53,7 +53,7 @@ export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
         <p className="text-[18px] font-semibold tracking-tight">
           {finished ? "Session complete" : "Queue clear"}
         </p>
-        <p className="text-body mt-2 max-w-sm text-[13.5px]">
+        <p className="text-body mt-2 max-w-sm text-[14px]">
           {finished
             ? `You worked through ${cards.length} ${cards.length === 1 ? "card" : "cards"}. Each one you remembered comes back later than the last.`
             : "Nothing is due right now. Master a lesson and it comes back tomorrow."}
@@ -99,7 +99,7 @@ export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
 
         {!revealed ? (
           <div className="mt-8">
-            <p className="text-body text-[13.5px]">
+            <p className="text-body text-[14px]">
               Say the answer out loud first. Then check yourself, recalling before you look is
               the part that makes this work.
             </p>
@@ -111,7 +111,7 @@ export function ReviewSession({ cards }: { cards: ReviewCard[] }) {
           <div className="fade-in mt-6">
             <ul className="well flex flex-col gap-2.5 p-4">
               {card.objectives.map((o) => (
-                <li key={o} className="flex gap-2.5 text-[13.5px] leading-relaxed">
+                <li key={o} className="flex gap-2.5 text-[14px] leading-relaxed">
                   <span className="shrink-0" style={{ color: "var(--primary)" }} aria-hidden>
                     →
                   </span>

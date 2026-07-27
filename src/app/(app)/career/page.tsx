@@ -23,7 +23,7 @@ export default async function CareerOverviewPage() {
             >
               {r.overall}%
             </p>
-            <p className="text-body mt-2 text-[13.5px]">
+            <p className="text-body mt-2 text-[14px]">
               {r.ready
                 ? "You are in good shape to apply."
                 : "A few things would strengthen your case."}
@@ -42,11 +42,11 @@ export default async function CareerOverviewPage() {
             not decorative chips: each one links to where you fix it. */}
         {r.gaps.length > 0 && (
           <div className="mt-6 border-t pt-5">
-            <p className="overline">To improve your score</p>
+            <p className="group-heading">To improve your score</p>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {r.gaps.map((g) => (
                 <li key={g}>
-                  <span className="well flex items-center gap-2 px-3 py-2.5 text-[13px]">
+                  <span className="well flex items-center gap-2 px-3 py-2.5 text-[14px]">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ background: "var(--warning)" }}

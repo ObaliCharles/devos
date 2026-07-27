@@ -214,7 +214,7 @@ export function CommandPalette() {
           <Search size={16} className="shrink-0" style={{ color: "var(--text-faint)" }} />
           <input
             ref={inputRef}
-            className="flex-1 bg-transparent py-3.5 text-[14.5px] outline-none"
+            className="flex-1 bg-transparent py-3.5 text-[14px] outline-none"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
@@ -239,7 +239,7 @@ export function CommandPalette() {
         <div ref={listRef} id="palette-results" className="max-h-[52vh] overflow-y-auto p-2">
           {rows.length === 0 ? (
             <div className="px-3 py-10 text-center">
-              <p className="text-[13.5px] font-medium">
+              <p className="text-[14px] font-medium">
                 {query.trim().length >= 2 ? `Nothing matches “${query.trim()}”` : "Start typing"}
               </p>
               <p className="text-meta mt-1">
@@ -279,7 +279,7 @@ export function CommandPalette() {
                       >
                         <Icon size={14} />
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-[13.5px]">{label}</span>
+                      <span className="min-w-0 flex-1 truncate text-[14px]">{label}</span>
                       {row.kind === "hit" && <span className="badge shrink-0">{row.hit.type}</span>}
                       {active && (
                         <CornerDownLeft
@@ -298,7 +298,7 @@ export function CommandPalette() {
 
         {/* -------------------------------------------------------- Footer */}
         <div
-          className="flex items-center gap-4 border-t px-4 py-2.5 text-[11px]"
+          className="flex items-center gap-4 border-t px-4 py-2.5 text-[12px]"
           style={{ borderColor: "var(--border)", color: "var(--text-faint)" }}
         >
           <span className="flex items-center gap-1.5">
@@ -318,5 +318,5 @@ export function CommandPalette() {
 }
 
 function GroupLabel({ children }: { children: React.ReactNode }) {
-  return <p className="overline px-2.5 pb-1.5 pt-2">{children}</p>;
+  return <p className="group-heading px-2.5 pb-1.5 pt-2">{children}</p>;
 }

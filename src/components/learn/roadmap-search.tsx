@@ -34,7 +34,7 @@ export function RoadmapSearch() {
         <label className="search h-12 px-4">
           <Search size={18} style={{ color: "var(--text-faint)" }} />
           <input
-            className="search-input text-[15px]"
+            className="search-input text-[14px]"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="Search Python, AI Engineering, Docker, projects, certifications…"

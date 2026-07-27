@@ -94,7 +94,7 @@ export default async function ProjectLayout({
           is what keeps learning and building from becoming two products. */}
       {skills.length > 0 && (
         <div className="-mt-2 flex flex-wrap items-center gap-1.5">
-          <span className="overline mr-1">Practising</span>
+          <span className="group-heading mr-1">Practising</span>
           {skills.map((s) => (
             <Link
               key={String(s._id)}

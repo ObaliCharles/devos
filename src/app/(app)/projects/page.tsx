@@ -88,7 +88,7 @@ export default async function ProjectsPage({
           >
             Archived
             {stats.archived > 0 && (
-              <span className="num text-[11px]" style={{ color: "var(--text-faint)" }}>
+              <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
                 {stats.archived}
               </span>
             )}
@@ -140,7 +140,7 @@ export default async function ProjectsPage({
                 </div>
 
                 {p.description && (
-                  <p className="text-body mt-2 line-clamp-2 text-[13px]">{p.description}</p>
+                  <p className="text-body mt-2 line-clamp-2 text-[14px]">{p.description}</p>
                 )}
 
                 {p.skills.length > 0 && (

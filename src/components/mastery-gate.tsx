@@ -103,7 +103,7 @@ export function MasteryGate({
         </div>
         <div className="min-w-0">
           <h2 className="text-lg font-semibold">Mastery gate</h2>
-          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          <p className="mt-1 text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
             {isMastered
               ? "Mastered. This lesson is now in your revision queue."
               : "Five requirements. The check runs on the server, so there is no way around it, which is the point."}

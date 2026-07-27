@@ -70,7 +70,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       {/* Back */}
       <Link
         href="/learning"
-        className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[13px] font-medium"
+        className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[14px] font-medium"
         style={{ color: "var(--text-muted)" }}
       >
         <ArrowLeft size={15} /> Learn
@@ -92,7 +92,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               <span className="badge badge-primary">{course.track}</span>
             </div>
             <h1 className="title-page mt-2">{course.title}</h1>
-            <p className="text-body mt-1.5 text-[14.5px]">{course.tagline}</p>
+            <p className="text-body mt-1.5 text-[14px]">{course.tagline}</p>
           </div>
         </div>
         <Link
@@ -111,7 +111,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       {/* Progress bar — only once you've started */}
       {completed.length > 0 && (
         <div className="panel p-4">
-          <div className="flex items-center justify-between text-[13px]">
+          <div className="flex items-center justify-between text-[14px]">
             <span className="font-medium">Your progress</span>
             <span className="num" style={{ color: "var(--text-muted)" }}>
               {completed.length} / {lessons} lessons · {pct}%
@@ -146,14 +146,14 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               <Lightbulb size={16} style={{ color: "var(--text-faint)" }} />
               <h3 className="title-card">Why it matters</h3>
             </div>
-            <p className="text-body mt-2 text-[13.5px]">{course.whyItMatters}</p>
+            <p className="text-body mt-2 text-[14px]">{course.whyItMatters}</p>
           </div>
           <div className="panel p-5">
             <div className="flex items-center gap-2">
               <FolderGit2 size={16} style={{ color: "var(--text-faint)" }} />
               <h3 className="title-card">You&apos;ll build</h3>
             </div>
-            <p className="mt-2 text-[13.5px] font-medium">{course.youWillBuild}</p>
+            <p className="mt-2 text-[14px] font-medium">{course.youWillBuild}</p>
           </div>
         </div>
       </section>
@@ -181,7 +181,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                       </span>
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13.5px] font-medium">{p.title}</span>
+                      <span className="block truncate text-[14px] font-medium">{p.title}</span>
                       <span className="text-meta block truncate text-[12px]">{p.tagline}</span>
                     </span>
                     <ArrowRight size={14} style={{ color: "var(--text-faint)" }} />
@@ -193,7 +193,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           {course.assumes && course.assumes.length > 0 && (
             <ul className="mt-3 flex flex-col gap-1.5">
               {course.assumes.map((a) => (
-                <li key={a} className="flex gap-2.5 text-[13.5px]" style={{ color: "var(--text-muted)" }}>
+                <li key={a} className="flex gap-2.5 text-[14px]" style={{ color: "var(--text-muted)" }}>
                   <Check size={14} className="mt-[3px] shrink-0" style={{ color: "var(--text-faint)" }} />
                   {a}
                 </li>
@@ -208,7 +208,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         <div className="flex items-end justify-between gap-4">
           <div>
             <h2 className="title-section">Curriculum</h2>
-            <p className="text-body mt-1 text-[13.5px]">
+            <p className="text-body mt-1 text-[14px]">
               {course.modules.length} modules · {lessons} lessons. Stuck on any of them? Ask the AI
               tutor right there.
             </p>
@@ -221,7 +221,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
                 <div className="flex items-center gap-3">
                   <span
-                    className="num grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-tile)] text-[13px] font-bold"
+                    className="num grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-tile)] text-[14px] font-bold"
                     style={{ background: "var(--surface-3)", color: "var(--text-muted)" }}
                   >
                     {mi + 1}
@@ -245,7 +245,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                       style={{ borderColor: "var(--border)", borderRadius: 0 }}
                     >
                       <span
-                        className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-semibold"
+                        className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[12px] font-semibold"
                         style={{
                           background: isDone ? "var(--success-faint)" : "var(--surface-2)",
                           color: isDone ? "var(--success)" : "var(--text-faint)",
@@ -256,11 +256,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                           <span className="text-[14px] font-medium">{lesson.title}</span>
-                          <span className="text-meta shrink-0 text-[11.5px]">
+                          <span className="text-meta shrink-0 text-[12px]">
                             {lesson.minutes} min
                           </span>
                         </div>
-                        <p className="text-body mt-0.5 text-[12.5px]">{lesson.objective}</p>
+                        <p className="text-body mt-0.5 text-[12px]">{lesson.objective}</p>
                       </div>
                       <ArrowRight
                         size={15}
@@ -284,7 +284,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       >
         <div>
           <p className="title-card">Ready to start {course.title}?</p>
-          <p className="text-body mt-0.5 text-[13px]">
+          <p className="text-body mt-0.5 text-[14px]">
             Begin at lesson one, or jump to the project you&apos;ll build.
           </p>
         </div>
@@ -304,7 +304,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       {(course.officialDocs || course.repo || (course.resources?.length ?? 0) > 0) && (
         <section className="panel p-5">
           <h2 className="title-card">Reference</h2>
-          <p className="text-body mt-1.5 text-[13px]">
+          <p className="text-body mt-1.5 text-[14px]">
             This course is built against these. When a lesson and the official documentation
             disagree, the documentation is right — tell us and we will fix the lesson.
           </p>
@@ -318,7 +318,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   className="row-link flex items-center gap-3 px-2 py-2.5"
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-medium">{r.label}</span>
+                    <span className="block truncate text-[14px] font-medium">{r.label}</span>
                     <span className="text-meta block truncate text-[12px]">
                       {KIND_LABEL[r.kind] ?? r.kind} · {new URL(r.url).hostname.replace(/^www\./, "")}
                     </span>
@@ -330,9 +330,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           </ul>
           {cert && (
             <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
-              <p className="text-meta text-[12.5px]">Counts toward</p>
-              <p className="mt-1 text-[13.5px] font-medium">{cert.title}</p>
-              <p className="text-meta mt-0.5 text-[12.5px]">{cert.provider} · {cert.tagline}</p>
+              <p className="text-meta text-[12px]">Counts toward</p>
+              <p className="mt-1 text-[14px] font-medium">{cert.title}</p>
+              <p className="text-meta mt-0.5 text-[12px]">{cert.provider} · {cert.tagline}</p>
             </div>
           )}
         </section>
@@ -358,7 +358,7 @@ function Stat({
           {value}
         </span>
       </span>
-      <span className="text-meta mt-0.5 block text-[11.5px]">{label}</span>
+      <span className="text-meta mt-0.5 block text-[12px]">{label}</span>
     </div>
   );
 }

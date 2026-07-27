@@ -28,14 +28,14 @@ export default async function VerifyIndex({
       <div className="w-full max-w-[460px]">
         <Link href="/" className="mb-8 flex items-center justify-center gap-2.5" aria-label="DeveloperOS home">
           <LogoMark size={22} />
-          <span className="text-[15px] font-semibold tracking-[-0.03em]">
+          <span className="text-[14px] font-semibold tracking-[-0.03em]">
             Developer<span style={{ color: "var(--text-faint)" }}>OS</span>
           </span>
         </Link>
 
         <div className="card p-6 sm:p-8">
-          <h1 className="text-[19px] font-semibold tracking-[-0.02em]">Verify a certificate</h1>
-          <p className="text-body mt-2 text-[13.5px]">
+          <h1 className="text-[22px] font-semibold tracking-[-0.02em]">Verify a certificate</h1>
+          <p className="text-body mt-2 text-[14px]">
             Enter the code printed on the certificate. It looks like{" "}
             <span className="num" style={{ color: "var(--text)" }}>
               DOS-A7K2-9QM4
@@ -50,7 +50,7 @@ export default async function VerifyIndex({
           />
         </div>
 
-        <p className="text-meta mt-6 text-center text-[12.5px]">
+        <p className="text-meta mt-6 text-center text-[12px]">
           No account is required to check a certificate.
         </p>
       </div>

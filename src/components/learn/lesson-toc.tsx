@@ -61,7 +61,7 @@ export function LessonToc({ headings }: { headings: Heading[] }) {
 
   return (
     <nav aria-labelledby="toc-heading">
-      <p className="overline" id="toc-heading">
+      <p className="group-heading" id="toc-heading">
         On this page
       </p>
       <ul className="mt-2.5 flex flex-col gap-0.5">
@@ -69,7 +69,7 @@ export function LessonToc({ headings }: { headings: Heading[] }) {
           <li key={h.id}>
             <a
               href={`#${h.id}`}
-              className="row-link block truncate py-1 text-[12.5px]"
+              className="row-link block truncate py-1 text-[12px]"
               style={{
                 paddingLeft: h.depth === 3 ? 18 : 8,
                 paddingRight: 8,

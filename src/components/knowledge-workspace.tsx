@@ -225,7 +225,7 @@ export function KnowledgeWorkspace({
 
         <div className="min-w-0 lg:flex-1 xl:flex-none">
           <div className="mb-2 flex items-center justify-between px-1">
-            <p className="overline">Collections</p>
+            <p className="group-heading">Collections</p>
             <button
               onClick={addCollection}
               className="btn-icon btn-icon-sm h-6 w-6"
@@ -267,7 +267,7 @@ export function KnowledgeWorkspace({
 
         {tags.length > 0 && (
           <div className="min-w-0 lg:flex-1 xl:flex-none">
-            <p className="overline mb-2 px-1">Tags</p>
+            <p className="group-heading mb-2 px-1">Tags</p>
             <div className="flex flex-wrap gap-1.5">
               {tags.slice(0, 20).map((t) => {
                 const on = filterTag === t.tag;
@@ -311,7 +311,7 @@ export function KnowledgeWorkspace({
 
         {visible.length === 0 ? (
           <div className="well px-3 py-6 text-center">
-            <p className="text-[13px] font-medium">
+            <p className="text-[14px] font-medium">
               {filtering ? "Nothing matches" : "No notes yet"}
             </p>
             <p className="text-meta mt-1">
@@ -358,7 +358,7 @@ export function KnowledgeWorkspace({
                         />
                       )}
                       <span
-                        className="min-w-0 flex-1 truncate text-[13.5px] font-medium"
+                        className="min-w-0 flex-1 truncate text-[14px] font-medium"
                         style={{ color: isActive ? "var(--primary)" : "var(--text)" }}
                       >
                         {n.title}
@@ -368,7 +368,7 @@ export function KnowledgeWorkspace({
                       <span className="text-meta min-w-0 flex-1 truncate">
                         {n.lessonTitle ? `From ${n.lessonTitle}` : n.body.slice(0, 48) || "Empty"}
                       </span>
-                      <span className="text-meta shrink-0 text-[11px]">
+                      <span className="text-meta shrink-0 text-[12px]">
                         {relativeDate(n.updatedAt)}
                       </span>
                     </span>
@@ -435,7 +435,7 @@ function FilterButton({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className="flex w-full items-center gap-2 rounded-[var(--radius-control)] px-2.5 py-1.5 text-left text-[13px] lg:w-auto xl:w-full"
+      className="flex w-full items-center gap-2 rounded-[var(--radius-control)] px-2.5 py-1.5 text-left text-[14px] lg:w-auto xl:w-full"
       style={{
         background: active ? "var(--primary-faint)" : "transparent",
         color: active ? "var(--primary)" : "var(--text-muted)",
@@ -448,7 +448,7 @@ function FilterButton({
       )}
       <span className="min-w-0 flex-1 truncate">{children}</span>
       {count !== undefined && (
-        <span className="num text-[11px]" style={{ color: "var(--text-faint)" }}>
+        <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
           {count}
         </span>
       )}
@@ -486,14 +486,14 @@ function Editor({
       {/* --------------------------------------------------------- Toolbar */}
       <div className="flex items-center gap-2 border-b px-4 py-3">
         <input
-          className="min-w-0 flex-1 bg-transparent text-[17px] font-semibold tracking-[-0.018em] outline-none"
+          className="min-w-0 flex-1 bg-transparent text-[16px] font-semibold tracking-[-0.018em] outline-none"
           value={note.title}
           onChange={(e) => onPatch({ title: e.target.value })}
           aria-label="Note title"
           placeholder="Untitled note"
         />
         <span
-          className="shrink-0 text-[11px]"
+          className="shrink-0 text-[12px]"
           style={{ color: saving ? "var(--warning)" : "var(--text-faint)" }}
           aria-live="polite"
         >
@@ -560,7 +560,7 @@ function Editor({
           <WikiMarkdown body={note.body || "_Nothing written yet._"} titleToId={titleToId} />
         ) : (
           <textarea
-            className="h-full min-h-[380px] w-full resize-none bg-transparent font-[family-name:var(--font-mono)] text-[13px] leading-[1.75] outline-none"
+            className="h-full min-h-[380px] w-full resize-none bg-transparent font-[family-name:var(--font-mono)] text-[14px] leading-[1.75] outline-none"
             value={note.body}
             onChange={(e) => onPatch({ body: e.target.value })}
             placeholder="Markdown supported. Link another note with [[its title]]. Autosaves as you type."

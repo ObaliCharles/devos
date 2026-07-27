@@ -157,7 +157,7 @@ export function Discover() {
             <Search size={16} style={{ color: "var(--text-faint)" }} />
           )}
           <input
-            className="search-input text-[14.5px]"
+            className="search-input text-[14px]"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search courses, projects, roadmaps, certifications…"
@@ -193,8 +193,8 @@ export function Discover() {
           <span className="icon-tile icon-tile-lg mx-auto">
             <Search size={20} />
           </span>
-          <p className="mt-3 text-[15px] font-semibold">Nothing matches “{query}”</p>
-          <p className="text-body mt-1 text-[13px]">
+          <p className="mt-3 text-[14px] font-semibold">Nothing matches “{query}”</p>
+          <p className="text-body mt-1 text-[14px]">
             Try a broader term like “Python”, “AI”, “Docker” or “Security”.
           </p>
         </div>
@@ -206,10 +206,10 @@ export function Discover() {
           {visibleGroups.map((g) => (
             <div key={g.kind} className="p-4 sm:p-5" style={{ background: "var(--surface)" }}>
               <div className="mb-3 flex items-center justify-between">
-                <span className="overline flex items-center gap-1.5">
+                <span className="group-heading flex items-center gap-1.5">
                   {g.icon} {g.plural}
                 </span>
-                <span className="text-meta num text-[11px]">{g.items.length}</span>
+                <span className="text-meta num text-[12px]">{g.items.length}</span>
               </div>
               <ul className="flex flex-col gap-1">
                 {g.items.map((item) => {
@@ -228,10 +228,10 @@ export function Discover() {
                           <span className="icon-tile">{g.icon}</span>
                         )}
                         <span className="min-w-0">
-                          <span className="block truncate text-[13px] font-medium">
+                          <span className="block truncate text-[14px] font-medium">
                             {item.title}
                           </span>
-                          <span className="text-meta block truncate text-[11.5px]">
+                          <span className="text-meta block truncate text-[12px]">
                             {item.level}
                           </span>
                         </span>

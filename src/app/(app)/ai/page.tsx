@@ -62,7 +62,7 @@ export default async function AiPage() {
           role="status"
         >
           <AlertTriangle size={16} className="mt-0.5 shrink-0" style={{ color: "var(--warning)" }} />
-          <p className="text-[13px] leading-relaxed" style={{ color: "var(--warning)" }}>
+          <p className="text-[14px] leading-relaxed" style={{ color: "var(--warning)" }}>
             The assistant is not configured. Add <code>ANTHROPIC_API_KEY</code> or{" "}
             <code>GROQ_API_KEY</code> to <code>.env.local</code> and restart the dev server.
             Everything else works without it.
@@ -115,7 +115,7 @@ export default async function AiPage() {
               <t.icon size={17} />
             </IconTile>
             <h2 className="title-card mt-4">{t.title}</h2>
-            <p className="text-body mt-1 text-[13px]">{t.body}</p>
+            <p className="text-body mt-1 text-[14px]">{t.body}</p>
           </Link>
         ))}
       </section>
@@ -130,7 +130,7 @@ export default async function AiPage() {
           </IconTile>
           <div className="min-w-0 flex-1">
             <p className="eyebrow">Pick up where you left off</p>
-            <p className="mt-1 truncate text-[15px] font-medium">{next.lesson.title}</p>
+            <p className="mt-1 truncate text-[14px] font-medium">{next.lesson.title}</p>
           </div>
         </Link>
       )}

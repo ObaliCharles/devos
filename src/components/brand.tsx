@@ -102,7 +102,7 @@ export function Wordmark({
   className?: string;
 }) {
   const mark = size === "lg" ? 26 : size === "sm" ? 21 : 23;
-  const text = size === "lg" ? "text-[19px]" : size === "sm" ? "text-[14.5px]" : "text-[16px]";
+  const text = size === "lg" ? "text-[22px]" : size === "sm" ? "text-[14px]" : "text-[16px]";
   return (
     <span className={`flex items-center gap-2 ${className ?? ""}`}>
       <LogoMark size={mark} />

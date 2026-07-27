@@ -45,7 +45,7 @@ export function CompleteLesson({
     <div className="flex flex-wrap items-center gap-3">
       {done ? (
         <span
-          className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-2 text-[13px] font-medium"
+          className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-2 text-[14px] font-medium"
           style={{ background: "var(--success-faint)", color: "var(--success)" }}
         >
           <Check size={15} /> Completed
@@ -68,7 +68,7 @@ export function CompleteLesson({
 
       {awarded !== null && (
         <span
-          className="inline-flex items-center gap-1 text-[13px] font-semibold"
+          className="inline-flex items-center gap-1 text-[14px] font-semibold"
           style={{ color: "var(--primary)" }}
         >
           <Zap size={14} /> +{awarded} XP

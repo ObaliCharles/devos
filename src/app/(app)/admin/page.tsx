@@ -19,7 +19,7 @@ export default async function AdminOverviewPage() {
       </section>
       <section className="card p-5">
         <p className="eyebrow">About this panel</p>
-        <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+        <p className="mt-3 text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
           Everything here crosses user boundaries, so every change is written to the audit log. The first account to
           sign up is the admin; promote others from the Users tab. Content edited here changes what every learner sees.
         </p>

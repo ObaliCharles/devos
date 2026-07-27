@@ -51,7 +51,7 @@ export function PageHeader({
         {back && (
           <Link
             href={back.href}
-            className="mb-3 -ml-1 inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[12.5px] font-medium"
+            className="mb-3 -ml-1 inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[12px] font-medium"
             style={{ color: "var(--text-muted)" }}
           >
             <BackGlyph />
@@ -61,7 +61,7 @@ export function PageHeader({
         {eyebrow && <p className="eyebrow eyebrow-accent">{eyebrow}</p>}
         <h1 className={`title-page ${eyebrow ? "mt-1.5" : ""}`}>{title}</h1>
         {description && !compact && (
-          <p className="text-body mt-2 max-w-[64ch] text-[13.5px]">{description}</p>
+          <p className="text-body mt-2 max-w-[64ch] text-[14px]">{description}</p>
         )}
         {meta && <div className="mt-3.5 flex flex-wrap items-center gap-2.5">{meta}</div>}
       </div>
@@ -240,11 +240,11 @@ export function Meter({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <span className="text-[14px] font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </span>
         <span
-          className="num text-[13px]"
+          className="num text-[14px]"
           style={{ color: near ? "var(--warning)" : "var(--text-faint)" }}
         >
           {value}
@@ -302,7 +302,7 @@ export function Ring({
             style={{ transition: "stroke-dashoffset 700ms var(--ease)" }}
           />
         </svg>
-        <span className="num absolute inset-0 grid place-items-center text-[17px] font-semibold">
+        <span className="num absolute inset-0 grid place-items-center text-[16px] font-semibold">
           {value}
         </span>
       </div>
@@ -349,12 +349,12 @@ export function StatTile({
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[12.5px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </p>
         {icon && <IconTile tone={tone}>{icon}</IconTile>}
       </div>
-      <p className="num mt-auto pt-3 text-[20px] font-semibold leading-none">{value}</p>
+      <p className="num mt-auto pt-3 text-[22px] font-semibold leading-none">{value}</p>
       {sub && <p className="text-meta mt-1.5 truncate text-[12px]">{sub}</p>}
     </>
   );
@@ -419,8 +419,8 @@ export function EmptyState({
             {icon}
           </span>
         )}
-        <p className="text-[15px] font-semibold tracking-[-0.014em]">{title}</p>
-        <p className="text-body mx-auto mt-1.5 max-w-[46ch] text-[13px]">{body}</p>
+        <p className="text-[14px] font-semibold tracking-[-0.014em]">{title}</p>
+        <p className="text-body mx-auto mt-1.5 max-w-[46ch] text-[14px]">{body}</p>
         {(action || secondary) && (
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             {action}

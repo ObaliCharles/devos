@@ -115,7 +115,7 @@ export default async function ProjectBriefPage({ params }: { params: Promise<{ s
                       <ContentIcon name={c.icon} size={13} />
                     </span>
                   )}
-                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium">{c.title}</span>
+                  <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{c.title}</span>
                   <ArrowRight size={14} style={{ color: "var(--text-faint)" }} />
                 </Link>
               </li>
@@ -133,7 +133,7 @@ export default async function ProjectBriefPage({ params }: { params: Promise<{ s
               {weightTotal === 100 ? "100 points" : `${weightTotal} points`}
             </span>
           </div>
-          <p className="text-body mt-1.5 text-[13px]">
+          <p className="text-body mt-1.5 text-[14px]">
             Every row is something you can check yourself. If you cannot tell whether you have met
             one, treat that as a bug in the brief and tell us.
           </p>
@@ -147,9 +147,9 @@ export default async function ProjectBriefPage({ params }: { params: Promise<{ s
                 <span className="num shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="min-w-0 flex-1 text-[13.5px] leading-relaxed">{r.criterion}</span>
+                <span className="min-w-0 flex-1 text-[14px] leading-relaxed">{r.criterion}</span>
                 <span
-                  className="num shrink-0 text-[12.5px] font-medium"
+                  className="num shrink-0 text-[12px] font-medium"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {r.weight}
@@ -168,7 +168,7 @@ export default async function ProjectBriefPage({ params }: { params: Promise<{ s
             {project.submission.map((s) => (
               <li
                 key={s}
-                className="flex gap-2.5 text-[13.5px] leading-relaxed"
+                className="flex gap-2.5 text-[14px] leading-relaxed"
                 style={{ color: "var(--text-muted)" }}
               >
                 <span className="shrink-0" style={{ color: "var(--text-faint)" }} aria-hidden>
@@ -195,7 +195,7 @@ export default async function ProjectBriefPage({ params }: { params: Promise<{ s
                   className="row-link flex items-center gap-3 px-2 py-2.5"
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-medium">Starter repository</span>
+                    <span className="block truncate text-[14px] font-medium">Starter repository</span>
                     <span className="text-meta block truncate text-[12px]">
                       {new URL(project.repo).hostname.replace(/^www\./, "")}
                     </span>
@@ -213,7 +213,7 @@ export default async function ProjectBriefPage({ params }: { params: Promise<{ s
                   className="row-link flex items-center gap-3 px-2 py-2.5"
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-medium">{r.label}</span>
+                    <span className="block truncate text-[14px] font-medium">{r.label}</span>
                     <span className="text-meta block truncate text-[12px]">
                       {KIND_LABEL[r.kind] ?? r.kind} · {new URL(r.url).hostname.replace(/^www\./, "")}
                     </span>
