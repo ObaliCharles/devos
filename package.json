@@ -9,6 +9,7 @@
     "lint": "next lint",
     "db": "tsx scripts/dev-db.ts",
     "seed": "tsx scripts/seed.ts",
+    "role": "tsx scripts/set-role.ts",
     "smoke": "SMOKE_MONGODB_URI=${SMOKE_MONGODB_URI:-mongodb://127.0.0.1:27017/developeros_smoke} tsx --tsconfig tsconfig.smoke.json scripts/smoke.ts"
   },
   "dependencies": {
