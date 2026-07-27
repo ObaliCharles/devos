@@ -59,40 +59,42 @@ export function Topbar({
       {/* Phone-only: the menu trigger and drawer hold the full navigation. */}
       <MobileDrawer dueCount={dueCount} isAdmin={isAdmin} user={navUser} />
 
-      {/* ------------------------------------------------------- Search */}
+      {/* ------------------------------------------------------- Search
+          Thin, borderless at rest, ⌘K on the right. It should read as a place
+          to start typing, not as a control with a frame around it. */}
       <button
         onClick={openPalette}
-        className="search max-w-[340px] flex-1 text-left sm:flex-none sm:w-[300px]"
+        className="search max-w-[380px] flex-1 text-left sm:w-[320px] sm:flex-none"
         aria-label="Search anything (Command K)"
       >
-        <Search size={15} className="shrink-0" style={{ color: "var(--text-faint)" }} />
+        <Search size={14} className="shrink-0" style={{ color: "var(--text-faint)" }} />
         <span className="flex-1 truncate text-[13.5px]">Search anything…</span>
         <kbd className="hidden sm:inline-flex">⌘K</kbd>
       </button>
 
       {/* -------------------------------------------------- Right cluster */}
       <div className="ml-auto flex items-center gap-1">
-        {/* Streak and XP read as one status group, separated from the controls */}
-        <div className="mr-1 hidden items-center gap-1 sm:flex">
+        {/* Streak and XP read as one status group, separated from the controls.
+            Both are neutral. They are readouts, not alerts, and a lit-up flame
+            in the corner of every screen is the fastest way to make a tool feel
+            like a game. */}
+        <div className="mr-1.5 hidden items-center gap-0.5 sm:flex">
           <span
-            className="tooltip flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] px-2.5 text-[12.5px] font-semibold"
+            className="tooltip flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] px-2.5 text-[12.5px] font-medium"
             data-tip={streak > 0 ? `${streak} day streak` : "No streak yet"}
-            style={{
-              color: streak > 0 ? "var(--warning)" : "var(--text-faint)",
-              background: streak > 0 ? "var(--warning-faint)" : "transparent",
-            }}
+            style={{ color: streak > 0 ? "var(--text-muted)" : "var(--text-faint)" }}
           >
-            <Flame size={14} strokeWidth={2.2} />
+            <Flame size={14} />
             <span className="num">{streak}</span>
           </span>
 
           <Link
             href="/analytics"
-            className="tooltip flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] px-2.5 text-[12.5px] font-medium"
+            className="tooltip row-link flex h-8 items-center gap-1.5 px-2.5 text-[12.5px] font-medium"
             data-tip="Experience earned"
             style={{ color: "var(--text-muted)" }}
           >
-            <Zap size={14} style={{ color: "var(--primary)" }} strokeWidth={2.2} />
+            <Zap size={14} />
             <span className="num">{xp.toLocaleString()}</span>
             <span className="hidden lg:inline" style={{ color: "var(--text-faint)" }}>
               XP
@@ -102,11 +104,12 @@ export function Topbar({
 
         <Link href="/notifications" className="btn-icon relative" aria-label="Notifications">
           <Bell size={16} />
+          {/* Accent, not red. Unread mail is not an error. */}
           {unread > 0 && (
             <span
-              className="absolute right-[7px] top-[7px] h-[7px] w-[7px] rounded-full"
+              className="absolute right-[8px] top-[8px] h-[6px] w-[6px] rounded-full"
               style={{
-                background: "var(--danger)",
+                background: "var(--primary)",
                 boxShadow: "0 0 0 2px var(--bg)",
               }}
               aria-hidden

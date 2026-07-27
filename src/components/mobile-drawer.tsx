@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { isActive, navGroups, type SidebarUser } from "./nav-config";
-import { LogoTile, Wordmark } from "./brand";
+import { Wordmark } from "./brand";
 
 /**
  * Mobile navigation. On phones the desktop sidebar is hidden, so this is how
@@ -100,12 +100,12 @@ export function MobileDrawer({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label="Main">
+          {/* Same three-signal selected state as the desktop rail, at touch
+              size. The two navigations must not drift apart. */}
           {groups.map((group, gi) => (
             <div key={group.heading ?? gi}>
-              {gi > 0 && (
-                <hr className="my-2.5 border-0" style={{ height: 1, background: "var(--border)" }} />
-              )}
-              {group.heading && <p className="overline mb-1 px-2.5 pt-0.5">{group.heading}</p>}
+              {gi > 0 && <div style={{ height: "var(--space-6)" }} aria-hidden />}
+              {group.heading && <p className="overline mb-1.5 px-2.5">{group.heading}</p>}
 
               <ul className="flex flex-col gap-[2px]">
                 {group.items.map(({ href, label, icon: Icon }) => {
@@ -116,18 +116,28 @@ export function MobileDrawer({
                       <Link
                         href={href}
                         aria-current={active ? "page" : undefined}
-                        className="flex h-[42px] items-center gap-3 rounded-[var(--radius-control)] px-2.5 text-[14px] font-medium"
-                        style={{
-                          background: active ? "var(--primary-faint)" : "transparent",
-                          color: active ? "var(--primary)" : "var(--text-muted)",
-                        }}
+                        className={`nav-row gap-3 px-2.5 text-[14px] ${
+                          active ? "nav-row-on icon-strong" : ""
+                        }`}
+                        style={{ height: 42 }}
                       >
-                        <Icon size={18} strokeWidth={active ? 2.2 : 1.9} />
+                        <span
+                          className="absolute left-0 top-1/2 h-[16px] w-[2px] -translate-y-1/2 rounded-r-full"
+                          style={{
+                            background: "var(--primary)",
+                            opacity: active ? 1 : 0,
+                          }}
+                          aria-hidden
+                        />
+                        <Icon size={17} />
                         <span className="flex-1">{label}</span>
                         {badge !== null && (
                           <span
                             className="count"
-                            style={{ background: "var(--warning-faint)", color: "var(--warning)" }}
+                            style={{
+                              background: "var(--neutral-faint)",
+                              color: "var(--text-muted)",
+                            }}
                           >
                             {badge}
                           </span>
@@ -149,10 +159,19 @@ export function MobileDrawer({
               className="row-link flex items-center gap-3 p-2"
             >
               <span className="relative shrink-0">
-                <LogoTile size={34} radius="var(--radius-pill)" />
+                <span
+                  className="grid h-[34px] w-[34px] place-items-center rounded-full text-[13px] font-medium"
+                  style={{
+                    background: "var(--surface-3)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-semibold">{user.name}</span>
+                <span className="block truncate text-[14px] font-medium">{user.name}</span>
                 <span className="block truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
                   Level {user.level} · {user.title}
                 </span>

@@ -95,12 +95,13 @@ export function RouteProgress() {
         transition: "opacity 200ms var(--ease)",
       }}
     >
+      {/* Flat accent, no gradient, no glow. A 2px line is too small to carry a
+          colour transition and a bloom only makes it look like it is on fire. */}
       <div
         style={{
           height: "100%",
           width: `${progress}%`,
-          background: "linear-gradient(90deg, var(--primary), var(--info))",
-          boxShadow: "0 0 8px var(--primary-muted)",
+          background: "var(--primary)",
           transition: "width 180ms var(--ease-out)",
         }}
       />

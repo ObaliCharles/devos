@@ -102,17 +102,21 @@ export function Sidebar({
       >
         {groups.map((group, gi) => (
           <div key={group.heading ?? gi}>
-            {/* A hairline is the only thing that survives collapse, so the
-                grouping still reads as grouping at 68px wide. */}
-            {gi > 0 && (
-              <hr
-                className="my-2.5 border-0"
-                style={{ height: 1, background: "var(--border)" }}
-              />
-            )}
+            {/* Expanded, the group heading is the separator and space does the
+                rest. Collapsed there is no heading to read, so a hairline
+                stands in, and the grouping still reads at 68px wide. */}
+            {gi > 0 &&
+              (collapsed ? (
+                <hr
+                  className="my-3 border-0"
+                  style={{ height: 1, background: "var(--border)" }}
+                />
+              ) : (
+                <div style={{ height: "var(--space-6)" }} aria-hidden />
+              ))}
 
             {group.heading && !collapsed && (
-              <p className="overline mb-1 px-2.5 pt-0.5">{group.heading}</p>
+              <p className="overline mb-1.5 px-2.5">{group.heading}</p>
             )}
 
             <ul className="flex flex-col gap-[2px]">
@@ -126,67 +130,57 @@ export function Sidebar({
                       href={href}
                       aria-current={active ? "page" : undefined}
                       // A CSS tooltip would be clipped by this nav's own scroll
-                      // container, so collapsed labels use the native one, 
+                      // container, so collapsed labels use the native one,
                       // which also survives keyboard focus.
                       title={collapsed ? label : undefined}
-                      className={`relative flex h-[36px] items-center rounded-[var(--radius-control)] text-[13.5px] font-medium ${
+                      // Selected state is three quiet signals stacked, an accent
+                      // rail, brighter text, a barely-there tint. No coloured
+                      // label, no coloured icon: you should be able to find
+                      // where you are without the sidebar becoming the loudest
+                      // thing on screen.
+                      className={`nav-row ${active ? "nav-row-on icon-strong" : ""} ${
                         collapsed ? "justify-center px-0" : "gap-2.5 px-2.5"
                       }`}
-                      style={{
-                        background: active ? "var(--primary-faint)" : "transparent",
-                        color: active ? "var(--primary)" : "var(--text-muted)",
-                        transition:
-                          "background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease)",
-                      }}
                     >
                       {/* The rail marker sits in the gutter. Present on every
                           item so the row never shifts; only opacity changes. */}
                       <span
-                        className="absolute top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-r-full"
+                        className="absolute top-1/2 h-[16px] w-[2px] -translate-y-1/2 rounded-r-full"
                         style={{
                           left: collapsed ? -8 : -10,
                           background: "var(--primary)",
                           opacity: active ? 1 : 0,
-                          transition: "opacity var(--dur-fast) var(--ease)",
+                          transition: "opacity var(--dur-fast) var(--ease-out)",
                         }}
                         aria-hidden
                       />
 
-                      <Icon size={17} className="shrink-0" strokeWidth={active ? 2.2 : 1.9} />
+                      {/* Every icon in this rail is the same weight and the
+                          same colour as its label. Nothing is tinted. */}
+                      <Icon size={16} className="shrink-0" />
 
                       {!collapsed && <span className="flex-1 truncate">{label}</span>}
 
-                      {/* Expanded: a count if there is one, otherwise a dot to
-                          confirm where you are. Collapsed: only the count,
-                          since the tinted background already says "here". */}
-                      {badge !== null ? (
-                        collapsed ? (
+                      {/* The one count in the nav. Neutral, because "4 due" is
+                          information, not an alarm. */}
+                      {badge !== null &&
+                        (collapsed ? (
                           <span
-                            className="absolute right-1.5 top-1.5 h-[6px] w-[6px] rounded-full"
-                            style={{ background: "var(--warning)" }}
+                            className="absolute right-1.5 top-1.5 h-[5px] w-[5px] rounded-full"
+                            style={{ background: "var(--primary)" }}
                             aria-hidden
                           />
                         ) : (
                           <span
                             className="count shrink-0"
                             style={{
-                              background: "var(--warning-faint)",
-                              color: "var(--warning)",
+                              background: "var(--neutral-faint)",
+                              color: "var(--text-muted)",
                             }}
                           >
                             {badge}
                           </span>
-                        )
-                      ) : (
-                        active &&
-                        !collapsed && (
-                          <span
-                            className="h-[6px] w-[6px] shrink-0 rounded-full"
-                            style={{ background: "var(--primary)" }}
-                            aria-hidden
-                          />
-                        )
-                      )}
+                        ))}
                     </Link>
                   </li>
                 );
@@ -210,14 +204,18 @@ export function Sidebar({
           >
             <span className="relative shrink-0">
               <span
-                className="grid h-[30px] w-[30px] place-items-center rounded-full text-[12px] font-bold"
-                style={{ background: "var(--primary)", color: "var(--primary-ink)" }}
+                className="grid h-[30px] w-[30px] place-items-center rounded-full text-[12px] font-medium"
+                style={{
+                  background: "var(--surface-3)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text-muted)",
+                }}
               >
                 {user.name.charAt(0).toUpperCase()}
               </span>
               {/* Presence dot, you are, by definition, online right now */}
               <span
-                className="absolute -bottom-px -right-px h-[9px] w-[9px] rounded-full"
+                className="absolute -bottom-px -right-px h-[8px] w-[8px] rounded-full"
                 style={{ background: "var(--success)", boxShadow: "0 0 0 2px var(--surface)" }}
                 aria-hidden
               />
@@ -226,8 +224,8 @@ export function Sidebar({
             {!collapsed && (
               <>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-semibold">{user.name}</span>
-                  <span className="block truncate text-[11.5px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="block truncate text-[13px] font-medium">{user.name}</span>
+                  <span className="block truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
                     {user.plan}
                   </span>
                 </span>
@@ -245,14 +243,14 @@ export function Sidebar({
               aria-label={`Level ${user.level}, ${user.title}. ${user.into} of ${user.need} XP`}
             >
               <span className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-[11.5px] font-medium" style={{ color: "var(--text-muted)" }}>
+                <span className="truncate text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
                   Level {user.level} · {user.title}
                 </span>
-                <span className="num shrink-0 text-[10.5px]" style={{ color: "var(--text-faint)" }}>
-                  {user.into} / {user.need} XP
+                <span className="num shrink-0 text-[11px]" style={{ color: "var(--text-faint)" }}>
+                  {user.into} / {user.need}
                 </span>
               </span>
-              <span className="progress progress-sm mt-1.5 block">
+              <span className="progress mt-2 block">
                 <span
                   className="progress-bar block"
                   style={{ width: `${Math.min(100, (user.into / user.need) * 100)}%` }}

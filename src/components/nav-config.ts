@@ -27,10 +27,12 @@ export const NAV_GROUPS: NavGroup[] = [
   { items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] },
   {
     heading: "Learn",
+    // Ordered the way the loop actually runs: you learn it, you drill it, you
+    // are re-tested on it, and what survives ends up in your knowledge base.
     items: [
       { href: "/learning", label: "Learning", icon: BookOpen },
-      { href: "/review", label: "Review", icon: RotateCcw },
       { href: "/practice", label: "Practice", icon: Dumbbell },
+      { href: "/review", label: "Review", icon: RotateCcw },
       { href: "/notes", label: "Knowledge", icon: NotebookPen },
     ],
   },
@@ -38,7 +40,7 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Build",
     items: [
       { href: "/projects", label: "Projects", icon: FolderKanban },
-      { href: "/ai", label: "AI Centre", icon: Sparkles },
+      { href: "/ai", label: "AI Workspace", icon: Sparkles },
     ],
   },
   {

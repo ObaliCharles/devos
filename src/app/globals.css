@@ -8,9 +8,11 @@
 
    1. Nothing hard-codes a colour. Everything reads a token.
    2. Every dimension is a multiple of 4, and preferably of 8.
-   3. Elevation comes from layered surfaces first, shadow second.
-   4. Motion is 150-220ms, ease-out, and only ever confirms an interaction.
-   5. Dark is primary. Light is a complete, first-class override.
+   3. The surface is 95% neutral. Exactly one accent exists, and it is spent
+      only on interactive state and progress, never on decoration.
+   4. Depth comes from contrast between layered surfaces, not from blur.
+   5. Motion is ~180ms ease-out, and only ever confirms an interaction.
+   6. Dark is primary. Light is a complete, first-class override.
    ======================================================================== */
 
 @theme {
@@ -19,22 +21,25 @@
   --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-var), ui-monospace, "SF Mono", monospace;
 
-  /* ---- Radii, one step per component scale, never ad hoc ----
-     Tight on purpose. Large radii read as consumer-app friendly; a tool people
-     work in all day wants corners that stay out of the way. */
-  --radius-xs: 4px;
-  --radius-control: 6px;
-  --radius-tile: 7px;
-  --radius-card: 8px;
-  --radius-panel: 10px;
-  --radius-dialog: 12px;
+  /* ---- Radii ----
+     Two values carry the whole product: 12 for anything you can press or that
+     holds a single idea, 14 for a container that holds several. A mixed
+     ladder (8/16/20/24) is the single loudest tell of a template. 6px exists
+     only for micro-chrome, a kbd cap or an inline tag, where 12 would round
+     a 20px-tall object into a pill. */
+  --radius-xs: 6px;
+  --radius-control: 12px;
+  --radius-tile: 12px;
+  --radius-card: 14px;
+  --radius-panel: 14px;
+  --radius-dialog: 14px;
   --radius-pill: 999px;
 
   /* ---- Motion ---- */
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --dur-fast: 140ms;
-  --dur: 190ms;
+  --dur-fast: 130ms;
+  --dur: 180ms;
   --dur-slow: 260ms;
 
   /* ---- 8px spacing scale ---- */
@@ -54,55 +59,63 @@
   --sidebar-w: 244px;
   --sidebar-w-collapsed: 68px;
   --page-max: 1400px;
-  --page-pad: 24px;
-  --page-top: 24px;
+  --page-pad: 32px;
+  --page-top: 32px;
 }
 
 /* ------------------------------------------------------------ Dark (default) */
 :root {
-  --bg: #0a0b0e;
-  --bg-elevated: #0d0f13;
-  --surface: #101217;
-  --surface-2: #16181f;
-  --surface-3: #1c1f28;
-  --surface-4: #232733;
+  --bg: #0b0d12;
+  --bg-elevated: #0e1016;
+  --surface: #11131a;
+  --surface-2: #161923;
+  --surface-3: #1d212c;
+  --surface-4: #262b38;
 
-  --border: #1d212b;
-  --border-strong: #2a2f3c;
-  --border-faint: rgb(255 255 255 / 0.045);
+  /* Borders are white at 5-6%, never a solid grey. A tinted hairline sits on
+     whatever is behind it, so a card on the page and a card on a panel read as
+     the same object instead of two slightly different greys. */
+  --border: rgb(255 255 255 / 0.06);
+  --border-strong: rgb(255 255 255 / 0.11);
+  --border-faint: rgb(255 255 255 / 0.04);
 
-  --text: #eceef3;
-  --text-muted: #98a0af;
-  --text-faint: #666e7e;
+  --text: #edeff4;
+  --text-muted: rgb(255 255 255 / 0.6);
+  --text-faint: rgb(255 255 255 / 0.38);
 
-  --primary: #6d74f4;
-  --primary-hover: #7f86f7;
-  --primary-press: #5f66ea;
+  /* The one accent. Everything interactive uses it; nothing else may. */
+  --primary: #7c6bff;
+  --primary-hover: #8b7cff;
+  --primary-press: #6f5dfa;
   --primary-ink: #ffffff;
-  --primary-faint: rgb(109 116 244 / 0.13);
-  --primary-soft: rgb(109 116 244 / 0.2);
-  --primary-muted: rgb(109 116 244 / 0.28);
+  --primary-faint: rgb(124 107 255 / 0.1);
+  --primary-soft: rgb(124 107 255 / 0.18);
+  --primary-muted: rgb(124 107 255 / 0.3);
 
-  --success: #3ccf91;
-  --success-faint: rgb(60 207 145 / 0.13);
-  --warning: #f2b13d;
-  --warning-faint: rgb(242 177 61 / 0.13);
-  --danger: #f2686b;
-  --danger-faint: rgb(242 104 107 / 0.13);
-  --info: #56a0f8;
-  --info-faint: rgb(86 160 248 / 0.13);
-  --neutral-faint: rgb(255 255 255 / 0.06);
+  /* Status colours are not part of the palette. They are signage: a failed
+     deploy, an overdue queue, a destructive confirm. Using one to decorate a
+     stat tile is what turns a tool into an admin template. */
+  --success: #4ec99a;
+  --success-faint: rgb(78 201 154 / 0.12);
+  --warning: #e8b054;
+  --warning-faint: rgb(232 176 84 / 0.12);
+  --danger: #ef6f72;
+  --danger-faint: rgb(239 111 114 / 0.12);
+  --info: #6ba8f5;
+  --info-faint: rgb(107 168 245 / 0.12);
+  --neutral-faint: rgb(255 255 255 / 0.05);
 
-  /* Elevation, restrained, layered, never a dark halo */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.32);
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -6px rgb(0 0 0 / 0.45);
-  --shadow-md: 0 4px 14px -6px rgb(0 0 0 / 0.5), 0 12px 32px -14px rgb(0 0 0 / 0.55);
-  --shadow-lg: 0 16px 44px -12px rgb(0 0 0 / 0.62);
-  --shadow-xl: 0 24px 64px -16px rgb(0 0 0 / 0.7);
+  /* Elevation, near-imperceptible. Depth is the job of contrast between
+     --bg and --surface; shadow only stops an overlay from floating free. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.2);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.22), 0 4px 10px -6px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 14px -8px rgb(0 0 0 / 0.4), 0 10px 28px -16px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 16px 44px -16px rgb(0 0 0 / 0.55);
+  --shadow-xl: 0 24px 64px -20px rgb(0 0 0 / 0.65);
 
-  /* The single highlight that makes filled controls read as physical */
-  --sheen: inset 0 1px 0 rgb(255 255 255 / 0.13);
-  --glow: rgb(109 116 244 / 0.07);
+  /* The single highlight that keeps a filled control from looking painted on */
+  --sheen: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --glow: rgb(124 107 255 / 0.045);
 
   color-scheme: dark;
 }
@@ -116,21 +129,21 @@
   --surface-3: #e8eaef;
   --surface-4: #dfe2e8;
 
-  --border: #e4e7ed;
-  --border-strong: #cfd4de;
+  --border: rgb(16 20 30 / 0.08);
+  --border-strong: rgb(16 20 30 / 0.14);
   --border-faint: rgb(16 20 30 / 0.05);
 
   --text: #14161c;
-  --text-muted: #59616f;
-  --text-faint: #868e9c;
+  --text-muted: rgb(16 20 30 / 0.62);
+  --text-faint: rgb(16 20 30 / 0.42);
 
-  --primary: #5b56e8;
-  --primary-hover: #4d48dc;
-  --primary-press: #423dcc;
+  --primary: #5f4de6;
+  --primary-hover: #5442dd;
+  --primary-press: #4a39d0;
   --primary-ink: #ffffff;
-  --primary-faint: rgb(91 86 232 / 0.09);
-  --primary-soft: rgb(91 86 232 / 0.14);
-  --primary-muted: rgb(91 86 232 / 0.22);
+  --primary-faint: rgb(95 77 230 / 0.08);
+  --primary-soft: rgb(95 77 230 / 0.14);
+  --primary-muted: rgb(95 77 230 / 0.24);
 
   --success: #0d9668;
   --success-faint: rgb(13 150 104 / 0.1);
@@ -140,16 +153,16 @@
   --danger-faint: rgb(219 67 72 / 0.1);
   --info: #2b71dd;
   --info-faint: rgb(43 113 221 / 0.1);
-  --neutral-faint: rgb(16 20 30 / 0.05);
+  --neutral-faint: rgb(16 20 30 / 0.04);
 
-  --shadow-sm: 0 1px 2px rgb(16 20 30 / 0.05);
-  --shadow: 0 1px 2px rgb(16 20 30 / 0.05), 0 4px 10px -6px rgb(16 20 30 / 0.1);
-  --shadow-md: 0 6px 18px -8px rgb(16 20 30 / 0.14), 0 2px 6px -3px rgb(16 20 30 / 0.06);
-  --shadow-lg: 0 18px 44px -14px rgb(16 20 30 / 0.18);
-  --shadow-xl: 0 28px 64px -18px rgb(16 20 30 / 0.22);
+  --shadow-sm: 0 1px 2px rgb(16 20 30 / 0.04);
+  --shadow: 0 1px 2px rgb(16 20 30 / 0.04), 0 4px 10px -6px rgb(16 20 30 / 0.07);
+  --shadow-md: 0 6px 18px -10px rgb(16 20 30 / 0.1), 0 2px 6px -3px rgb(16 20 30 / 0.05);
+  --shadow-lg: 0 18px 44px -16px rgb(16 20 30 / 0.14);
+  --shadow-xl: 0 28px 64px -20px rgb(16 20 30 / 0.18);
 
-  --sheen: inset 0 1px 0 rgb(255 255 255 / 0.22);
-  --glow: rgb(91 86 232 / 0.05);
+  --sheen: inset 0 1px 0 rgb(255 255 255 / 0.16);
+  --glow: rgb(95 77 230 / 0.035);
 
   color-scheme: light;
 }
@@ -159,13 +172,13 @@
    Changing the gutter here re-flows every page at once. */
 @media (max-width: 1100px) {
   :root {
-    --page-pad: 20px;
-    --page-top: 20px;
+    --page-pad: 24px;
+    --page-top: 24px;
   }
 }
 @media (max-width: 640px) {
   :root {
-    --page-pad: 14px;
+    --page-pad: 16px;
     --page-top: 16px;
     --topbar-h: 52px;
   }
@@ -195,7 +208,9 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Ambient light source, a hint of atmosphere, never a visible gradient band */
+/* Ambient light source, a hint of atmosphere, never a visible gradient band.
+   Kept below the threshold where it reads as a colour, it exists so the top of
+   the viewport is not the same flat value as the bottom. */
 body::before {
   content: "";
   position: fixed;
@@ -224,6 +239,18 @@ h1 {
 }
 h2 {
   letter-spacing: -0.026em;
+}
+
+/* Every icon in the product is a 1.5px outline. Lucide ships 2px and several
+   call sites ask for 2.2; a presentation attribute loses to a stylesheet, so
+   this one rule makes the whole set consistent without touching call sites.
+   Weight is opt-in through .icon-strong, and only for a selected nav row. */
+svg.lucide {
+  stroke-width: 1.5px;
+}
+.icon-strong svg.lucide,
+svg.lucide.icon-strong {
+  stroke-width: 1.85px;
 }
 
 code,
@@ -311,16 +338,19 @@ samp {
   }
 
   /* Vertical rhythm between the header and the first section, and between
-     sections. Two values, applied everywhere, so every page shares a pulse. */
+     sections. Two values, applied everywhere, so every page shares a pulse.
+     32px between major sections, 24px inside one, both straight off the
+     8-point grid, and both a step wider than before: whitespace is what
+     creates the hierarchy here, not weight. */
   .page-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
   }
   .section-stack {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: var(--space-6);
   }
 
   /* A page that fills the viewport instead of growing the document, chat is
@@ -342,16 +372,18 @@ samp {
 
   /* ================================================================= Surfaces */
 
+  /* A card is a physical surface: one flat fill, one hairline, no shadow of
+     its own. It separates from the page because it is lighter than it, which
+     is a cleaner signal than a blur ever is. */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-sm);
     transition:
-      transform var(--dur) var(--ease),
-      box-shadow var(--dur) var(--ease),
-      border-color var(--dur) var(--ease),
-      background var(--dur) var(--ease);
+      transform var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out),
+      background var(--dur) var(--ease-out);
   }
 
   /* Larger container for a whole region of the page */
@@ -359,7 +391,6 @@ samp {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-panel);
-    box-shadow: var(--shadow-sm);
   }
 
   /* A quieter surface for nested blocks that must not compete with .card */
@@ -370,18 +401,18 @@ samp {
   }
 
   /* Any card that is also a link or button gets the lift. Opt in explicitly so
-     static cards never animate on hover. */
+     static cards never animate on hover. One pixel, 180ms, no bounce, no
+     shadow bloom, the card acknowledges the cursor and nothing more. */
   .card-link {
     cursor: pointer;
   }
   .card-link:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+    background: var(--surface-2);
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-md);
   }
   .card-link:active {
     transform: translateY(0);
-    box-shadow: var(--shadow-sm);
     transition-duration: 80ms;
   }
 
@@ -389,12 +420,38 @@ samp {
   .row-link {
     border-radius: var(--radius-control);
     transition:
-      background var(--dur-fast) var(--ease),
-      color var(--dur-fast) var(--ease);
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
     cursor: pointer;
   }
   .row-link:hover {
-    background: var(--surface-2);
+    background: var(--neutral-faint);
+  }
+
+  /* The sidebar and drawer navigation row. Three states and no colour in any
+     of them except the 2px accent rail the component draws on the selected
+     one: rest is muted, hover lifts the text to full, selected adds the tint. */
+  .nav-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 36px;
+    border-radius: var(--radius-control);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+  .nav-row:hover {
+    color: var(--text);
+    background: var(--neutral-faint);
+  }
+  .nav-row-on,
+  .nav-row-on:hover {
+    color: var(--text);
+    background: var(--neutral-faint);
   }
 
   .glass {
@@ -421,9 +478,9 @@ samp {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    height: 36px;
-    padding-inline: 14px;
+    gap: 8px;
+    height: 38px;
+    padding-inline: 16px;
     border-radius: var(--radius-control);
     font-size: 13.5px;
     font-weight: 500;
@@ -434,14 +491,13 @@ samp {
     border: 1px solid transparent;
     user-select: none;
     transition:
-      background var(--dur-fast) var(--ease),
-      border-color var(--dur-fast) var(--ease),
-      color var(--dur-fast) var(--ease),
-      box-shadow var(--dur-fast) var(--ease),
-      transform 90ms var(--ease);
+      background var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      transform 90ms var(--ease-out);
   }
   .btn:active:not(:disabled) {
-    transform: scale(0.975);
+    transform: scale(0.98);
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
@@ -452,28 +508,27 @@ samp {
     flex-shrink: 0;
   }
 
+  /* Flat accent, no shadow, no sheen. A raised button is a 2014 button. */
   .btn-primary {
     background: var(--primary);
     color: var(--primary-ink);
-    box-shadow: var(--sheen), var(--shadow-sm);
   }
   .btn-primary:hover:not(:disabled) {
     background: var(--primary-hover);
-    box-shadow: var(--sheen), var(--shadow);
   }
   .btn-primary:active:not(:disabled) {
     background: var(--primary-press);
   }
 
-  /* Soft surface, not an outline, outlined pills read as cheap */
+  /* Transparent, hairline only. Next to a solid accent this reads as the
+     quieter of two choices, which is exactly what a secondary action is. */
   .btn-secondary {
-    background: var(--surface-2);
+    background: transparent;
     color: var(--text);
-    border-color: var(--border);
+    border-color: var(--border-strong);
   }
   .btn-secondary:hover:not(:disabled) {
-    background: var(--surface-3);
-    border-color: var(--border-strong);
+    background: var(--surface-2);
   }
 
   .btn-ghost {
@@ -511,19 +566,21 @@ samp {
 
   .btn-xs {
     height: 28px;
-    padding-inline: 9px;
+    padding-inline: 10px;
     font-size: 12.5px;
-    gap: 5px;
+    gap: 6px;
     border-radius: var(--radius-xs);
   }
   .btn-sm {
     height: 32px;
-    padding-inline: 11px;
+    padding-inline: 12px;
     font-size: 13px;
   }
+  /* The primary-action size: 44px tall, 12px radius. Used for the one thing a
+     page most wants you to do. */
   .btn-lg {
-    height: 42px;
-    padding-inline: 20px;
+    height: 44px;
+    padding-inline: 22px;
     font-size: 14.5px;
     gap: 8px;
   }
@@ -626,24 +683,26 @@ samp {
     color: var(--text-muted);
   }
 
-  /* --- Search field: Spotlight/Raycast proportions, icon inset, ⌘K hint --- */
+  /* --- Search field ---
+     No visible container at rest: a fill one step off the page, a hairline you
+     have to look for, and the glyph. It becomes a field when you touch it. */
   .search {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
-    height: 38px;
+    height: 36px;
     padding-inline: 12px;
     gap: 9px;
     background: var(--surface-2);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-faint);
     border-radius: var(--radius-control);
     color: var(--text-faint);
     cursor: text;
     transition:
-      border-color var(--dur-fast) var(--ease),
-      background var(--dur-fast) var(--ease),
-      box-shadow var(--dur-fast) var(--ease);
+      border-color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
   }
   /* The topbar renders this shape as a button that opens ⌘K, so it must not
      claim to be a text field. */
@@ -651,7 +710,8 @@ samp {
     cursor: pointer;
   }
   .search:hover {
-    border-color: var(--border-strong);
+    background: var(--surface-3);
+    border-color: var(--border);
   }
   .search:focus-within {
     background: var(--surface);
@@ -686,19 +746,21 @@ samp {
     min-width: 20px;
     height: 20px;
     padding-inline: 5px;
-    border-radius: 5px;
-    background: var(--surface-3);
-    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--neutral-faint);
+    border: 0;
     font-family: var(--font-sans);
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 500;
     color: var(--text-faint);
   }
 
   /* ================================================================== Badges */
 
-  /* Filled and tonal. No outlines, a badge is a colour-coded label, not a
-     button, and a border makes it compete with real controls. */
+  /* Tonal, never outlined: a badge is a label, and a border makes it compete
+     with real controls. Neutral by default and neutral in almost every call
+     site, the tone variants exist for genuine status, a failing build or an
+     overdue item, not for colour-coding a taxonomy. */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -708,7 +770,7 @@ samp {
     border-radius: var(--radius-xs);
     background: var(--neutral-faint);
     border: 0;
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.003em;
@@ -790,7 +852,8 @@ samp {
     border-radius: var(--radius-xs);
   }
 
-  /* A count that hangs off a nav item */
+  /* A count that hangs off a nav item. Neutral: "4 due" is information, and
+     an accent pill next to every number turns the nav into a scoreboard. */
   .count {
     display: inline-flex;
     align-items: center;
@@ -799,11 +862,11 @@ samp {
     height: 19px;
     padding-inline: 5px;
     border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 11.5px;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
-    background: var(--primary-faint);
-    color: var(--primary);
+    background: var(--neutral-faint);
+    color: var(--text-muted);
   }
 
   /* ============================================================== Typography */
@@ -811,50 +874,72 @@ samp {
   /* Muted by default, because most eyebrows are quiet labels inside a card.
      The accent variant is reserved for the one at the top of a page, where it
      is doing real work: naming the section you are standing in. */
+  /* ---- The type scale ----
+     Six sizes, three weights, and that is the whole system. Hierarchy is made
+     by size and space; weight is the last resort, never the first. Nothing is
+     700, because when everything is bold nothing is.
+
+       48  display   the one title on the dashboard
+       34  page      every route header
+       20  section   a region of a page
+       16  card      a title inside a surface
+       15  body
+       13  metadata
+       12  caption / eyebrow                                                  */
+
   .eyebrow {
     display: block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.09em;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-faint);
   }
+  /* Reserved for the eyebrow at the top of a page, where naming the section
+     you are standing in is real work. Elsewhere an eyebrow stays neutral. */
   .eyebrow-accent {
-    color: var(--primary);
+    color: var(--text-muted);
   }
 
   /* Group label inside sidebars and panels */
   .overline {
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.085em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--text-faint);
   }
 
+  /* The dashboard hero, and nothing else. */
+  .title-display {
+    font-size: clamp(32px, 4.2vw, 48px);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
   .title-page {
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.033em;
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.032em;
   }
   .title-section {
-    font-size: 17px;
+    font-size: 20px;
     font-weight: 600;
-    letter-spacing: -0.019em;
+    letter-spacing: -0.022em;
   }
   .title-card {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
-    letter-spacing: -0.014em;
+    letter-spacing: -0.016em;
   }
   .text-body {
-    font-size: 14px;
-    line-height: 1.65;
+    font-size: 15px;
+    line-height: 1.6;
     color: var(--text-muted);
   }
   .text-meta {
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--text-faint);
   }
   .num {
@@ -864,96 +949,86 @@ samp {
 
   @media (max-width: 640px) {
     .title-page {
-      font-size: 26px;
+      font-size: 27px;
+    }
+    .title-section {
+      font-size: 18px;
     }
   }
 
   /* ================================================================= Icon tile */
 
-  /* The rounded, tinted square that carries an icon. One size ladder so icons
-     never dominate, 36/40 outer, 16/18 glyph. */
+  /* The square that carries an icon. 32px, white at 4%, a muted glyph. It is
+     meant to be almost invisible, present enough to give the icon a home and
+     quiet enough that four of them in a row do not read as a colour chart.
+     This is the single biggest lever on whether the product looks expensive.
+
+     The tone variants are deliberately near-neutral now: they tint the glyph
+     and leave the tile alone, so a status still registers when you look for it
+     without shouting when you are not. */
   .icon-tile {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
     border-radius: var(--radius-tile);
-    background: var(--surface-2);
+    background: var(--neutral-faint);
     color: var(--text-muted);
   }
   .icon-tile-lg {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-card);
+    width: 40px;
+    height: 40px;
   }
   .icon-tile-primary {
-    background: var(--primary-faint);
     color: var(--primary);
   }
   .icon-tile-success {
-    background: var(--success-faint);
     color: var(--success);
   }
   .icon-tile-warning {
-    background: var(--warning-faint);
     color: var(--warning);
   }
   .icon-tile-danger {
-    background: var(--danger-faint);
     color: var(--danger);
   }
   .icon-tile-info {
-    background: var(--info-faint);
-    color: var(--info);
+    color: var(--text-muted);
   }
 
   /* ================================================================ Progress */
 
+  /* A progress bar is a line, not a tube. 3px, flat accent, no gradient and no
+     glow: the only job is to say how far along you are, and a gradient makes a
+     3px line look like a smear. */
   .progress {
     position: relative;
-    height: 6px;
+    height: 3px;
     width: 100%;
     overflow: hidden;
     border-radius: var(--radius-pill);
-    background: var(--surface-3);
+    background: var(--neutral-faint);
   }
   .progress-sm {
-    height: 4px;
+    height: 2px;
   }
   .progress-lg {
-    height: 8px;
+    height: 6px;
   }
   .progress-bar {
     height: 100%;
     border-radius: var(--radius-pill);
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--primary) 82%, transparent),
-      var(--primary)
-    );
-    transition: width var(--dur-slow) var(--ease);
+    background: var(--primary);
+    transition: width var(--dur-slow) var(--ease-out);
   }
   .progress-bar-success {
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--success) 82%, transparent),
-      var(--success)
-    );
+    background: var(--success);
   }
   .progress-bar-warning {
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--warning) 82%, transparent),
-      var(--warning)
-    );
+    background: var(--warning);
   }
   .progress-bar-danger {
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--danger) 82%, transparent),
-      var(--danger)
-    );
+    background: var(--danger);
   }
 
   /* Segmented step meter, for "3 of 5 requirements" style gates */
@@ -963,14 +1038,67 @@ samp {
     width: 100%;
   }
   .step {
-    height: 4px;
+    height: 3px;
     flex: 1;
     border-radius: var(--radius-pill);
-    background: var(--surface-3);
-    transition: background var(--dur) var(--ease);
+    background: var(--neutral-faint);
+    transition: background var(--dur) var(--ease-out);
   }
   .step-done {
-    background: var(--success);
+    background: var(--primary);
+  }
+
+  /* ================================================================== Chart */
+
+  /* A daily-activity chart in the GitHub Insights idiom: soft horizontal
+     rules behind, discrete bars in front, and a tooltip that only exists on
+     hover. No axes, no legend, no fill under a curve. The data is fourteen
+     daily totals, so it gets fourteen bars and nothing else. */
+  .chart {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  /* Four rules, evenly spaced, at the threshold of visible. They give the
+     bars something to be measured against without becoming graph paper. */
+  .chart-grid {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .chart-grid span {
+    display: block;
+    height: 1px;
+    background: var(--border-faint);
+  }
+  .chart-col {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+  .bar {
+    width: 100%;
+    border-radius: 3px;
+    background: var(--primary-soft);
+    transition: background var(--dur) var(--ease-out);
+  }
+  .chart-col:hover .bar {
+    background: var(--primary);
+  }
+  /* Today is the one bar you should be able to find without counting. */
+  .bar-today {
+    background: var(--primary);
+  }
+  .bar-empty,
+  .chart-col:hover .bar-empty {
+    background: var(--neutral-faint);
   }
 
   /* =================================================================== Tabs */
@@ -982,20 +1110,22 @@ samp {
     padding: 3px;
     border-radius: var(--radius-tile);
     background: var(--surface-2);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-faint);
     overflow-x: auto;
     scrollbar-width: none;
   }
   .segmented::-webkit-scrollbar {
     display: none;
   }
+  /* Concentric: the inner radius is the outer minus the padding, which is the
+     one case where a value other than 12/14 is correct rather than arbitrary. */
   .segment {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     height: 30px;
     padding-inline: 12px;
-    border-radius: calc(var(--radius-tile) - 4px);
+    border-radius: calc(var(--radius-tile) - 3px);
     font-size: 13px;
     font-weight: 500;
     color: var(--text-muted);
@@ -1254,11 +1384,11 @@ samp {
 }
 .prose-doc code {
   background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 5px;
+  border: 1px solid var(--border-faint);
+  border-radius: var(--radius-xs);
   padding: 1px 5px;
-  font-size: 12.5px;
-  color: var(--primary);
+  font-size: 13px;
+  color: var(--text);
 }
 .prose-doc pre {
   background: var(--surface-2);

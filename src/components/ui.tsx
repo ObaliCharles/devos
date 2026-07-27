@@ -59,11 +59,11 @@ export function PageHeader({
           </Link>
         )}
         {eyebrow && <p className="eyebrow eyebrow-accent">{eyebrow}</p>}
-        <h1 className={`title-page ${eyebrow ? "mt-2" : ""}`}>{title}</h1>
+        <h1 className={`title-page ${eyebrow ? "mt-2.5" : ""}`}>{title}</h1>
         {description && !compact && (
-          <p className="text-body mt-2 max-w-[58ch]">{description}</p>
+          <p className="text-body mt-3 max-w-[58ch]">{description}</p>
         )}
-        {meta && <div className="mt-4 flex flex-wrap items-center gap-3">{meta}</div>}
+        {meta && <div className="mt-5 flex flex-wrap items-center gap-3">{meta}</div>}
       </div>
       {actions && (
         <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:pt-1">
@@ -320,6 +320,14 @@ export function Ring({
 /**
  * The one stat tile for the whole product. An optional href turns it into a
  * navigable card without changing a single visual rule.
+ *
+ * Deliberately undramatic. The label leads, the value is 24px rather than the
+ * 32-40px a dashboard template would use, the icon is a near-invisible 32px
+ * square, and the whole tile is a fixed height so a row of four reads as one
+ * object. A stat is a fact you glance at, not a headline.
+ *
+ * `tone` is still accepted so every existing call site keeps working, but it
+ * now only tints the glyph, never the tile.
  */
 export function StatTile({
   label,
@@ -341,19 +349,21 @@ export function StatTile({
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[12.5px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </p>
         {icon && <IconTile tone={tone}>{icon}</IconTile>}
       </div>
-      <p className="num mt-3 text-[26px] font-semibold leading-none">{value}</p>
-      {sub && <p className="text-meta mt-1.5">{sub}</p>}
+      <p className="num mt-auto pt-4 text-[24px] font-semibold leading-none">{value}</p>
+      {sub && <p className="text-meta mt-2">{sub}</p>}
     </>
   );
 
-  const className = "card p-4";
+  // flex-col + mt-auto on the value: four tiles with different amounts of
+  // sub-text still align their numbers on the same baseline.
+  const className = "card flex min-h-[128px] flex-col p-5";
   return href ? (
-    <Link href={href} className={`${className} card-link block`}>
+    <Link href={href} className={`${className} card-link`}>
       {body}
     </Link>
   ) : (
@@ -395,31 +405,22 @@ export function EmptyState({
     >
       <div className="max-w-sm">
         {icon && (
-          <div className="relative mx-auto mb-6 grid h-16 w-16 place-items-center">
-            {/* A soft halo instead of a flat grey square, the mark should feel
-                deliberate, not like a missing image. */}
-            <span
-              className="absolute inset-0 rounded-[var(--radius-dialog)]"
-              style={{
-                background:
-                  "radial-gradient(circle at 50% 40%, var(--primary-soft), transparent 70%)",
-              }}
-            />
-            <span
-              className="relative grid h-14 w-14 place-items-center rounded-[var(--radius-panel)]"
-              style={{
-                background: "var(--surface-2)",
-                border: "1px solid var(--border)",
-                color: "var(--primary)",
-                boxShadow: "var(--shadow-sm)",
-              }}
-            >
-              {icon}
-            </span>
-          </div>
+          // One flat square, one hairline, a muted glyph. The halo that used to
+          // sit behind this was the only accent on an otherwise empty screen,
+          // which put the loudest thing in the product on the page with the
+          // least to say.
+          <span
+            className="mx-auto mb-6 grid h-12 w-12 place-items-center rounded-[var(--radius-tile)]"
+            style={{
+              background: "var(--neutral-faint)",
+              color: "var(--text-muted)",
+            }}
+          >
+            {icon}
+          </span>
         )}
-        <p className="text-[18px] font-semibold tracking-tight">{title}</p>
-        <p className="text-body mt-2 text-[13.5px]">{body}</p>
+        <p className="text-[18px] font-semibold tracking-[-0.018em]">{title}</p>
+        <p className="text-body mx-auto mt-2 max-w-[42ch] text-[14px]">{body}</p>
         {(action || secondary) && (
           <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
             {action}

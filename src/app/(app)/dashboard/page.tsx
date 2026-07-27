@@ -7,7 +7,6 @@ import {
   NotebookPen,
   RotateCcw,
   Sparkles,
-  Target,
   TrendingUp,
 } from "lucide-react";
 import { requireUser, levelFromXp } from "@/lib/user";
@@ -18,17 +17,10 @@ import {
   getRecentNotes,
   getRoadmap,
 } from "@/lib/queries";
-import { EmptyState, IconTile, StatTile, Steps } from "@/components/ui";
+import { EmptyState, StatTile } from "@/components/ui";
 import { relativeDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
 
 const QUICK_ACTIONS = [
   { href: "/practice", label: "Practice", icon: Dumbbell },
@@ -53,6 +45,13 @@ export default async function DashboardPage() {
       ? Math.round((roadmap.masteredLessons / roadmap.totalLessons) * 100)
       : 0;
 
+  // "Lesson 3 of 8" is a more useful position than a global percentage when
+  // you are standing in front of one skill, so it is computed against the
+  // skill the next lesson belongs to, not the whole roadmap.
+  const lessonIndex = next ? next.skill.lessons.findIndex((l) => l.id === next.lesson.id) + 1 : 0;
+  const lessonTotal = next?.skill.lessons.length ?? 0;
+  const skillPct = lessonTotal > 0 ? ((lessonIndex - 1) / lessonTotal) * 100 : 0;
+
   const maxMinutes = Math.max(60, ...strip.map((d) => d.minutes));
   const totalMinutes = strip.reduce((sum, d) => sum + d.minutes, 0);
   const activeDays = strip.filter((d) => d.minutes > 0).length;
@@ -60,64 +59,68 @@ export default async function DashboardPage() {
   return (
     <div className="page-body">
       {/* =============================================================== Hero
-          One question answered above the fold: what do I do next. Everything
-          else on this page is context for that decision, not competition. */}
+          Two lines. The roadmap you are on, and what this page is for. No
+          greeting, no time of day, no name: none of it changes what you do
+          next, and all of it competes with the thing that does. */}
       <section className="rise">
-        <p className="eyebrow eyebrow-accent">{roadmap?.title ?? "No roadmap loaded"}</p>
-        <h1 className="title-page mt-2">
-          {greeting()}, {user.name}
-        </h1>
-        <p className="text-body mt-2">
-          {dueCount > 0
-            ? `${dueCount} lesson${dueCount === 1 ? "" : "s"} ${dueCount === 1 ? "is" : "are"} waiting for review.`
-            : "All caught up. Ready for something new?"}
+        <h1 className="title-display">{roadmap?.title ?? "No roadmap loaded"}</h1>
+        <p className="text-body mt-3">
+          {next ? "Continue where you left off." : "Nothing queued on this path."}
         </p>
       </section>
 
-      {/* ---------------------------------------------------- Continue card */}
+      {/* ------------------------------------------------------ Continue card
+          The one decision this page exists to make. Lesson title large, three
+          pieces of metadata under it, a 3px line for position, one button. */}
       {next ? (
-        <Link
-          href={`/learning/lesson/${next.lesson.id}`}
-          className="card card-link rise group relative block overflow-hidden p-4 sm:p-5"
-        >
-          {/* A single directional wash marks this as the primary path forward */}
-          <span
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(100deg, var(--primary-faint), transparent 46%)",
-            }}
-            aria-hidden
-          />
-          <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+        <section className="card rise p-6 sm:p-8">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 flex-1">
-              <p className="eyebrow eyebrow-accent">Next up</p>
-              <h2 className="mt-1.5 truncate text-[21px] font-semibold tracking-[-0.024em]">
+              <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.028em] sm:text-[30px]">
                 {next.lesson.title}
               </h2>
-              <p className="text-meta mt-1.5">
-                {next.phase.title} · {next.skill.title} · about {next.lesson.estimatedMinutes} min
+
+              {/* Metadata reads as one quiet line, separated by dots rather
+                  than stacked, so it stays subordinate to the title. */}
+              <p className="text-meta mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>{next.skill.title}</span>
+                <Dot />
+                <span>{next.lesson.estimatedMinutes} min remaining</span>
+                {lessonTotal > 0 && (
+                  <>
+                    <Dot />
+                    <span>
+                      Lesson {lessonIndex} of {lessonTotal}
+                    </span>
+                  </>
+                )}
               </p>
-              <div className="mt-4 flex max-w-sm items-center gap-3">
-                <Steps
-                  done={next.lesson.gateDone}
-                  total={5}
-                  label={`${next.lesson.gateDone} of 5 mastery requirements met`}
+
+              <div className="progress mt-6 max-w-md">
+                <div
+                  className="progress-bar"
+                  style={{ width: `${skillPct}%` }}
+                  role="progressbar"
+                  aria-valuenow={Math.round(skillPct)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${next.skill.title}, lesson ${lessonIndex} of ${lessonTotal}`}
                 />
-                <span className="num shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
-                  {next.lesson.gateDone}/5
-                </span>
               </div>
             </div>
-            <span className="btn btn-primary btn-lg shrink-0 self-start sm:self-auto">
-              {next.lesson.gateDone > 0 ? "Resume lesson" : "Start lesson"}
-            </span>
+
+            <Link
+              href={`/learning/lesson/${next.lesson.id}`}
+              className="btn btn-primary btn-lg shrink-0 self-start lg:self-auto"
+            >
+              {next.lesson.gateDone > 0 ? "Resume" : "Start"}
+            </Link>
           </div>
-        </Link>
+        </section>
       ) : (
         <EmptyState
           compact
-          icon={<Map size={22} />}
+          icon={<Map size={20} />}
           title={roadmap ? "Every lesson mastered" : "No roadmap loaded"}
           body={
             roadmap
@@ -134,54 +137,51 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* ---------------------------------------------------------- Signals */}
+      {/* ---------------------------------------------------------- Signals
+          Four facts, one height, one type size, one icon treatment. Nothing
+          here is coloured, because none of these four is more urgent than the
+          others and colour would claim otherwise. */}
       <section
         className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
         aria-label="Progress summary"
       >
         <StatTile
           href="/learning"
-          label="Roadmap progress"
+          label="Progress"
           value={`${pct}%`}
           sub={`${roadmap?.masteredLessons ?? 0} of ${roadmap?.totalLessons ?? 0} lessons`}
-          icon={<Map size={17} />}
-          tone="primary"
-          trend={pct > 0 ? "up" : undefined}
+          icon={<Map size={16} />}
         />
         <StatTile
           href="/analytics"
           label="Current level"
-          value={level.level}
-          sub={`${level.title} · ${level.need - level.into} XP to next`}
-          icon={<TrendingUp size={17} />}
-          tone="info"
+          value={level.title}
+          sub={`Level ${level.level} · ${level.need - level.into} XP to next`}
+          icon={<TrendingUp size={16} />}
         />
         <StatTile
           label="Streak"
-          value={`${user.currentStreak ?? 0}d`}
+          value={`${user.currentStreak ?? 0} ${(user.currentStreak ?? 0) === 1 ? "day" : "days"}`}
           sub={`Best ${user.longestStreak ?? 0} days`}
-          icon={<Sparkles size={17} />}
-          tone="warning"
-          trend={(user.currentStreak ?? 0) > 0 ? "up" : "flat"}
+          icon={<Sparkles size={16} />}
         />
         <StatTile
           href="/review"
-          label="Due for review"
+          label="Review queue"
           value={dueCount}
           sub={dueCount ? "waiting on you" : "all clear"}
-          icon={<RotateCcw size={17} />}
-          tone={dueCount ? "warning" : "success"}
+          icon={<RotateCcw size={16} />}
         />
       </section>
 
       {/* -------------------------------------------------- Activity + rail */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,1fr)]">
         {/* ------------------------------------------------------- Activity */}
-        <section className="card flex flex-col p-4 sm:p-5">
+        <section className="card flex flex-col p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="title-section">Your progress</h2>
-              <p className="text-meta mt-0.5">
+              <p className="text-meta mt-1">
                 {totalMinutes > 0
                   ? `${Math.round(totalMinutes / 6) / 10}h across ${activeDays} of the last 14 days`
                   : "Nothing tracked in the last two weeks"}
@@ -194,36 +194,35 @@ export default async function DashboardPage() {
 
           {/* Bars, not a line: the data is discrete daily totals, and a line
               between them would imply values that were never measured. */}
-          <div className="mt-6 flex flex-1 items-end gap-1.5" style={{ minHeight: 132 }}>
+          <div className="chart mt-8 flex-1" style={{ minHeight: 148 }}>
+            <div className="chart-grid" aria-hidden>
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
             {strip.map((d, i) => {
               const isToday = i === strip.length - 1;
-              const height = d.minutes > 0 ? Math.max(4, (d.minutes / maxMinutes) * 128) : 3;
+              const empty = d.minutes === 0;
+              const height = empty ? 2 : Math.max(4, (d.minutes / maxMinutes) * 144);
               return (
                 <div
                   key={d.day}
-                  className="tooltip group flex flex-1 flex-col justify-end"
+                  className="chart-col tooltip"
                   data-tip={`${d.minutes} min · ${d.day.slice(5)}`}
-                  style={{ height: 132 }}
+                  style={{ height: 148 }}
                 >
                   <div
-                    className="w-full rounded-[var(--radius-xs)]"
-                    style={{
-                      height,
-                      background:
-                        d.minutes > 0
-                          ? isToday
-                            ? "var(--primary)"
-                            : "var(--primary-muted)"
-                          : "var(--surface-3)",
-                      transition: "background var(--dur) var(--ease)",
-                    }}
+                    className={`bar ${empty ? "bar-empty" : isToday ? "bar-today" : ""}`}
+                    style={{ height }}
                   />
                 </div>
               );
             })}
           </div>
+
           <div
-            className="mt-2.5 flex justify-between text-[11px]"
+            className="mt-3 flex justify-between text-[12px]"
             style={{ color: "var(--text-faint)" }}
           >
             <span>{strip[0]?.day.slice(5)}</span>
@@ -231,65 +230,41 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* ----------------------------------------------------------- Rail */}
-        <div className="flex flex-col gap-6">
-          {/* Review queue */}
-          <section className="card p-4">
-            <div className="flex items-center gap-3">
-              <IconTile tone={dueCount ? "warning" : "success"}>
-                <RotateCcw size={16} />
-              </IconTile>
-              <h2 className="title-card">Revision queue</h2>
-            </div>
+        {/* ------------------------------------------------------------ Rail
+            Three small utility cards, stacked. Each is a label, a fact, and at
+            most one way in. None of them carries an icon tile: at this size a
+            tile is 32px of chrome around 16px of content. */}
+        <div className="flex flex-col gap-4">
+          <RailCard title="Revision queue" href={dueCount ? "/review" : undefined} cta="Start review">
             {dueCount === 0 ? (
-              <p className="text-body mt-3 text-[13px]">
+              <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
                 Nothing due. Master a lesson and it comes back tomorrow.
               </p>
             ) : (
-              <>
-                <p className="text-body mt-3 text-[13px]">
-                  <strong style={{ color: "var(--text)" }}>{dueCount}</strong>{" "}
-                  {dueCount === 1 ? "lesson is" : "lessons are"} ready to be re-tested.
-                </p>
-                <Link href="/review" className="btn btn-secondary btn-block mt-4">
-                  <Target size={15} /> Start review
-                </Link>
-              </>
+              <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
+                <span className="num font-medium" style={{ color: "var(--text)" }}>
+                  {dueCount}
+                </span>{" "}
+                {dueCount === 1 ? "lesson is" : "lessons are"} ready to be re-tested.
+              </p>
             )}
-          </section>
+          </RailCard>
 
-          {/* Recent notes */}
-          <section className="card p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <IconTile tone="info">
-                  <NotebookPen size={16} />
-                </IconTile>
-                <h2 className="title-card">Recent notes</h2>
-              </div>
-              <Link href="/notes" className="btn btn-ghost btn-sm" aria-label="All notes">
-                View all
-              </Link>
-            </div>
+          <RailCard title="Recent notes" href="/notes" cta="View all">
             {notes.length === 0 ? (
-              <p className="text-body mt-3 text-[13px]">
+              <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
                 Nothing captured yet. Notes you write link themselves into a graph.
               </p>
             ) : (
-              <ul className="mt-3 flex flex-col">
+              <ul className="-mx-2 flex flex-col">
                 {notes.map((n) => (
                   <li key={String(n._id)}>
                     <Link
                       href="/notes"
-                      className="row-link flex items-center gap-2.5 px-2 py-2 text-[13px]"
+                      className="row-link flex items-center gap-3 px-2 py-1.5 text-[13px]"
                     >
-                      <span
-                        className="h-1.5 w-1.5 shrink-0 rounded-full"
-                        style={{ background: "var(--primary-muted)" }}
-                        aria-hidden
-                      />
                       <span className="min-w-0 flex-1 truncate">{n.title}</span>
-                      <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
+                      <span className="shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
                         {relativeDate(n.updatedAt)}
                       </span>
                     </Link>
@@ -297,27 +272,70 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             )}
-          </section>
+          </RailCard>
 
-          {/* Quick actions, four places you actually go, not a menu dump */}
-          <section className="card p-4">
-            <h2 className="title-card">Quick actions</h2>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+          <RailCard title="Quick actions">
+            <div className="-mx-2 grid grid-cols-2">
               {QUICK_ACTIONS.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="well flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-medium"
-                  style={{ transition: "background var(--dur-fast) var(--ease)" }}
+                  className="row-link flex items-center gap-2.5 px-2 py-2 text-[13px]"
                 >
                   <Icon size={15} style={{ color: "var(--text-faint)" }} />
                   <span className="truncate">{label}</span>
                 </Link>
               ))}
             </div>
-          </section>
+          </RailCard>
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * A rail card. Deliberately spare: a 13px label, the content, and an optional
+ * text link in the header rather than a button in the footer, which keeps the
+ * card the height of what is actually in it.
+ */
+function RailCard({
+  title,
+  href,
+  cta,
+  children,
+}: {
+  title: string;
+  href?: string;
+  cta?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="card p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
+          {title}
+        </h2>
+        {href && cta && (
+          <Link
+            href={href}
+            className="shrink-0 text-[12px] font-medium"
+            style={{ color: "var(--primary)" }}
+          >
+            {cta}
+          </Link>
+        )}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** The separator between metadata fields. */
+function Dot() {
+  return (
+    <span aria-hidden style={{ color: "var(--text-faint)", opacity: 0.6 }}>
+      ·
+    </span>
   );
 }
