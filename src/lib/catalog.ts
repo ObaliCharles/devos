@@ -22,9 +22,29 @@
  */
 
 import { LESSON_CONTENT, fallbackBody } from "./catalog-lessons";
+import { LESSON_CHALLENGES } from "./catalog-challenges";
 
 export type Level = "Beginner" | "Intermediate" | "Advanced";
 export type Accent = "primary" | "info" | "success" | "warning" | "danger";
+
+/**
+ * A hands-on task attached to a lesson.
+ *
+ * Levelled the way the 30 Days curricula this content is grounded in level
+ * theirs, because the progression is the pedagogy and flattening it loses the
+ * point: level 1 is recall you should be able to do immediately after reading,
+ * level 2 makes you combine two ideas, level 3 is a small problem where the
+ * approach is not handed to you.
+ */
+export type Challenge = {
+  level: 1 | 2 | 3;
+  prompt: string;
+  /** A starting point, so nobody opens the editor to a blank page. */
+  starter?: string;
+  /** Revealed on request, never by default. */
+  solution?: string;
+  hint?: string;
+};
 
 export type Lesson = {
   title: string;
@@ -36,6 +56,9 @@ export type Lesson = {
   body?: string;
   /** A short knowledge-check for the lesson page. */
   quiz?: { prompt: string; choices: string[]; answer: number }[];
+  /** Practice tasks, authored in catalog-challenges.ts and stitched in at
+   *  module load exactly like bodies are. */
+  challenges?: Challenge[];
 };
 
 export type Module = {
@@ -154,6 +177,113 @@ export const COURSES: Course[] = [
           { title: "Defining functions", minutes: 25, objective: "Take arguments, return values, set defaults." },
           { title: "Modules and imports", minutes: 20, objective: "Split code across files and use the standard library." },
           { title: "Errors and exceptions", minutes: 25, objective: "Fail loudly, then handle it gracefully." },
+        ],
+      },
+    ],
+  },
+
+  /* -------------------------------------------------------- JavaScript ---- */
+  {
+    slug: "javascript-essentials",
+    tech: "javascript",
+    title: "JavaScript Essentials",
+    icon: "Code2",
+    accent: "warning",
+    level: "Beginner",
+    track: "Development",
+    tagline: "The only language that runs in every browser on earth.",
+    description:
+      "Fourteen lessons that take you from your first console.log to fetching real data and putting it on a page. The order follows the 30 Days Of JavaScript curriculum, so you meet the language the way it is actually taught rather than the way a framework tutorial assumes you already know it.",
+    whyItMatters:
+      "Every website runs JavaScript, and every front-end framework you will ever pick up is JavaScript underneath. Learning React before this is learning the abstraction before the thing it abstracts.",
+    youWillBuild: "A live-search country browser that fetches real API data and remembers your list across refreshes.",
+    hours: 14,
+    tags: ["javascript", "js", "frontend", "web", "dom", "async", "beginner"],
+    modules: [
+      {
+        title: "The language",
+        summary: "How JavaScript runs, what a value is, and how to make a decision.",
+        lessons: [
+          { title: "How JavaScript runs", minutes: 20, objective: "Run a script in the browser and read the console." },
+          { title: "Data types", minutes: 30, objective: "Tell the seven primitives apart and predict coercion." },
+          { title: "Conditionals", minutes: 25, objective: "Branch with if, else if and switch — and know which to reach for." },
+        ],
+      },
+      {
+        title: "Collections and functions",
+        summary: "The two things almost every program is made of.",
+        lessons: [
+          { title: "Arrays", minutes: 35, objective: "Build, slice, sort and search an ordered list." },
+          { title: "Loops", minutes: 25, objective: "Repeat work with for, while and for...of." },
+          { title: "Functions", minutes: 30, objective: "Write declarations, expressions and arrows, and know the difference." },
+          { title: "Objects", minutes: 30, objective: "Model a thing with keys, values and methods." },
+        ],
+      },
+      {
+        title: "Modern JavaScript",
+        summary: "The features that separate 2015 JavaScript from what people write now.",
+        lessons: [
+          { title: "Higher order functions", minutes: 35, objective: "Replace most of your loops with map, filter and reduce." },
+          { title: "Destructuring and spread", minutes: 25, objective: "Pull values out and merge them back in without ceremony." },
+          { title: "Classes", minutes: 30, objective: "Model related things with constructors, methods and inheritance." },
+          { title: "Error handling", minutes: 25, objective: "Catch what you can fix and throw what you cannot." },
+        ],
+      },
+      {
+        title: "The browser",
+        summary: "Fetching real data and putting it on a real page.",
+        lessons: [
+          { title: "Promises and async", minutes: 40, objective: "Fetch data without callback nesting, and handle it failing." },
+          { title: "The DOM", minutes: 35, objective: "Select, create and update elements from JavaScript." },
+          { title: "Web storage", minutes: 20, objective: "Persist state across a page refresh." },
+        ],
+      },
+    ],
+  },
+
+  /* ------------------------------------------------------- Git & GitHub --- */
+  {
+    slug: "git-github",
+    tech: "git",
+    title: "Git & GitHub",
+    icon: "GitBranch",
+    accent: "danger",
+    level: "Beginner",
+    track: "Development",
+    tagline: "Version control you can actually recover from.",
+    description:
+      "Most Git tutorials teach four commands and leave you stranded the first time something goes wrong. This one covers the model underneath — commits, branches, remotes — then spends real time on undoing, conflicts and reflog, because that is where the fear lives.",
+    whyItMatters:
+      "Git is the one tool you will use on every project for the rest of your career, and the only one where not understanding it can lose someone else's work. Every team assumes you know it and nobody teaches it.",
+    youWillBuild: "A repository with a protected main branch, a CI workflow, and a history you are not embarrassed by.",
+    hours: 9,
+    tags: ["git", "github", "version control", "collaboration", "ci", "workflow"],
+    modules: [
+      {
+        title: "The model",
+        summary: "What Git is actually storing, and how a change gets into it.",
+        lessons: [
+          { title: "What version control actually is", minutes: 20, objective: "Explain commits, the index and the working tree." },
+          { title: "Staging and committing", minutes: 35, objective: "Craft small, honest commits — and ignore what should never be tracked." },
+          { title: "Reading history", minutes: 30, objective: "Find when a line changed and who changed it." },
+        ],
+      },
+      {
+        title: "Getting out of trouble",
+        summary: "The lessons everyone wishes they had done before their first bad day.",
+        lessons: [
+          { title: "Undoing things", minutes: 40, objective: "Choose correctly between restore, reset and revert." },
+          { title: "Branching and merging", minutes: 45, objective: "Work in parallel and resolve a conflict without panic." },
+        ],
+      },
+      {
+        title: "Working with GitHub",
+        summary: "Everything that happens once the repository is not only yours.",
+        lessons: [
+          { title: "Remotes and GitHub", minutes: 35, objective: "Push, pull, fetch, and know why they differ." },
+          { title: "Pull requests and review", minutes: 35, objective: "Open a PR people can actually review, and review one well." },
+          { title: "Automating with Actions", minutes: 40, objective: "Run your tests on every push without asking anyone." },
+          { title: "Working on a team", minutes: 30, objective: "Stash, cherry-pick and commit conventions that scale past one person." },
         ],
       },
     ],
@@ -297,7 +427,7 @@ export const COURSES: Course[] = [
   /* ----------------------------------------------------------- Backend ---- */
   {
     slug: "apis-and-databases",
-    tech: "git",
+    tech: "postgresql",
     title: "APIs & Databases",
     icon: "Server",
     accent: "primary",
@@ -487,15 +617,26 @@ export function getCourse(slug: string): Course | undefined {
    content to render, never a blank. */
 for (const course of COURSES) {
   const content = LESSON_CONTENT[course.slug];
+  const challenges = LESSON_CHALLENGES[course.slug];
   let i = 0;
   for (const mod of course.modules) {
     for (const lesson of mod.lessons) {
       const authored = content?.[i];
       lesson.body = authored?.body ?? fallbackBody(lesson.title, lesson.objective, course.title);
       if (authored?.quiz) lesson.quiz = authored.quiz;
+      const tasks = challenges?.[i];
+      if (tasks?.length) lesson.challenges = tasks;
       i += 1;
     }
   }
+}
+
+/** Total practice tasks in a course, for the course page's "what you get" row. */
+export function challengeCount(course: Course): number {
+  return course.modules.reduce(
+    (n, m) => n + m.lessons.reduce((k, l) => k + (l.challenges?.length ?? 0), 0),
+    0,
+  );
 }
 
 /* ------------------------------------------------------------- Projects ---

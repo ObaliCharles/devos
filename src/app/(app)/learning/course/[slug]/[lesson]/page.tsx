@@ -9,6 +9,7 @@ import { getCatalogProgress } from "@/lib/queries";
 import { ExplainLesson } from "@/components/learn/explain-lesson";
 import { LessonQuiz } from "@/components/learn/lesson-quiz";
 import { CompleteLesson } from "@/components/learn/complete-lesson";
+import { Challenges } from "@/components/learn/challenges";
 
 // Reads per-user progress, so it renders per request rather than at build time.
 export const dynamic = "force-dynamic";
@@ -105,6 +106,13 @@ export default async function CourseLessonPage({
         </p>
         <ExplainLesson course={course.title} topic={current.title} objective={current.objective} />
       </section>
+
+      {/* Practice — the tasks come before the quiz on purpose. A multiple
+          choice question checks that you followed along; writing the code is
+          what actually moves the lesson from read to known. */}
+      {current.challenges && current.challenges.length > 0 && (
+        <Challenges challenges={current.challenges} />
+      )}
 
       {/* Knowledge check */}
       {current.quiz && current.quiz.length > 0 && (

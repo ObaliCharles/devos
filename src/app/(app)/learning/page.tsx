@@ -31,6 +31,7 @@ import { COURSES } from "@/lib/catalog";
 import { isConfigured } from "@/lib/ai";
 import { ROADMAP_META } from "@/lib/learn-content";
 import { ContentIcon } from "@/components/learn/icon";
+import { TechLogo, inferTech } from "@/components/learn/tech-logo";
 import { RoadmapSearch } from "@/components/learn/roadmap-search";
 import { CurriculumBuilder } from "@/components/learn/curriculum-builder";
 import { RoadmapCard } from "@/components/learn/roadmap-card";
@@ -280,13 +281,19 @@ function ContinueLearning({
   next: NextLesson;
 }) {
   const href = next ? `/learning/lesson/${next.lesson.id}` : "/learning/roadmap";
+  // The real logo for whatever this path is about, read out of its own titles.
+  const tech = inferTech(title, next?.skill.title, next?.lesson.title);
   return (
     <div className="panel flex flex-col p-5">
-      <p className="eyebrow eyebrow-accent">Continue Learning</p>
+      <p className="eyebrow">Continue Learning</p>
       <div className="mt-4 flex items-center gap-3">
-        <span className="icon-tile icon-tile-lg icon-tile-info">
-          <ContentIcon name="Code2" size={20} />
-        </span>
+        {tech ? (
+          <TechLogo name={tech} mode="plate" size={40} />
+        ) : (
+          <span className="icon-tile icon-tile-lg">
+            <ContentIcon name="Code2" size={18} />
+          </span>
+        )}
         <div className="min-w-0">
           <h3 className="title-card truncate">{title}</h3>
           <p className="text-meta">

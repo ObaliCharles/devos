@@ -79,6 +79,20 @@ const QuestionSchema = new Schema(
   { _id: false }
 );
 
+/**
+ * A practice task. Levelled 1-3 (recall / apply / solve) to match the
+ * hand-authored catalog, so a generated path and a catalog course present
+ * practice the same way rather than looking like two different products.
+ */
+const TaskSchema = new Schema(
+  {
+    level: { type: Number, default: 1, min: 1, max: 3 },
+    prompt: { type: String, required: true },
+    hint: String,
+  },
+  { _id: false }
+);
+
 const LessonSchema = new Schema(
   {
     skill: { type: Schema.Types.ObjectId, ref: "Skill", required: true, index: true },
@@ -95,6 +109,8 @@ const LessonSchema = new Schema(
       acceptance: [String],
     },
     quiz: [QuestionSchema],
+    /** Practice tasks. Empty on older lessons generated before this existed. */
+    tasks: [TaskSchema],
     xp: { type: Number, default: 50 },
   },
   { timestamps: true }

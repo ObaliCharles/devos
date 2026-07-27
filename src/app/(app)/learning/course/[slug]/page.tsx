@@ -59,13 +59,13 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       {/* ------------------------------------------------------------- Header */}
       <header className="rise flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <span className={`icon-tile icon-tile-lg h-14 w-14 ${course.tech && TECH_WITH_LOGO.has(course.tech) ? "" : `icon-tile-${course.accent}`}`}>
-            {course.tech && TECH_WITH_LOGO.has(course.tech) ? (
-              <TechLogo name={course.tech} size={30} />
-            ) : (
-              <ContentIcon name={course.icon} size={26} />
-            )}
-          </span>
+          {course.tech && TECH_WITH_LOGO.has(course.tech) ? (
+            <TechLogo name={course.tech} mode="plate" size={56} />
+          ) : (
+            <span className="icon-tile icon-tile-lg h-14 w-14">
+              <ContentIcon name={course.icon} size={24} />
+            </span>
+          )}
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="badge">{course.level}</span>

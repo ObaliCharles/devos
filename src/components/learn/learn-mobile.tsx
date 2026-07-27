@@ -176,9 +176,13 @@ function Row({
   const hasLogo = tech && TECH_WITH_LOGO.has(tech);
   const inner = (
     <>
-      <span className={`icon-tile icon-tile-lg ${hasLogo ? "" : `icon-tile-${accent}`}`}>
-        {hasLogo ? <TechLogo name={tech} size={22} /> : <ContentIcon name={icon} size={20} />}
-      </span>
+      {hasLogo ? (
+        <TechLogo name={tech} mode="plate" size={40} />
+      ) : (
+        <span className="icon-tile icon-tile-lg">
+          <ContentIcon name={icon} size={18} />
+        </span>
+      )}
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-[14.5px] font-semibold">{title}</span>

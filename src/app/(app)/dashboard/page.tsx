@@ -1,8 +1,11 @@
 import Link from "next/link";
 import {
+  ArrowRight,
   CalendarDays,
+  Check,
   Dumbbell,
   FolderKanban,
+  Lock,
   Map,
   NotebookPen,
   RotateCcw,
@@ -18,6 +21,8 @@ import {
   getRoadmap,
 } from "@/lib/queries";
 import { EmptyState, StatTile } from "@/components/ui";
+import { TechLogo, inferTech } from "@/components/learn/tech-logo";
+import { COURSES } from "@/lib/catalog";
 import { relativeDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -45,23 +50,68 @@ export default async function DashboardPage() {
       ? Math.round((roadmap.masteredLessons / roadmap.totalLessons) * 100)
       : 0;
 
-  // "Lesson 3 of 8" is a more useful position than a global percentage when
-  // you are standing in front of one skill, so it is computed against the
-  // skill the next lesson belongs to, not the whole roadmap.
   const lessonIndex = next ? next.skill.lessons.findIndex((l) => l.id === next.lesson.id) + 1 : 0;
   const lessonTotal = next?.skill.lessons.length ?? 0;
   const skillPct = lessonTotal > 0 ? ((lessonIndex - 1) / lessonTotal) * 100 : 0;
+
+  // The mark for the thing you are learning right now. Generated paths carry no
+  // technology field, so it is read out of the titles themselves.
+  const tech = next ? inferTech(next.skill.title, next.phase.title, next.lesson.title) : null;
 
   const maxMinutes = Math.max(60, ...strip.map((d) => d.minutes));
   const totalMinutes = strip.reduce((sum, d) => sum + d.minutes, 0);
   const activeDays = strip.filter((d) => d.minutes > 0).length;
 
+  /* ---- The path, flattened to a row of steps ----------------------------
+     Every unlocked skill in order, with the one holding the next lesson
+     marked current. This is the single most useful thing a learner can see:
+     not "35% complete" but "here is the ladder and here is your rung." */
+  const steps =
+    roadmap?.phases.flatMap((phase) =>
+      phase.skills.map((skill) => {
+        const total = skill.lessons.length;
+        const done = skill.lessons.filter((l) => l.state === "mastered").length;
+        return {
+          id: skill.id,
+          title: skill.title,
+          locked: phase.locked,
+          done,
+          total,
+          current: next ? skill.id === next.skill.id : false,
+          tech: inferTech(skill.title, phase.title),
+        };
+      }),
+    ) ?? [];
+
+  // Today: the smallest honest to-do list the data can support. No invented
+  // targets — every row is something the app can actually check off.
+  const today = [
+    next && {
+      href: `/learning/lesson/${next.lesson.id}`,
+      label: next.lesson.title,
+      meta: `${next.lesson.estimatedMinutes} min`,
+      done: false,
+    },
+    dueCount > 0 && {
+      href: "/review",
+      label: `Clear ${dueCount} review${dueCount === 1 ? "" : "s"}`,
+      meta: `${dueCount * 3} min`,
+      done: false,
+    },
+    {
+      href: "/practice",
+      label: "Practice a challenge",
+      meta: "15 min",
+      done: false,
+    },
+  ].filter(Boolean) as { href: string; label: string; meta: string; done: boolean }[];
+
+  // Three catalog courses to look at next, skipping anything on the path.
+  const recommended = COURSES.filter((c) => c.tech).slice(0, 4);
+
   return (
     <div className="page-body">
-      {/* =============================================================== Hero
-          Two lines. The roadmap you are on, and what this page is for. No
-          greeting, no time of day, no name: none of it changes what you do
-          next, and all of it competes with the thing that does. */}
+      {/* =============================================================== Hero */}
       <section className="rise">
         <h1 className="title-display">{roadmap?.title ?? "No roadmap loaded"}</h1>
         <p className="text-body mt-3">
@@ -70,19 +120,23 @@ export default async function DashboardPage() {
       </section>
 
       {/* ------------------------------------------------------ Continue card
-          The one decision this page exists to make. Lesson title large, three
-          pieces of metadata under it, a 3px line for position, one button. */}
+          The one decision this page exists to make. The technology's own mark
+          sits on the left because it is the fastest possible answer to "what
+          am I even working on" — faster than reading the title. */}
       {next ? (
-        <section className="card rise p-6 sm:p-8">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <section className="card rise p-5 sm:p-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-8">
+            {tech ? (
+              <TechLogo name={tech} mode="plate" size={72} className="hidden sm:grid" />
+            ) : null}
+
             <div className="min-w-0 flex-1">
-              <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.028em] sm:text-[30px]">
+              <p className="eyebrow">Continue learning</p>
+              <h2 className="mt-2 text-[24px] font-semibold leading-tight tracking-[-0.026em] sm:text-[28px]">
                 {next.lesson.title}
               </h2>
 
-              {/* Metadata reads as one quiet line, separated by dots rather
-                  than stacked, so it stays subordinate to the title. */}
-              <p className="text-meta mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="text-meta mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>{next.skill.title}</span>
                 <Dot />
                 <span>{next.lesson.estimatedMinutes} min remaining</span>
@@ -96,16 +150,21 @@ export default async function DashboardPage() {
                 )}
               </p>
 
-              <div className="progress mt-6 max-w-md">
-                <div
-                  className="progress-bar"
-                  style={{ width: `${skillPct}%` }}
-                  role="progressbar"
-                  aria-valuenow={Math.round(skillPct)}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`${next.skill.title}, lesson ${lessonIndex} of ${lessonTotal}`}
-                />
+              <div className="mt-5 flex max-w-md items-center gap-3">
+                <div className="progress flex-1">
+                  <div
+                    className="progress-bar"
+                    style={{ width: `${skillPct}%` }}
+                    role="progressbar"
+                    aria-valuenow={Math.round(skillPct)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${next.skill.title}, lesson ${lessonIndex} of ${lessonTotal}`}
+                  />
+                </div>
+                <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  {Math.round(skillPct)}%
+                </span>
               </div>
             </div>
 
@@ -114,6 +173,7 @@ export default async function DashboardPage() {
               className="btn btn-primary btn-lg shrink-0 self-start lg:self-auto"
             >
               {next.lesson.gateDone > 0 ? "Resume" : "Start"}
+              <ArrowRight size={16} />
             </Link>
           </div>
         </section>
@@ -137,10 +197,27 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* ---------------------------------------------------------- Signals
-          Four facts, one height, one type size, one icon treatment. Nothing
-          here is coloured, because none of these four is more urgent than the
-          others and colour would claim otherwise. */}
+      {/* ------------------------------------------------------------- Path */}
+      {steps.length > 1 && (
+        <section className="card p-5 sm:p-6">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="title-section">Your path</h2>
+            <Link href="/learning/roadmap" className="btn btn-ghost btn-sm">
+              Full roadmap
+            </Link>
+          </div>
+
+          {/* Horizontal scroll rather than wrap: a path is a sequence, and
+              wrapping it onto a second line breaks the one thing it is for. */}
+          <ol className="scrollbar-none mt-6 flex gap-2 overflow-x-auto pb-1">
+            {steps.map((step, i) => (
+              <PathStep key={step.id} step={step} index={i} last={i === steps.length - 1} />
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* ---------------------------------------------------------- Signals */}
       <section
         className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
         aria-label="Progress summary"
@@ -176,7 +253,6 @@ export default async function DashboardPage() {
 
       {/* -------------------------------------------------- Activity + rail */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.62fr)_minmax(0,1fr)]">
-        {/* ------------------------------------------------------- Activity */}
         <section className="card flex flex-col p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -192,8 +268,6 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          {/* Bars, not a line: the data is discrete daily totals, and a line
-              between them would imply values that were never measured. */}
           <div className="chart mt-8 flex-1" style={{ minHeight: 148 }}>
             <div className="chart-grid" aria-hidden>
               <span />
@@ -230,24 +304,44 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* ------------------------------------------------------------ Rail
-            Three small utility cards, stacked. Each is a label, a fact, and at
-            most one way in. None of them carries an icon tile: at this size a
-            tile is 32px of chrome around 16px of content. */}
+        {/* ------------------------------------------------------------ Rail */}
         <div className="flex flex-col gap-4">
-          <RailCard title="Revision queue" href={dueCount ? "/review" : undefined} cta="Start review">
-            {dueCount === 0 ? (
-              <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
-                Nothing due. Master a lesson and it comes back tomorrow.
-              </p>
-            ) : (
-              <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
-                <span className="num font-medium" style={{ color: "var(--text)" }}>
-                  {dueCount}
-                </span>{" "}
-                {dueCount === 1 ? "lesson is" : "lessons are"} ready to be re-tested.
-              </p>
-            )}
+          <RailCard title="Today">
+            <ul className="-mx-2 flex flex-col">
+              {today.map((t) => (
+                <li key={t.href}>
+                  <Link
+                    href={t.href}
+                    className="row-link flex items-center gap-3 px-2 py-2 text-[13px]"
+                  >
+                    <span
+                      className="grid h-[16px] w-[16px] shrink-0 place-items-center rounded-[5px]"
+                      style={{ border: "1px solid var(--border-strong)" }}
+                      aria-hidden
+                    />
+                    <span className="min-w-0 flex-1 truncate">{t.label}</span>
+                    <span className="shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                      {t.meta}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </RailCard>
+
+          <RailCard title="Revision queue" href={dueCount ? "/review" : undefined} cta="Start">
+            <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>
+              {dueCount === 0 ? (
+                "Nothing due. Master a lesson and it comes back tomorrow."
+              ) : (
+                <>
+                  <span className="num font-medium" style={{ color: "var(--text)" }}>
+                    {dueCount}
+                  </span>{" "}
+                  {dueCount === 1 ? "lesson is" : "lessons are"} ready to be re-tested.
+                </>
+              )}
+            </p>
           </RailCard>
 
           <RailCard title="Recent notes" href="/notes" cta="View all">
@@ -290,15 +384,128 @@ export default async function DashboardPage() {
           </RailCard>
         </div>
       </div>
+
+      {/* ------------------------------------------------------ Recommended */}
+      <section>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="title-section">Courses to look at</h2>
+          <Link href="/learning" className="btn btn-ghost btn-sm">
+            Browse all
+          </Link>
+        </div>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {recommended.map((course) => (
+            <Link
+              key={course.slug}
+              href={`/learning/course/${course.slug}`}
+              className="card card-link flex h-full flex-col p-4"
+            >
+              <TechLogo name={course.tech!} mode="plate" size={40} />
+              <p className="mt-4 text-[14px] font-medium leading-snug">{course.title}</p>
+              <p className="text-meta mt-1.5 line-clamp-2 text-[12px]">{course.tagline}</p>
+              <p className="text-meta mt-auto pt-4 text-[12px]">
+                {course.level} · {course.hours}h
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
 
+/* --------------------------------------------------------------- Path step */
+
 /**
- * A rail card. Deliberately spare: a 13px label, the content, and an optional
- * text link in the header rather than a button in the footer, which keeps the
- * card the height of what is actually in it.
+ * One rung of the ladder. Four states, and each one is legible without colour:
+ * done carries a tick, current carries the accent ring, upcoming is a number,
+ * locked is a padlock. Colour only reinforces what the shape already says.
  */
+function PathStep({
+  step,
+  index,
+  last,
+}: {
+  step: {
+    title: string;
+    locked: boolean;
+    done: number;
+    total: number;
+    current: boolean;
+    tech: string | null;
+  };
+  index: number;
+  last: boolean;
+}) {
+  const complete = step.done >= step.total && step.total > 0;
+
+  return (
+    <li className="flex min-w-[132px] flex-1 shrink-0 flex-col items-center gap-2.5 text-center">
+      <div className="flex w-full items-center gap-2">
+        {/* The connector before this node, so the line sits between nodes
+            rather than hanging off the end of the last one. */}
+        <span
+          className="h-px flex-1"
+          style={{ background: index === 0 ? "transparent" : "var(--border)" }}
+          aria-hidden
+        />
+
+        <span
+          className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-[12px] font-medium"
+          style={{
+            background: complete ? "var(--primary)" : "var(--surface-2)",
+            border: `1px solid ${step.current ? "var(--primary)" : complete ? "var(--primary)" : "var(--border)"}`,
+            boxShadow: step.current ? "0 0 0 3px var(--primary-faint)" : undefined,
+            color: complete
+              ? "var(--primary-ink)"
+              : step.locked
+                ? "var(--text-faint)"
+                : "var(--text-muted)",
+          }}
+        >
+          {complete ? (
+            <Check size={15} strokeWidth={2.5} />
+          ) : step.locked ? (
+            <Lock size={13} />
+          ) : step.tech ? (
+            <TechLogo name={step.tech} size={16} mode="mono" />
+          ) : (
+            index + 1
+          )}
+        </span>
+
+        <span
+          className="h-px flex-1"
+          style={{ background: last ? "transparent" : "var(--border)" }}
+          aria-hidden
+        />
+      </div>
+
+      <span className="w-full px-1">
+        <span
+          className="block truncate text-[12.5px] font-medium"
+          style={{ color: step.current || complete ? "var(--text)" : "var(--text-muted)" }}
+          title={step.title}
+        >
+          {step.title}
+        </span>
+        <span className="mt-0.5 block text-[11.5px]" style={{ color: "var(--text-faint)" }}>
+          {step.locked
+            ? "Locked"
+            : complete
+              ? "Complete"
+              : step.current
+                ? "In progress"
+                : `${step.done}/${step.total}`}
+        </span>
+      </span>
+    </li>
+  );
+}
+
+/* --------------------------------------------------------------- Rail card */
+
 function RailCard({
   title,
   href,
@@ -331,7 +538,6 @@ function RailCard({
   );
 }
 
-/** The separator between metadata fields. */
 function Dot() {
   return (
     <span aria-hidden style={{ color: "var(--text-faint)", opacity: 0.6 }}>

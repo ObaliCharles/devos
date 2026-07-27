@@ -12,6 +12,7 @@ import {
   Search,
 } from "lucide-react";
 import { DISCOVER_FALLBACK, type DiscoverItem, type DiscoverKind } from "@/lib/learn-content";
+import { TechLogo, inferTech } from "./tech-logo";
 
 /**
  * Discover: one search bar over everything you can learn or build.
@@ -23,12 +24,19 @@ import { DISCOVER_FALLBACK, type DiscoverItem, type DiscoverKind } from "@/lib/l
  * real route. Results re-group live into the five kinds as you type.
  */
 
-const KINDS: { kind: DiscoverKind; plural: string; icon: React.ReactNode; accent: string }[] = [
-  { kind: "Course", plural: "Courses", icon: <BookOpen size={13} />, accent: "var(--info)" },
-  { kind: "Project", plural: "Projects", icon: <FolderGit2 size={13} />, accent: "var(--primary)" },
-  { kind: "Roadmap", plural: "Roadmaps", icon: <Route size={13} />, accent: "var(--success)" },
-  { kind: "Certification", plural: "Certifications", icon: <Award size={13} />, accent: "var(--warning)" },
-  { kind: "Assessment", plural: "Assessments", icon: <ClipboardList size={13} />, accent: "var(--danger)" },
+/**
+ * The five columns. Each used to carry its own accent colour, which made this
+ * panel a five-hue rainbow the moment it had results in every column. The
+ * column heading is already the label; a colour saying the same thing twice is
+ * decoration. Where a row is about a real technology it gets that
+ * technology's actual logo instead, which is information rather than tint.
+ */
+const KINDS: { kind: DiscoverKind; plural: string; icon: React.ReactNode }[] = [
+  { kind: "Course", plural: "Courses", icon: <BookOpen size={13} /> },
+  { kind: "Project", plural: "Projects", icon: <FolderGit2 size={13} /> },
+  { kind: "Roadmap", plural: "Roadmaps", icon: <Route size={13} /> },
+  { kind: "Certification", plural: "Certifications", icon: <Award size={13} /> },
+  { kind: "Assessment", plural: "Assessments", icon: <ClipboardList size={13} /> },
 ];
 
 const TABS: (DiscoverKind | "All")[] = [
@@ -198,37 +206,39 @@ export function Discover() {
           {visibleGroups.map((g) => (
             <div key={g.kind} className="p-4 sm:p-5" style={{ background: "var(--surface)" }}>
               <div className="mb-3 flex items-center justify-between">
-                <span
-                  className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.06em]"
-                  style={{ color: g.accent }}
-                >
+                <span className="overline flex items-center gap-1.5">
                   {g.icon} {g.plural}
                 </span>
-                <span className="text-meta text-[11px]">{g.items.length}</span>
+                <span className="text-meta num text-[11px]">{g.items.length}</span>
               </div>
               <ul className="flex flex-col gap-1">
-                {g.items.map((item) => (
-                  <li key={`${item.kind}-${item.title}`}>
-                    <Link
-                      href={item.href}
-                      className="row-link flex w-full items-center gap-3 p-2 text-left"
-                    >
-                      <span
-                        className="grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-tile)]"
-                        style={{
-                          background: `color-mix(in srgb, ${g.accent} 14%, transparent)`,
-                          color: g.accent,
-                        }}
+                {g.items.map((item) => {
+                  // The technology's own mark where there is one, the column's
+                  // glyph where there is not.
+                  const tech = inferTech(item.title, item.tags?.join(" "));
+                  return (
+                    <li key={`${item.kind}-${item.title}`}>
+                      <Link
+                        href={item.href}
+                        className="row-link flex w-full items-center gap-3 p-2 text-left"
                       >
-                        {g.icon}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-[13px] font-medium">{item.title}</span>
-                        <span className="text-meta block truncate text-[11.5px]">{item.level}</span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                        {tech ? (
+                          <TechLogo name={tech} mode="plate" size={32} />
+                        ) : (
+                          <span className="icon-tile">{g.icon}</span>
+                        )}
+                        <span className="min-w-0">
+                          <span className="block truncate text-[13px] font-medium">
+                            {item.title}
+                          </span>
+                          <span className="text-meta block truncate text-[11.5px]">
+                            {item.level}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

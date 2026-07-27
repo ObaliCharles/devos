@@ -95,6 +95,7 @@ export async function generateRoadmapAction(input: GenerateInput) {
           estimatedMinutes: lesson.estimatedMinutes,
           body: lesson.body,
           quiz: lesson.quiz,
+          tasks: lesson.tasks,
           xp: 50,
         });
         lessonCount += 1;

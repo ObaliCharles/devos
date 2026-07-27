@@ -12,6 +12,7 @@ import { NoteComposer } from "@/components/note-composer";
 import { AiPanel } from "@/components/ai-panel";
 import { TimeTracker } from "@/components/time-tracker";
 import { IconTile, PageHeader } from "@/components/ui";
+import { Challenges } from "@/components/learn/challenges";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
     body: string;
     exercise?: { brief?: string; acceptance?: string[] };
     quiz?: Question[];
+    tasks?: { level: 1 | 2 | 3; prompt: string; hint?: string }[];
   }>();
   if (!lesson) notFound();
 
@@ -99,6 +101,13 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
           <article className="card prose-doc p-5 sm:p-8">
             <Markdown remarkPlugins={[remarkGfm]}>{lesson.body}</Markdown>
           </article>
+
+          {/* Generated lessons carry practice tasks now, and they render with
+              the same component the catalog courses use — one practice
+              experience across the product, not two. */}
+          {lesson.tasks && lesson.tasks.length > 0 && (
+            <Challenges challenges={lesson.tasks} />
+          )}
 
           {lesson.exercise?.brief && (
             <Requirement id="exercise" eyebrow="Requirement 3" title="Exercise">
