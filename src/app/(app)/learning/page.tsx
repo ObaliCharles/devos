@@ -13,7 +13,7 @@ import {
   Target,
   Trophy,
   Zap } from "lucide-react";
-import { requireUser } from "@/lib/user";
+import { requireUser, levelFromXp } from "@/lib/user";
 import {
   countDueReviews,
   findNextLesson,
@@ -22,6 +22,7 @@ import {
   getCatalogProgressMap,
   getCertificates,
   getProjectStats,
+  getProjects,
   getRoadmap,
   getUserCounts,
   listRoadmaps } from "@/lib/queries";
@@ -36,6 +37,7 @@ import { RoadmapCard } from "@/components/learn/roadmap-card";
 import { Discover } from "@/components/learn/discover";
 import { LearnMobile } from "@/components/learn/learn-mobile";
 import { LearnTop } from "@/components/learn/learn-top";
+import { LearnBands } from "@/components/learn/learn-blocks";
 import { Heatmap } from "@/components/heatmap";
 import { Ring } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
@@ -60,7 +62,7 @@ export default async function LearningPage() {
 
   // One coordinated read across the learning, analytics, project and career
   // modules. Each is defensive so a missing collection never blanks the page.
-  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress, dueCount] =
+  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress, dueCount, projects] =
     await Promise.all([
       getRoadmap(user._id).catch(() => null),
       listRoadmaps(user._id).catch(() => []),
@@ -71,6 +73,7 @@ export default async function LearningPage() {
       getCertificates(user._id).catch(() => []),
       getCatalogProgressMap(user._id, COURSES.map((c) => c.slug)).catch(() => ({})),
       countDueReviews(user._id).catch(() => 0),
+      getProjects(user._id).catch(() => []),
     ]);
 
   const next = findNextLesson(roadmap);
@@ -178,6 +181,41 @@ export default async function LearningPage() {
         }
         dueCount={dueCount}
         openProjects={projectStats?.active ?? 0}
+      />
+
+      {/* ============================================== 2. The reference bands
+          Roadmap · Projects · Courses · Certifications, then
+          Progress · AI mentor · Career journey. All real data. */}
+      <LearnBands
+        phases={
+          roadmap?.phases.map((ph) => ({
+            id: ph.id,
+            title: ph.title,
+            pct:
+              ph.totalLessons > 0 ? Math.round((ph.masteredLessons / ph.totalLessons) * 100) : 0,
+            locked: ph.locked,
+            current: next ? ph.skills.some((sk) => sk.id === next.skill.id) : false,
+          })) ?? []
+        }
+        pathTitle={roadmap?.title ?? "No path yet"}
+        pathPct={activePct}
+        projects={projects.map((pr) => ({
+          id: pr.id,
+          title: pr.title,
+          status: pr.status,
+          tasks: pr.tasks,
+          tasksDone: pr.tasksDone,
+        }))}
+        courseProgress={catalogProgress}
+        earnedCertNames={certs.map((c) => c.name)}
+        level={levelFromXp(xp).level}
+        levelTitle={levelFromXp(xp).title}
+        xp={xp}
+        into={levelFromXp(xp).into}
+        need={levelFromXp(xp).need}
+        streak={streak}
+        badgesEarned={achievements.filter((a) => a.unlocked).length}
+        badgesTotal={achievements.length}
       />
 
       {/* ========================================== 3. Popular roadmaps */}

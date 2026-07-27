@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function ChatPage({
   searchParams,
 }: {
-  searchParams: Promise<{ c?: string }>;
+  searchParams: Promise<{ c?: string; q?: string }>;
 }) {
-  const { c } = await searchParams;
+  const { c, q } = await searchParams;
   const user = await requireUser();
 
   const [conversations, active] = await Promise.all([
@@ -38,6 +38,7 @@ export default async function ChatPage({
         conversations={conversations}
         active={active}
         configured={isConfigured()}
+        initialPrompt={q?.slice(0, 500) ?? ""}
       />
     </div>
   );

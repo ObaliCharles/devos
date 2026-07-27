@@ -94,16 +94,22 @@ export function AiChat({
   conversations,
   active,
   configured,
+  initialPrompt = "",
 }: {
   conversations: ConversationSummary[];
   active: ActiveConversation;
   configured: boolean;
+  /** Seeded from ?q= so a prompt chip elsewhere lands with the box filled.
+   *  Deliberately NOT auto-sent: arriving to find a question already asked on
+   *  your behalf is startling, and the whole point of the chips is to save
+   *  typing, not to take the decision. */
+  initialPrompt?: string;
 }) {
   const router = useRouter();
   const [, start] = useTransition();
 
   const [messages, setMessages] = useState<Message[]>(active?.messages ?? []);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialPrompt);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [streamed, setStreamed] = useState("");
