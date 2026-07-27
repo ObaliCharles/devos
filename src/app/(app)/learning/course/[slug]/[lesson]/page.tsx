@@ -10,6 +10,7 @@ import { ExplainLesson } from "@/components/learn/explain-lesson";
 import { LessonQuiz } from "@/components/learn/lesson-quiz";
 import { CompleteLesson } from "@/components/learn/complete-lesson";
 import { Challenges } from "@/components/learn/challenges";
+import { LessonToc, extractHeadings, markdownHeadings } from "@/components/learn/lesson-toc";
 
 // Reads per-user progress, so it renders per request rather than at build time.
 export const dynamic = "force-dynamic";
@@ -43,13 +44,21 @@ export default async function CourseLessonPage({
   const completed = await getCatalogProgress(user._id, course.slug).catch(() => []);
   const doneSet = new Set(completed);
 
+  // Parsed on the server so the rail and the body render in the same pass.
+  const headings = extractHeadings(current.body ?? "");
+  // The lessons either side of this one inside the same module, for the rail's
+  // outline. Showing the whole course there would be a second navigation.
+  const siblings = all.filter((l) => l.moduleIndex === current.moduleIndex);
+
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx < all.length - 1 ? all[idx + 1] : null;
   // Course progress by lessons actually completed, not just position reached.
   const progressPct = Math.round((completed.length / all.length) * 100);
 
   return (
-    <div className="page-body measure-reading pb-10">
+    <div className="grid gap-6 pb-10 lg:grid-cols-[minmax(0,1fr)_232px]">
+      {/* ------------------------------------------------------ main column */}
+      <div className="page-body min-w-0">
       {/* Back to the course overview */}
       <Link
         href={`/learning/course/${course.slug}`}
@@ -93,7 +102,9 @@ export default async function CourseLessonPage({
 
       {/* Lesson content — stored, loads instantly */}
       <article className="card prose-doc p-5 sm:p-8">
-        <Markdown remarkPlugins={[remarkGfm]}>{current.body ?? ""}</Markdown>
+        <Markdown remarkPlugins={[remarkGfm]} components={markdownHeadings}>
+          {current.body ?? ""}
+        </Markdown>
       </article>
 
       {/* Go deeper with the tutor, right here, no navigation */}
@@ -193,6 +204,56 @@ export default async function CourseLessonPage({
       <p className="text-meta flex items-center justify-center gap-1.5">
         <Clock size={12} /> About {current.minutes} minutes · {course.title}
       </p>
+      </div>
+
+      {/* ------------------------------------------------------------- rail
+          Sticky, and hidden below lg where there is no room for a second
+          column — on a phone the outline is the course page, one tap away. */}
+      <aside className="hidden lg:block">
+        <div className="sticky top-4 flex flex-col gap-6">
+          <LessonToc headings={headings} />
+
+          <nav aria-labelledby="module-heading">
+            <p className="overline" id="module-heading">
+              {current.moduleTitle}
+            </p>
+            <ul className="mt-2.5 flex flex-col gap-0.5">
+              {siblings.map((l) => {
+                const here = l.index === idx;
+                const done = doneSet.has(l.index);
+                return (
+                  <li key={l.index}>
+                    <Link
+                      href={`/learning/course/${course.slug}/${l.index + 1}`}
+                      aria-current={here ? "page" : undefined}
+                      className="row-link flex items-start gap-2 px-2 py-1.5 text-[12.5px]"
+                      style={{
+                        background: here ? "var(--neutral-faint)" : undefined,
+                        color: here ? "var(--text)" : "var(--text-muted)",
+                      }}
+                    >
+                      <span className="mt-[3px] shrink-0" aria-hidden>
+                        {done ? (
+                          <Check size={11} style={{ color: "var(--success)" }} />
+                        ) : (
+                          <span
+                            className="block h-[7px] w-[7px] rounded-full"
+                            style={{
+                              background: here ? "var(--primary)" : "transparent",
+                              border: here ? undefined : "1px solid var(--border-strong)",
+                            }}
+                          />
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1 leading-snug">{l.title}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+      </aside>
     </div>
   );
 }
