@@ -19,12 +19,14 @@ import {
   findNextLesson,
   getAchievements,
   getActivityStrip,
+  getCatalogProgressMap,
   getCertificates,
   getRoadmap,
   getUserCounts,
 } from "@/lib/queries";
-import { COURSES } from "@/lib/catalog";
+import { COURSES, lessonCount } from "@/lib/catalog";
 import { TechLogo, inferTech } from "@/components/learn/tech-logo";
+import { DashboardMobile } from "@/components/dashboard-mobile";
 import { EmptyState } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 
@@ -52,13 +54,16 @@ export default async function DashboardPage() {
   const xp = user.xp ?? 0;
   const streak = user.currentStreak ?? 0;
 
-  const [roadmap, dueCount, strip, counts, achievements, certs] = await Promise.all([
+  const [roadmap, dueCount, strip, counts, achievements, certs, catalogProgress] = await Promise.all([
     getRoadmap(user._id).catch(() => null),
     countDueReviews(user._id).catch(() => 0),
     getActivityStrip(user._id, 14).catch(() => []),
     getUserCounts(user._id, xp, streak).catch(() => null),
     getAchievements(user._id, xp, streak).catch(() => []),
     getCertificates(user._id).catch(() => []),
+    getCatalogProgressMap(user._id, COURSES.map((c) => c.slug)).catch(
+      () => ({}) as Record<string, number>,
+    ),
   ]);
 
   const next = findNextLesson(roadmap);
@@ -101,6 +106,35 @@ export default async function DashboardPage() {
         current: next ? p.skills.some((s) => s.id === next.skill.id) : false,
       };
     }) ?? [];
+
+  /* ---- Mobile-only derivations -------------------------------------------
+     The phone dashboard shows "courses completed" and "time left in this
+     skill", neither of which the desktop band needs. Both are computed from
+     data already loaded, so the mobile view costs exactly one extra query. */
+  const coursesCompleted = COURSES.filter((c) => {
+    const total = lessonCount(c);
+    return total > 0 && (catalogProgress[c.slug] ?? 0) >= total;
+  }).length;
+
+  const skillMinutesLeft = next
+    ? next.skill.lessons
+        .filter((l) => l.state !== "mastered")
+        .reduce((n, l) => n + l.estimatedMinutes, 0)
+    : 0;
+
+  /* Phase nodes, restated as the rail states the mobile stepper draws. */
+  const mobileSteps = phases.map((p) => ({
+    id: p.id,
+    title: p.title,
+    pct: p.pct,
+    state: (p.pct === 100
+      ? "done"
+      : p.locked
+        ? "locked"
+        : p.current
+          ? "current"
+          : "todo") as "done" | "locked" | "current" | "todo",
+  }));
 
   /* ---- Today: only rows the app can actually check off ------------------- */
   const today = [
@@ -146,7 +180,48 @@ export default async function DashboardPage() {
   const recommended = COURSES.filter((c) => c.tech).slice(0, 4);
 
   return (
-    <div className="page-body">
+    <>
+      {/* ============================================================== MOBILE
+          The same information, re-authored for a phone. Renders only below lg;
+          the desktop band below takes over from there. */}
+      <div className="lg:hidden">
+        <DashboardMobile
+          name={user.name?.split(" ")[0] || "Developer"}
+          streak={streak}
+          hoursThisWeek={hrs(thisWeek)}
+          coursesCompleted={coursesCompleted}
+          xp={xp}
+          next={
+            next
+              ? {
+                  lessonId: next.lesson.id,
+                  lessonTitle: next.lesson.title,
+                  skillTitle: next.skill.title,
+                  minutesLeft: skillMinutesLeft,
+                  skillPct,
+                  tech,
+                  started: next.lesson.gateDone > 0,
+                }
+              : null
+          }
+          path={roadmap ? { title: roadmap.title, origin: roadmap.origin } : null}
+          steps={mobileSteps}
+          pathPct={pathPct}
+          tasks={today.map((t) => ({ href: t.href, label: t.label, sub: t.sub, meta: t.meta }))}
+          level={level}
+          recommended={recommended.map((c) => ({
+            slug: c.slug,
+            title: c.title,
+            tech: c.tech,
+            level: c.level,
+            hours: c.hours,
+          }))}
+          achievementsEarned={achievements.filter((a) => a.unlocked).length}
+        />
+      </div>
+
+      {/* ============================================================= DESKTOP */}
+      <div className="page-body hidden lg:flex">
       {/* ============================================================ Greeting */}
       <header className="rise">
         <h1 className="title-page">{greeting()}, {user.name?.split(" ")[0] || "Developer"}</h1>
@@ -571,7 +646,8 @@ export default async function DashboardPage() {
           }
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
