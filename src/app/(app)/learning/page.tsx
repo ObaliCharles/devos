@@ -26,7 +26,7 @@ import {
   getRoadmap,
   getUserCounts,
   listRoadmaps } from "@/lib/queries";
-import { COURSES } from "@/lib/catalog";
+import { COURSES, PROJECTS as CATALOG_PROJECTS, lessonCount } from "@/lib/catalog";
 import { isConfigured } from "@/lib/ai";
 import { ROADMAP_META } from "@/lib/learn-content";
 import { ContentIcon } from "@/components/learn/icon";
@@ -35,7 +35,7 @@ import { RoadmapSearch } from "@/components/learn/roadmap-search";
 import { CurriculumBuilder } from "@/components/learn/curriculum-builder";
 import { RoadmapCard } from "@/components/learn/roadmap-card";
 import { Discover } from "@/components/learn/discover";
-import { LearnMobile } from "@/components/learn/learn-mobile";
+import { LearnMobileHome } from "@/components/learn/learn-mobile-home";
 import { LearnTop } from "@/components/learn/learn-top";
 import { LearnBands } from "@/components/learn/learn-blocks";
 import { Heatmap } from "@/components/heatmap";
@@ -43,6 +43,16 @@ import { Ring } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
 
 export const dynamic = "force-dynamic";
+
+/** The stored status, said the way a person would read it on a card. */
+const PROJECT_STATUS: Record<string, string> = {
+  planning: "Planning",
+  building: "In progress",
+  testing: "Testing",
+  deployed: "Deployed",
+  paused: "Paused",
+  complete: "Complete",
+};
 
 /**
  * The Learn hub, wired to real data.
@@ -71,7 +81,9 @@ export default async function LearningPage() {
       getUserCounts(user._id, xp, streak).catch(() => null),
       getProjectStats(user._id).catch(() => null),
       getCertificates(user._id).catch(() => []),
-      getCatalogProgressMap(user._id, COURSES.map((c) => c.slug)).catch(() => ({})),
+      getCatalogProgressMap(user._id, COURSES.map((c) => c.slug)).catch(
+        () => ({}) as Record<string, number>,
+      ),
       countDueReviews(user._id).catch(() => 0),
       getProjects(user._id).catch(() => []),
     ]);
@@ -117,11 +129,70 @@ export default async function LearningPage() {
 
   const completedPct = totalLessons > 0 ? Math.round((lessonsMastered / totalLessons) * 100) : 0;
 
-  // Per-roadmap progress for the mobile list: only the active path has a real
-  // number to show; the rest read 0 until followed.
-  const mobileRoadmaps = roadmaps.map((r) => ({
-    ...r,
-    pct: r.active ? activePct : 0 }));
+  /* ---- Mobile Learn ------------------------------------------------------
+     The phone opens on your own path rather than on the catalogue, so it needs
+     the remainder of the current skill and three short rails. All of it comes
+     from data this page already loads. */
+  const mobileLessonsLeft = next
+    ? next.skill.lessons.filter((l) => l.state !== "mastered").length
+    : 0;
+  const mobileSkillMinutesLeft = next
+    ? next.skill.lessons
+        .filter((l) => l.state !== "mastered")
+        .reduce((n, l) => n + l.estimatedMinutes, 0)
+    : 0;
+  const mobileSkillPct = next
+    ? Math.round(
+        (next.skill.lessons.filter((l) => l.state === "mastered").length /
+          Math.max(1, next.skill.lessons.length)) * 100,
+      )
+    : 0;
+
+  // Only the active path has a real number to show; the rest read 0 until
+  // followed.
+  const mobileRoadmapCards = roadmaps.slice(0, 8).map((r) => ({
+    id: r.id,
+    title: r.title,
+    icon: (ROADMAP_META[r.title] ?? ROADMAP_META._default).icon,
+    lessons: r.lessons,
+    pct: r.active ? activePct : 0,
+    active: r.active,
+  }));
+
+  /* Your own projects first — they are the ones with real progress — then
+     catalogue briefs to fill the rail, marked as what they are: not started. */
+  const mobileProjectCards = [
+    ...projects.slice(0, 4).map((p) => ({
+      key: `own-${p.id}`,
+      href: `/projects/${p.id}`,
+      title: p.title,
+      icon: "FolderGit2",
+      status: PROJECT_STATUS[p.status] ?? "In progress",
+      pct: p.tasks > 0 ? Math.round((p.tasksDone / p.tasks) * 100) : 0,
+    })),
+    ...CATALOG_PROJECTS.slice(0, 4).map((p) => ({
+      key: `brief-${p.slug}`,
+      href: `/learning/project/${p.slug}`,
+      title: p.title,
+      tech: p.tech,
+      icon: p.icon,
+      status: "Not started",
+      pct: null,
+    })),
+  ].slice(0, 6);
+
+  const mobileCourseCards = COURSES.slice(0, 8).map((c) => {
+    const total = lessonCount(c);
+    const done = catalogProgress[c.slug] ?? 0;
+    return {
+      slug: c.slug,
+      title: c.title,
+      tech: c.tech,
+      icon: c.icon,
+      level: c.level,
+      pct: total > 0 ? Math.round((done / total) * 100) : 0,
+    };
+  });
 
   return (
     <>
@@ -129,25 +200,39 @@ export default async function LearningPage() {
           A compact, list-first experience: tabs, chips, tight rows. Renders
           only below lg; the desktop hub below takes over from there. */}
       <div className="page-body pb-8 lg:hidden">
-        <LearnMobile
-          roadmaps={mobileRoadmaps}
-          metaFor={ROADMAP_META}
-          courseProgress={catalogProgress}
+        <LearnMobileHome
+          name={user.name?.split(" ")[0] || "Developer"}
+          next={
+            next
+              ? {
+                  id: next.lesson.id,
+                  lessonTitle: next.lesson.title,
+                  skillTitle: next.skill.title,
+                  minutesLeft: mobileSkillMinutesLeft,
+                  lessonsLeft: mobileLessonsLeft,
+                  skillPct: mobileSkillPct,
+                  tech: inferTech(next.skill.title, next.phase.title, next.lesson.title),
+                  started: next.lesson.gateDone > 0,
+                }
+              : null
+          }
+          dueCount={dueCount}
+          openProjects={projectStats?.active ?? 0}
+          path={roadmap ? { title: roadmap.title, pct: activePct } : null}
+          steps={pathSteps}
+          roadmaps={mobileRoadmapCards}
+          projects={mobileProjectCards}
+          courses={mobileCourseCards}
         />
 
-        <section id="build-mobile" className="section-stack scroll-mt-4">
+        <section id="build" className="section-stack scroll-mt-4">
           <div>
-            <h2 className="text-[22px] font-bold tracking-[-0.025em]">Build your own path</h2>
+            <h2 className="text-[22px] font-bold tracking-[-0.025em]">Build with AI</h2>
             <p className="text-body mt-1 text-[14px]">
-              Tell AI who you want to become and it writes a real curriculum.
+              Create a personalised curriculum in minutes.
             </p>
           </div>
           <CurriculumBuilder configured={configured} />
-        </section>
-
-        <section className="section-stack">
-          <h2 className="text-[22px] font-bold tracking-[-0.025em]">Discover</h2>
-          <Discover />
         </section>
       </div>
 

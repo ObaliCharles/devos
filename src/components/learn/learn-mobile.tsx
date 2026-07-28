@@ -42,13 +42,16 @@ export function LearnMobile({
   roadmaps,
   metaFor,
   courseProgress = {},
+  initialTab = "Roadmaps",
 }: {
   roadmaps: RoadmapRow[];
   metaFor: Record<string, RoadmapMeta>;
   /** courseSlug -> lessons completed, for the per-course progress bar. */
   courseProgress?: Record<string, number>;
+  /** Which tab opens first, so a rail's "See all" lands on its own list. */
+  initialTab?: Tab;
 }) {
-  const [tab, setTab] = useState<Tab>("Roadmaps");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [track, setTrack] = useState<string>("All");
   const [query, setQuery] = useState("");
 
@@ -65,8 +68,10 @@ export function LearnMobile({
     <div className="flex flex-col gap-4">
       {/* Page heading */}
       <div className="rise">
-        <h1 className="title-page">Learn</h1>
-        <p className="text-body mt-1 text-[14px]">Explore roadmaps and start your journey.</p>
+        <h1 className="title-page">Browse</h1>
+        <p className="text-body mt-1 text-[14px]">
+          Every roadmap, course, project and certification in one list.
+        </p>
       </div>
 
       {/* Search */}
@@ -117,16 +122,11 @@ export function LearnMobile({
       {tab === "Projects" && <ProjectList track={track} q={q} />}
       {tab === "Certifications" && <CertList track={track} q={q} />}
 
-      {/* Assessment CTA */}
+      {/* Assessment CTA. The builder lives on the Learn page itself, so this
+          navigates there rather than scrolling to a section that is no longer
+          on this route. */}
       <Reveal className="mt-1">
-        <Link
-          href="#build"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById("build-mobile")?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className="card card-link flex items-center gap-4 p-4"
-        >
+        <Link href="/learning#build" className="card card-link flex items-center gap-4 p-4">
           <span className="icon-tile icon-tile-lg">
             <TrendingUp size={20} />
           </span>
