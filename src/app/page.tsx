@@ -121,8 +121,8 @@ export default function Landing() {
           renders on top of it, which is what the component's children slot is
           for. Nothing about the message was traded for the animation. */}
       <ParticleHero particleCount={13}>
-      <section className="mx-auto grid w-full items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:py-24" style={{ maxWidth: 1200 }}>
-        <div className="rise">
+      <section className="mx-auto flex w-full flex-col items-center px-5 py-20 text-center sm:px-8 lg:py-28" style={{ maxWidth: 880 }}>
+        <div className="rise flex flex-col items-center">
           <span className="badge badge-lg">
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--primary)" }} aria-hidden />
             The operating system for developers
@@ -143,12 +143,12 @@ export default function Landing() {
             ))}
           </p>
 
-          <p className="text-body mt-6 max-w-[52ch] text-[16px]">
+          <p className="text-body mt-6 max-w-[54ch] text-[16px]">
             DeveloperOS guides you from your first line of code to shipping production-ready software
             through missions, projects and structured learning paths.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/sign-up" className="btn btn-primary btn-lg">
               Get Started <ArrowRight size={16} />
             </Link>
@@ -156,10 +156,6 @@ export default function Landing() {
               Explore Roadmaps
             </Link>
           </div>
-        </div>
-
-        <div className="rise">
-          <DashboardPreview />
         </div>
       </section>
       </ParticleHero>

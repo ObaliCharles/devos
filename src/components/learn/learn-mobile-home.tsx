@@ -1,14 +1,19 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Award,
   BookOpen,
+  Check,
   ChevronRight,
   ClipboardCheck,
   Clock,
   Code2,
   FolderGit2,
   Play,
+  Sparkles,
   Target,
+  Trophy,
+  Zap,
 } from "lucide-react";
 import { ContentIcon } from "./icon";
 import { PathRail, type PathStep } from "./path-rail";
@@ -71,8 +76,25 @@ type CourseCard = {
   pct: number;
 };
 
+type CertCard = {
+  slug: string;
+  title: string;
+  provider: string;
+  icon: string;
+  earned: boolean;
+};
+
+type Progress = {
+  completedPct: number;
+  lessons: [number, number];
+  projects: [number, number];
+  certs: number;
+  challenges: number;
+  badgesEarned: number;
+  badgesTotal: number;
+};
+
 export function LearnMobileHome({
-  name,
   next,
   dueCount,
   openProjects,
@@ -81,8 +103,9 @@ export function LearnMobileHome({
   roadmaps,
   projects,
   courses,
+  certifications,
+  progress,
 }: {
-  name: string;
   next: Next | null;
   dueCount: number;
   openProjects: number;
@@ -91,15 +114,18 @@ export function LearnMobileHome({
   roadmaps: RoadmapCard[];
   projects: ProjectCard[];
   courses: CourseCard[];
+  certifications: CertCard[];
+  progress: Progress;
 }) {
   return (
     <div className="flex flex-col gap-6">
-      {/* ============================================================ Greeting */}
+      {/* ============================================================== Heading
+          No greeting here. The dashboard already greets you by name, and a
+          second "Good morning" one tap later is noise — this page's job is to
+          get you back into the lesson, so it says what the page is and stops. */}
       <header className="rise">
-        <h1 className="text-[24px] font-bold leading-tight tracking-[-0.03em]">
-          {greeting()}, {name}
-        </h1>
-        <p className="text-body mt-1 text-[14px]">Let&apos;s continue your learning journey.</p>
+        <h1 className="text-[24px] font-bold leading-tight tracking-[-0.03em]">Learn</h1>
+        <p className="text-body mt-1 text-[14px]">Pick up where you left off.</p>
       </header>
 
       {/* =================================================== Continue learning */}
@@ -392,6 +418,124 @@ export function LearnMobileHome({
         </Rail>
       </section>
 
+      {/* ================================================= Certifications rail
+          The fourth catalogue the desktop hub carries and the phone did not.
+          A cert you have already earned says so rather than inviting you to
+          start it again. */}
+      {certifications.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <RailHeader title="Certifications" href="/learning/browse?tab=certifications" />
+          <Rail>
+            {certifications.map((c, i) => (
+              <Reveal as="li" index={i} key={c.slug} className="shrink-0">
+                <Link
+                  href="/career/certificates"
+                  className="card card-link flex h-full w-[190px] flex-col p-3.5"
+                >
+                  <span className={`icon-tile ${c.earned ? "icon-tile-primary" : ""}`}>
+                    <ContentIcon name={c.icon} size={16} />
+                  </span>
+                  <span className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug">
+                    {c.title}
+                  </span>
+                  <span className="text-meta mt-1 text-[12px]">{c.provider}</span>
+                  <span className="mt-auto pt-3">
+                    {c.earned ? (
+                      <span className="badge badge-primary">
+                        <Check size={10} /> Earned
+                      </span>
+                    ) : (
+                      <span className="badge">Not started</span>
+                    )}
+                  </span>
+                </Link>
+              </Reveal>
+            ))}
+          </Rail>
+        </section>
+      )}
+
+      {/* ======================================================= Your progress
+          The desktop hub ends on a progress overview; the phone had nothing
+          equivalent, so the page never answered "how far in am I overall".
+          Every figure is a real count, not a target nobody set. */}
+      <Reveal>
+        <div className="card p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-[16px] font-bold tracking-[-0.02em]">Your progress</h2>
+            <Link
+              href="/analytics"
+              className="inline-flex items-center gap-0.5 text-[12px] font-medium"
+              style={{ color: "var(--primary)" }}
+            >
+              Details <ChevronRight size={13} />
+            </Link>
+          </div>
+
+          <div className="mt-3 flex items-center gap-2">
+            <div className="progress progress-lg flex-1">
+              <div className="progress-bar" style={{ width: `${progress.completedPct}%` }} />
+            </div>
+            <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+              {progress.completedPct}%
+            </span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+            <Stat
+              icon={<BookOpen size={14} />}
+              value={`${progress.lessons[0]}/${progress.lessons[1]}`}
+              label="Lessons mastered"
+            />
+            <Stat
+              icon={<FolderGit2 size={14} />}
+              value={`${progress.projects[0]}/${progress.projects[1]}`}
+              label="Projects done"
+            />
+            <Stat icon={<Award size={14} />} value={`${progress.certs}`} label="Certificates" />
+            <Stat
+              icon={<Zap size={14} />}
+              value={`${progress.challenges}`}
+              label="Challenges solved"
+            />
+          </div>
+
+          <Link
+            href="/analytics/achievements"
+            className="row-link -mx-2 mt-3 flex items-center gap-3 px-2 py-2"
+          >
+            <span className="icon-tile">
+              <Trophy size={15} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-medium">Achievements</span>
+              <span className="text-meta block text-[12px]">
+                {progress.badgesEarned} of {progress.badgesTotal} earned
+              </span>
+            </span>
+            <ChevronRight size={16} style={{ color: "var(--text-faint)" }} />
+          </Link>
+        </div>
+      </Reveal>
+
+      {/* ============================================================ AI mentor
+          On desktop this is a whole band. On a phone it is one row that opens
+          the assistant — the point is that it is reachable from Learn at all. */}
+      <Reveal>
+        <Link href="/ai/chat" className="card card-link flex items-center gap-3.5 p-4">
+          <span className="icon-tile icon-tile-lg icon-tile-primary">
+            <Sparkles size={18} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[14px] font-semibold">Ask the AI mentor</span>
+            <span className="text-meta mt-0.5 block text-[12px]">
+              It can see your lessons, notes and projects.
+            </span>
+          </span>
+          <ChevronRight size={18} style={{ color: "var(--text-faint)" }} />
+        </Link>
+      </Reveal>
+
       {/* Browse everything — the catalogue this page used to be. */}
       <Reveal>
         <Link href="/learning/browse" className="card card-link flex items-center gap-3.5 p-4">
@@ -432,6 +576,26 @@ function RailHeader({ title, href }: { title: string; href: string }) {
 function Rail({ children }: { children: React.ReactNode }) {
   return (
     <ul className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 pb-1">{children}</ul>
+  );
+}
+
+function Stat({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="icon-tile">{icon}</span>
+      <span className="min-w-0">
+        <span className="num block text-[15px] font-semibold leading-none">{value}</span>
+        <span className="text-meta mt-1 block truncate text-[12px]">{label}</span>
+      </span>
+    </div>
   );
 }
 
@@ -476,10 +640,3 @@ function fmtDuration(minutes: number) {
   return rest === 0 ? `${h}h` : `${h}h ${rest}m`;
 }
 
-/** Server-side clock, so the greeting matches the server's day. */
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}

@@ -28,6 +28,7 @@ import { COURSES, lessonCount } from "@/lib/catalog";
 import { TechLogo, inferTech } from "@/components/learn/tech-logo";
 import { DashboardMobile } from "@/components/dashboard-mobile";
 import { EmptyState } from "@/components/ui";
+import { Greeting } from "@/components/greeting";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -224,7 +225,7 @@ export default async function DashboardPage() {
       <div className="page-body hidden lg:flex">
       {/* ============================================================ Greeting */}
       <header className="rise">
-        <h1 className="title-page">{greeting()}, {user.name?.split(" ")[0] || "Developer"}</h1>
+        <Greeting name={user.name?.split(" ")[0] || "Developer"} className="title-page" />
         <p className="text-body mt-1 text-[14px]">
           {next
             ? `You're ${lessonTotal - lessonIndex + 1} lesson${lessonTotal - lessonIndex + 1 === 1 ? "" : "s"} from finishing ${next.skill.title}.`
@@ -649,14 +650,6 @@ export default async function DashboardPage() {
       </div>
     </>
   );
-}
-
-/** Server-side clock, so the greeting matches the server's day, not a stale render. */
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
 }
 
 /**

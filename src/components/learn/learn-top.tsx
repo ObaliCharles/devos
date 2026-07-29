@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Check, Clock, Code2, ClipboardCheck, Lock, Target } from "lucide-react";
 import { TechLogo, TECH_WITH_LOGO, inferTech } from "./tech-logo";
+import { Greeting } from "@/components/greeting";
 
 /**
  * The top of the Learn page, built to the reference layout.
@@ -63,9 +64,7 @@ export function LearnTop({
     <div className="flex flex-col gap-5">
       {/* ------------------------------------------------------------ Greeting */}
       <header className="rise">
-        <h1 className="title-page">
-          {greeting()}, {name}
-        </h1>
+        <Greeting name={name} className="title-page" />
         <p className="text-body mt-1 text-[14px]">Ready to build your future?</p>
       </header>
 
@@ -311,13 +310,6 @@ function GoalRow({
       </Link>
     </li>
   );
-}
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
 }
 
 /** Re-exported so the page can build steps without importing the logo module. */

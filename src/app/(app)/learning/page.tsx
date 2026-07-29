@@ -26,7 +26,7 @@ import {
   getRoadmap,
   getUserCounts,
   listRoadmaps } from "@/lib/queries";
-import { COURSES, PROJECTS as CATALOG_PROJECTS, lessonCount } from "@/lib/catalog";
+import { CERTIFICATIONS, COURSES, PROJECTS as CATALOG_PROJECTS, lessonCount } from "@/lib/catalog";
 import { isConfigured } from "@/lib/ai";
 import { ROADMAP_META } from "@/lib/learn-content";
 import { ContentIcon } from "@/components/learn/icon";
@@ -181,6 +181,15 @@ export default async function LearningPage() {
     })),
   ].slice(0, 6);
 
+  const earnedCertNames = new Set(certs.map((c) => c.name));
+  const mobileCertCards = CERTIFICATIONS.slice(0, 8).map((c) => ({
+    slug: c.slug,
+    title: c.title,
+    provider: c.provider,
+    icon: c.icon,
+    earned: earnedCertNames.has(c.title),
+  }));
+
   const mobileCourseCards = COURSES.slice(0, 8).map((c) => {
     const total = lessonCount(c);
     const done = catalogProgress[c.slug] ?? 0;
@@ -201,7 +210,6 @@ export default async function LearningPage() {
           only below lg; the desktop hub below takes over from there. */}
       <div className="page-body pb-8 lg:hidden">
         <LearnMobileHome
-          name={user.name?.split(" ")[0] || "Developer"}
           next={
             next
               ? {
@@ -223,7 +231,22 @@ export default async function LearningPage() {
           roadmaps={mobileRoadmapCards}
           projects={mobileProjectCards}
           courses={mobileCourseCards}
+          certifications={mobileCertCards}
+          progress={{
+            completedPct,
+            lessons: [lessonsMastered, totalLessons],
+            projects: [projectsDone, projectsTotal],
+            certs: certsEarned,
+            challenges: counts?.challengesSolved ?? 0,
+            badgesEarned: achievements.filter((a) => a.unlocked).length,
+            badgesTotal: achievements.length,
+          }}
         />
+
+        <section className="section-stack">
+          <h2 className="text-[22px] font-bold tracking-[-0.025em]">Discover</h2>
+          <Discover />
+        </section>
 
         <section id="build" className="section-stack scroll-mt-4">
           <div>

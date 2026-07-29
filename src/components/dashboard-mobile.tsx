@@ -16,6 +16,7 @@ import {
 import { TechLogo, TECH_WITH_LOGO } from "@/components/learn/tech-logo";
 import { Ring } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
+import { Greeting } from "@/components/greeting";
 
 /**
  * The dashboard as it reads on a phone.
@@ -110,9 +111,7 @@ export function DashboardMobile({
           {/* 24px, not the 28px page title: the streak pill has to sit beside
               this on a 390px screen, and a title that wraps to two lines pushes
               everything below the fold before you have read a single number. */}
-          <h1 className="text-[24px] font-bold leading-tight tracking-[-0.03em]">
-            {greeting()}, {name}
-          </h1>
+          <Greeting name={name} className="text-[24px] font-bold leading-tight tracking-[-0.03em]" />
           <p className="text-body mt-1 text-[14px]">
             {next
               ? `Pick up where you left off in ${next.skillTitle}.`
@@ -552,10 +551,3 @@ function fmtHours(hours: number) {
   return Number.isInteger(hours) ? `${hours}` : hours.toFixed(1);
 }
 
-/** Server-side clock, so the greeting matches the server's day. */
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
