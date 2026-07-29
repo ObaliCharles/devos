@@ -20,6 +20,8 @@ import {
   Twitter,
 } from "lucide-react";
 import { LogoTile, Wordmark } from "@/components/brand";
+import { SiteNavbar } from "@/components/marketing/site-navbar";
+import { ParticleHero } from "@/components/marketing/particle-hero";
 import { Reveal } from "@/components/reveal";
 
 /**
@@ -32,14 +34,6 @@ import { Reveal } from "@/components/reveal";
  * describing it. Everything reads a design token, so it matches the app shell
  * exactly and flips to light mode with it.
  */
-
-const NAV = [
-  { label: "Roadmaps", href: "/sign-in" },
-  { label: "Projects", href: "/sign-in" },
-  { label: "Pricing", href: "/sign-in" },
-  { label: "Docs", href: "/sign-in" },
-  { label: "About", href: "/sign-in" },
-];
 
 const STATS = [
   { value: "15+", label: "Learning Journeys" },
@@ -120,35 +114,13 @@ export default function Landing() {
   return (
     <main className="min-h-screen">
       {/* ================================================================ Nav */}
-      <header className="glass sticky top-0 z-30 border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="mx-auto flex h-16 w-full items-center justify-between px-5 sm:px-8" style={{ maxWidth: 1200 }}>
-          <Link href="/" aria-label="DeveloperOS home">
-            <Wordmark size="sm" />
-          </Link>
-          <nav className="hidden items-center gap-1 md:flex">
-            {NAV.map((n) => (
-              <Link
-                key={n.label}
-                href={n.href}
-                className="rounded-[var(--radius-control)] px-3 py-2 text-[14px] font-medium transition-colors"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/sign-in" className="btn btn-ghost btn-sm">
-              Sign in
-            </Link>
-            <Link href="/sign-up" className="btn btn-primary btn-sm">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteNavbar />
 
-      {/* ============================================================== Hero */}
+      {/* ============================================================== Hero
+          The particle field is the backdrop; the copy below is unchanged and
+          renders on top of it, which is what the component's children slot is
+          for. Nothing about the message was traded for the animation. */}
+      <ParticleHero particleCount={13}>
       <section className="mx-auto grid w-full items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:py-24" style={{ maxWidth: 1200 }}>
         <div className="rise">
           <span className="badge badge-lg">
@@ -190,6 +162,7 @@ export default function Landing() {
           <DashboardPreview />
         </div>
       </section>
+      </ParticleHero>
 
       {/* ============================================================= Stats */}
       <section className="border-y" style={{ borderColor: "var(--border)" }}>
