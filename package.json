@@ -13,7 +13,7 @@
     "smoke": "SMOKE_MONGODB_URI=${SMOKE_MONGODB_URI:-mongodb://127.0.0.1:27017/developeros_smoke} tsx --tsconfig tsconfig.smoke.json scripts/smoke.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@anthropic-ai/sdk": "^0.115.0",
     "@clerk/nextjs": "^6.9.6",
     "framer-motion": "^12.42.2",
     "lucide-react": "^0.468.0",

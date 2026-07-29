@@ -26,7 +26,13 @@ export type Usage = { input: number; output: number };
 
 export type StreamResult = { text: string; usage: Usage; provider: Provider };
 
-export const ANTHROPIC_MODEL = "claude-sonnet-4-5";
+/**
+ * Claude Opus 5. The model matters here beyond quality: the web-search server
+ * tool used to ground curriculum generation (see `researchResources`) is only
+ * available on current models, so the old sonnet-4-5 pin made grounding
+ * impossible rather than merely worse.
+ */
+export const ANTHROPIC_MODEL = "claude-opus-5";
 
 /** Groq's current general-purpose instruct model. Fast, and free to test on. */
 export const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -244,6 +250,149 @@ async function streamGroq({
   }
 
   return { text, usage, provider: "groq" };
+}
+
+/* -------------------------------------------------------------- Grounding */
+
+/** One real thing a learner can open: the docs page, the course, the video. */
+export type Resource = {
+  title: string;
+  url: string;
+  kind: "docs" | "course" | "video" | "article" | "repo";
+  /** Why this one and not the other forty. */
+  note: string;
+};
+
+export type ResearchResult = { resources: Resource[]; usage: Usage };
+
+/**
+ * Find what the internet actually recommends for a subject, before writing a
+ * single lesson.
+ *
+ * This is the difference between a curriculum and a plausible-sounding list of
+ * headings. Asked cold, a model writes the roadmap it remembers — which means
+ * last year's tooling, a library that has since been deprecated, and links that
+ * 404. Here the model searches first and the results are carried into every
+ * later prompt, so lesson order follows the order the official documentation
+ * teaches in and every citation is a page that resolves.
+ *
+ * Anthropic-only by design: `web_search` is a server tool that runs on
+ * Anthropic's side, and Groq has no equivalent. A Groq-only install still
+ * generates paths, just ungrounded — the caller is told which it got so the UI
+ * can say so rather than implying a citation that was never checked.
+ */
+export async function researchResources({
+  topic,
+  goal,
+  level,
+  style,
+  maxSearches = 5,
+}: {
+  topic: string;
+  goal: string;
+  level: string;
+  /** Videos / Reading / Interactive / Mixed — steers what counts as a good source. */
+  style?: string;
+  maxSearches?: number;
+}): Promise<ResearchResult> {
+  if (!hasAnthropic()) return { resources: [], usage: { input: 0, output: 0 } };
+
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 1 });
+
+  const prefer =
+    style === "Videos"
+      ? "Favour high-quality video courses and conference talks, but always include the official documentation."
+      : style === "Interactive"
+        ? "Favour interactive tutorials, playgrounds and exercise sets, but always include the official documentation."
+        : style === "Reading"
+          ? "Favour written documentation, books and long-form articles."
+          : "Mix official documentation, one respected course, and one or two strong written guides.";
+
+  const message = await client.messages.create({
+    model: ANTHROPIC_MODEL,
+    max_tokens: 4000,
+    // The research step is short and its output is a list, not an argument.
+    // Low effort keeps it from turning five searches into fifteen.
+    output_config: { effort: "low" },
+    tools: [{ type: "web_search_20260209", name: "web_search", max_uses: maxSearches }],
+    system: `You research learning resources for a curriculum designer.
+
+Search the web for what is actually recommended for this subject today, then return the best sources. ${prefer}
+
+Rules:
+- Prefer canonical and primary sources: the official docs, the maintainers' own guide, the standard reference.
+- Every URL must be one you saw in a search result. Never invent or guess a URL.
+- Reject anything you cannot date to a currently-maintained version of the technology.
+- Between 4 and 8 resources. Fewer good ones beats a padded list.
+
+Output ONLY valid JSON, no prose and no markdown fences:
+{"resources":[{"title":string,"url":string,"kind":"docs"|"course"|"video"|"article"|"repo","note":string}]}
+
+"note" is one short sentence on what this source is best for.`,
+    messages: [
+      {
+        role: "user",
+        content: `Subject: ${topic}\nLearner's goal: ${goal}\nCurrent level: ${level}\n\nResearch and return the JSON now.`,
+      },
+    ],
+  });
+
+  const text = message.content
+    .map((b) => (b.type === "text" ? b.text : ""))
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    resources: parseResources(text),
+    usage: {
+      input: message.usage?.input_tokens ?? 0,
+      output: message.usage?.output_tokens ?? 0,
+    },
+  };
+}
+
+/**
+ * Read the resource list out of the reply, dropping anything malformed.
+ *
+ * Deliberately lenient: research is an enhancement to generation, not a gate on
+ * it. A garbled list costs the path its citations, never the path itself.
+ */
+function parseResources(text: string): Resource[] {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end <= start) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return [];
+  }
+
+  const rows = (parsed as { resources?: unknown[] })?.resources;
+  if (!Array.isArray(rows)) return [];
+
+  const kinds = new Set(["docs", "course", "video", "article", "repo"]);
+  const seen = new Set<string>();
+  const out: Resource[] = [];
+
+  for (const row of rows) {
+    const r = row as Partial<Resource>;
+    const url = String(r?.url ?? "").trim();
+    const title = String(r?.title ?? "").trim();
+    // A citation that is not an http(s) URL is not a citation.
+    if (!title || !/^https?:\/\//i.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    out.push({
+      title: title.slice(0, 160),
+      url,
+      kind: (kinds.has(String(r?.kind)) ? r!.kind : "article") as Resource["kind"],
+      note: String(r?.note ?? "").trim().slice(0, 240),
+    });
+    if (out.length >= 8) break;
+  }
+
+  return out;
 }
 
 /* ----------------------------------------------------------- Non-streaming */

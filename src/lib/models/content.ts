@@ -25,7 +25,25 @@ const RoadmapSchema = new Schema(
       topic: String,
       goal: String,
       level: { type: String, enum: ["beginner", "intermediate", "advanced"] },
+      months: Number,
+      hoursPerDay: Number,
+      style: String,
     },
+    /**
+     * The sources the generator searched for and grounded the path in. Stored
+     * so the path can show its work: "this is where the curriculum came from"
+     * is the difference between a citation and a claim.
+     */
+    resources: [
+      {
+        title: String,
+        url: String,
+        kind: { type: String, enum: ["docs", "course", "video", "article", "repo"] },
+        note: String,
+      },
+    ],
+    /** False when no provider could search, so the UI never implies grounding. */
+    grounded: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

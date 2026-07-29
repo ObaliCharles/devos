@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { completeChat } from "./ai-provider";
+import { completeChat, researchResources, type Resource } from "./ai-provider";
+import { planShape } from "./plan-shape";
 
 /**
  * Turning a topic and a goal into a full learning path.
@@ -89,7 +90,33 @@ export type GenerateInput = {
   level: "beginner" | "intermediate" | "advanced";
   /** Optional pasted context, a syllabus, job description, notes. */
   context?: string;
+  /** How long the learner has. Drives how many lessons the path is worth. */
+  months?: number;
+  /** Hours per day they can actually give it. The other half of the budget. */
+  hoursPerDay?: number;
+  includeProjects?: boolean;
+  includeCertifications?: boolean;
+  /** Videos | Reading | Interactive | Mixed — steers which sources are cited. */
+  style?: string;
 };
+
+/**
+ * What the generator is doing right now.
+ *
+ * Generation takes a minute or more and runs in four distinct stages, so the
+ * UI can say which one rather than spinning a wheel and hoping. `researching`
+ * carries the sources as they are found, because watching real URLs arrive is
+ * the only honest way to show that the grounding actually happened.
+ */
+export type GenerateProgress =
+  | { stage: "researching" }
+  | { stage: "researched"; resources: Resource[] }
+  | { stage: "outlining" }
+  | { stage: "outlined"; title: string; phases: number; lessons: number }
+  | { stage: "writing"; done: number; total: number; skill: string }
+  | { stage: "saving" };
+
+export type OnProgress = (event: GenerateProgress) => void;
 
 /* ------------------------------------------------------------------ Pass 1 */
 
@@ -126,11 +153,12 @@ Shape:
 }
 
 Rules:
-- Aim for 12 to 18 lessons total.
+- Hit the lesson count you are given. It is derived from how much time the learner actually has.
 - Tailor everything to the learner's topic and goal. Do NOT default to Python or AI unless they asked for it.
 - Follow the conventional teaching order for this subject — the order a well-regarded course or the official documentation would use, not an arbitrary one.
 - Every lesson title must name a specific, checkable capability. Reject any title you could copy into an unrelated course.
-- Order phases from fundamentals to advanced; later phases must build on earlier ones.`;
+- Order phases from fundamentals to advanced; later phases must build on earlier ones.
+- When you are given researched sources, let them set the shape: teach the concepts those sources treat as foundational, in the order they introduce them, using their vocabulary for things.`;
 
 /* ------------------------------------------------------------------ Pass 2 */
 
@@ -163,14 +191,45 @@ Quiz rules:
 Task rules:
 - 3 to 5 tasks. Level 1 is recall you can do straight after reading, level 2 combines two ideas, level 3 is a small problem where the approach is not handed to you.
 - Each task must be something you can actually sit down and do. State the input and what the finished result looks like.
-- Include at least one level 1 and at least one level 2.`;
+- Include at least one level 1 and at least one level 2.
 
-function buildOutlinePrompt(input: GenerateInput) {
+Source rules:
+- You may be given researched sources with real URLs. Where one is relevant, cite it inline in the body as a markdown link and say what to read there.
+- Only ever link a URL from that list. Never write a URL from memory — a link that 404s is worse than no link.`;
+
+/** The researched sources, formatted for a prompt. */
+function sourceBlock(resources: Resource[]) {
+  if (resources.length === 0) return "";
+  return [
+    "Researched sources — real, checked URLs. Ground the path in these:",
+    ...resources.map((r) => `- [${r.kind}] ${r.title} — ${r.url}${r.note ? ` (${r.note})` : ""}`),
+  ].join("\n");
+}
+
+function buildOutlinePrompt(input: GenerateInput, resources: Resource[]) {
+  const shape = planShape(input.months, input.hoursPerDay);
   const parts = [
     `Topic: ${input.topic}`,
     `Learner's goal: ${input.goal}`,
     `Current level: ${input.level}`,
+    `Time available: ${input.months ?? 6} months at ${input.hoursPerDay ?? 2} hours a day.`,
+    `Build exactly ${shape.phases} phases and about ${shape.lessons} lessons in total — that is what fits their time.`,
   ];
+  if (input.includeProjects) {
+    parts.push(
+      `The learner wants projects. Make at least ${shape.projects} lessons a build: the lesson title names the thing they ship.`,
+    );
+  }
+  if (input.includeCertifications) {
+    parts.push(
+      "The learner is working toward certifications. Where a real, recognised certification covers a phase, align that phase to its exam objectives and say so in the phase subtitle.",
+    );
+  }
+  if (input.style && input.style !== "Mixed") {
+    parts.push(`Preferred way of learning: ${input.style}.`);
+  }
+  const sources = sourceBlock(resources);
+  if (sources) parts.push(sources);
   if (input.context?.trim()) {
     parts.push(
       `Additional context to follow closely (a syllabus, job description, or notes the learner provided):\n${input.context.trim().slice(0, 6000)}`,
@@ -185,7 +244,9 @@ function buildContentPrompt(
   pathTitle: string,
   skill: { title: string; why: string; difficulty: string },
   lessons: { title: string; objectives: string[] }[],
+  resources: Resource[],
 ) {
+  const sources = sourceBlock(resources);
   return [
     `Learning path: ${pathTitle}`,
     `Learner's goal: ${input.goal}. Current level: ${input.level}.`,
@@ -198,6 +259,7 @@ function buildContentPrompt(
           `${i + 1}. ${l.title}\n   Objectives: ${l.objectives.join("; ")}`,
       )
       .join("\n"),
+    ...(sources ? ["", sources] : []),
     "",
     "Return JSON only.",
   ].join("\n");
@@ -218,7 +280,7 @@ function extractJson(text: string): unknown {
 }
 
 export type GenerateResult =
-  | { ok: true; roadmap: GeneratedRoadmap; provider: string }
+  | { ok: true; roadmap: GeneratedRoadmap; provider: string; resources: Resource[] }
   | { ok: false; error: string };
 
 /**
@@ -240,13 +302,37 @@ const SkillContent = z.object({
     .default([]),
 });
 
-export async function generateRoadmap(input: GenerateInput): Promise<GenerateResult> {
+export async function generateRoadmap(
+  input: GenerateInput,
+  onProgress: OnProgress = () => {},
+): Promise<GenerateResult> {
+  /* ---- Pass 0: research ------------------------------------------------
+     Ungrounded generation is the failure this stage exists to prevent: a
+     roadmap that reads well and teaches last year's tooling. If the search
+     fails or the provider cannot search, generation continues unground rather
+     than failing — a path with no citations still teaches. */
+  onProgress({ stage: "researching" });
+  let resources: Resource[] = [];
+  try {
+    const research = await researchResources({
+      topic: input.topic,
+      goal: input.goal,
+      level: input.level,
+      style: input.style,
+    });
+    resources = research.resources;
+  } catch (err) {
+    console.warn("[roadmap-gen] research failed, continuing ungrounded:", err);
+  }
+  onProgress({ stage: "researched", resources });
+
   /* ---- Pass 1: the outline ------------------------------------------- */
+  onProgress({ stage: "outlining" });
   let reply;
   try {
     reply = await completeChat({
       system: OUTLINE_SYSTEM,
-      messages: [{ role: "user", content: buildOutlinePrompt(input) }],
+      messages: [{ role: "user", content: buildOutlinePrompt(input, resources) }],
       // An outline of ~15 lessons with no bodies is small. This is deliberately
       // generous rather than tight, so length is never the failure.
       maxTokens: 3000,
@@ -290,6 +376,14 @@ export async function generateRoadmap(input: GenerateInput): Promise<GenerateRes
   // staring at a spinner, in parallel it is one call's latency.
   const skills = roadmap.phases.flatMap((phase) => phase.skills);
 
+  onProgress({
+    stage: "outlined",
+    title: roadmap.title,
+    phases: roadmap.phases.length,
+    lessons: skills.reduce((n, s) => n + s.lessons.length, 0),
+  });
+
+  let written = 0;
   await Promise.all(
     skills.map(async (skill) => {
       try {
@@ -298,7 +392,7 @@ export async function generateRoadmap(input: GenerateInput): Promise<GenerateRes
           messages: [
             {
               role: "user",
-              content: buildContentPrompt(input, roadmap.title, skill, skill.lessons),
+              content: buildContentPrompt(input, roadmap.title, skill, skill.lessons, resources),
             },
           ],
           maxTokens: 4000,
@@ -327,6 +421,11 @@ export async function generateRoadmap(input: GenerateInput): Promise<GenerateRes
         // A skill whose content call failed keeps its outline and gets a
         // metadata body below. One bad call must not cost the whole path.
         console.error(`[roadmap-gen] content pass failed for "${skill.title}":`, err);
+      } finally {
+        // Reported in the finally so a failed skill still advances the bar —
+        // a progress indicator that stalls on an error is worse than none.
+        written += 1;
+        onProgress({ stage: "writing", done: written, total: skills.length, skill: skill.title });
       }
     }),
   );
@@ -348,7 +447,8 @@ export async function generateRoadmap(input: GenerateInput): Promise<GenerateRes
     }
   }
 
-  return { ok: true, roadmap, provider: reply.provider };
+  onProgress({ stage: "saving" });
+  return { ok: true, roadmap, provider: reply.provider, resources };
 }
 
 /**
