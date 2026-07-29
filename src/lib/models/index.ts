@@ -22,6 +22,8 @@
  *                    NetworkContact, CareerGoal
  *   productivity.ts  TimeEntry, FocusSession, Goal, Habit, Achievement,
  *                    CalendarEvent
+ *   community.ts     Group, GroupMember, Post, CommunityReply, Reaction,
+ *                    PostBookmark
  *
  * Two rules that hold across all of them:
  *
@@ -40,3 +42,4 @@ export * from "./practice";
 export * from "./ai";
 export * from "./career";
 export * from "./productivity";
+export * from "./community";

@@ -23,3 +23,4 @@ export * from "./calendar";
 export * from "./admin";
 export * from "./platform";
 export * from "./search";
+export * from "./community";

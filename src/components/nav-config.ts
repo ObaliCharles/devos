@@ -6,6 +6,7 @@ import {
   Dumbbell,
   FolderKanban,
   LayoutDashboard,
+  MessagesSquare,
   NotebookPen,
   RotateCcw,
   Settings,
@@ -41,6 +42,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/projects", label: "Projects", icon: FolderKanban },
       { href: "/ai", label: "AI Workspace", icon: Sparkles },
+      // Community sits in Build, not in its own group: you come here because
+      // you are stuck on something you are building, which is the same trip.
+      { href: "/community", label: "Community", icon: MessagesSquare },
     ],
   },
   {

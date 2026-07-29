@@ -30,3 +30,4 @@ export * from "./career";
 export * from "./productivity";
 export * from "./admin";
 export * from "./platform";
+export * from "./community";
