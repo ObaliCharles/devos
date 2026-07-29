@@ -67,3 +67,39 @@ export async function requireProjectAccess(
 export function can(access: Access, min: ProjectRole): boolean {
   return Boolean(access && ROLE_RANK[access.role] >= ROLE_RANK[min]);
 }
+
+/**
+ * Fetch a project-owned document and authorise it in one step.
+ *
+ * Every edit action used to filter `{ _id, user }` — the same conflation of
+ * ownership and authorisation the read side had. On a solo project it looked
+ * correct; on a team it meant a contributor could not touch a task the owner
+ * typed, which is the opposite of what joining a project is for.
+ *
+ * The doc carries `project`, so the check is: find it, then ask whether this
+ * person may write to the project it belongs to. Returns null on both "missing"
+ * and "not allowed" — callers already handle a null doc, and distinguishing the
+ * two would tell an unauthorised caller that the id exists.
+ */
+/* The project models are declared without Mongoose generics, so a document is
+   structurally an index signature here. Narrowing it further would mean typing
+   seven schemas twice; the callers already know their own fields. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+type ProjectDoc = {
+  project?: unknown;
+  save(): Promise<unknown>;
+  deleteOne(): Promise<unknown>;
+  [key: string]: any;
+};
+
+export async function docWithAccess(
+  Model: { findOne(filter: Record<string, unknown>): PromiseLike<ProjectDoc | null> },
+  id: string,
+  userId: unknown,
+  min: ProjectRole = "contributor",
+): Promise<ProjectDoc | null> {
+  const doc = await Model.findOne({ _id: id });
+  if (!doc) return null;
+  const access = await requireProjectAccess(userId, String(doc.project), min);
+  return access ? doc : null;
+}

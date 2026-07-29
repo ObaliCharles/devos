@@ -14,8 +14,10 @@ import {
   Task,
   TASK_STATUSES,
   TimeEntry,
+  ProjectMember,
 } from "../models";
 import { recordActivity, requireUser } from "../user";
+import { docWithAccess, requireProjectAccess, type ProjectRole } from "../project-access";
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -24,8 +26,19 @@ import { recordActivity, requireUser } from "../user";
  * check and the "does it exist" check in one, and it returns the project so a
  * caller cannot forget to scope the next query.
  */
-async function ownedProject(userId: unknown, projectId: string) {
-  const project = await Project.findOne({ _id: projectId, user: userId });
+/**
+ * The guard every write goes through. It was an ownership check; it is now a
+ * membership check, which is what makes a project writable by the people on it
+ * rather than only by whoever created it.
+ *
+ * It still throws rather than returning null: these are called at the top of
+ * mutations that have nothing sensible to do with a refusal, and a thrown error
+ * is the one thing an action cannot silently ignore.
+ */
+async function writableProject(userId: unknown, projectId: string, min: ProjectRole = "contributor") {
+  const access = await requireProjectAccess(userId, projectId, min);
+  if (!access) throw new Error("Project not found");
+  const project = await Project.findById(projectId);
   if (!project) throw new Error("Project not found");
   return project;
 }
@@ -85,6 +98,9 @@ export async function createProject(input: {
     status: "planning",
   });
 
+  // The owner is a membership row like everyone else — see project-access.ts.
+  await ProjectMember.create({ project: project._id, user: user._id, role: "owner" }).catch(() => {});
+
   // A project created from the wizard's feature list starts with the tasks
   // that list implies. An empty board is the most common reason a project
   // never gets a second visit.
@@ -129,7 +145,7 @@ export async function updateProject(
 ) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, projectId);
+  await writableProject(user._id, projectId);
 
   // Whitelist: server action arguments are JSON by the time they land, so
   // spreading `input` would let a caller set `user` and steal the project.
@@ -151,14 +167,15 @@ export async function updateProject(
 
   if (Object.keys(patch).length === 0) return;
 
-  await Project.updateOne({ _id: projectId, user: user._id }, { $set: patch });
+  if (!(await requireProjectAccess(user._id, projectId, "maintainer"))) return;
+  await Project.updateOne({ _id: projectId }, { $set: patch });
   revalidateProject(projectId);
 }
 
 export async function toggleProjectPin(projectId: string) {
   await connectDB();
   const user = await requireUser();
-  const project = await ownedProject(user._id, projectId);
+  const project = await writableProject(user._id, projectId);
   project.pinned = !project.pinned;
   await project.save();
   revalidatePath("/projects");
@@ -167,7 +184,7 @@ export async function toggleProjectPin(projectId: string) {
 export async function archiveProject(projectId: string, archived = true) {
   await connectDB();
   const user = await requireUser();
-  const project = await ownedProject(user._id, projectId);
+  const project = await writableProject(user._id, projectId);
   project.archived = archived;
   await project.save();
   await log(user._id, project._id, "project", archived ? "Archived" : "Restored");
@@ -178,18 +195,18 @@ export async function archiveProject(projectId: string, archived = true) {
 export async function deleteProject(projectId: string) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, projectId);
+  await writableProject(user._id, projectId, "owner");
 
   await Promise.all([
-    Task.deleteMany({ project: projectId, user: user._id }),
-    Milestone.deleteMany({ project: projectId, user: user._id }),
-    Bug.deleteMany({ project: projectId, user: user._id }),
-    Deployment.deleteMany({ project: projectId, user: user._id }),
-    ApiEndpoint.deleteMany({ project: projectId, user: user._id }),
-    SchemaDesign.deleteMany({ project: projectId, user: user._id }),
-    ActivityLog.deleteMany({ project: projectId, user: user._id }),
+    Task.deleteMany({ project: projectId }),
+    Milestone.deleteMany({ project: projectId }),
+    Bug.deleteMany({ project: projectId }),
+    Deployment.deleteMany({ project: projectId }),
+    ApiEndpoint.deleteMany({ project: projectId }),
+    SchemaDesign.deleteMany({ project: projectId }),
+    ActivityLog.deleteMany({ project: projectId }),
   ]);
-  await Project.deleteOne({ _id: projectId, user: user._id });
+  await Project.deleteOne({ _id: projectId });
 
   revalidatePath("/projects");
   return { ok: true as const };
@@ -209,7 +226,7 @@ export async function createTask(input: {
 }) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, input.projectId);
+  await writableProject(user._id, input.projectId);
 
   const title = input.title?.trim();
   if (!title) return { ok: false as const, message: "A task needs a title." };
@@ -248,7 +265,7 @@ export async function moveTask(taskId: string, status: string, beforeOrder?: num
   await connectDB();
   const user = await requireUser();
 
-  const task = await Task.findOne({ _id: taskId, user: user._id });
+  const task = await docWithAccess(Task, taskId, user._id);
   if (!task) return;
   if (!(TASK_STATUSES as readonly string[]).includes(status)) return;
 
@@ -293,7 +310,7 @@ export async function updateTask(
   await connectDB();
   const user = await requireUser();
 
-  const task = await Task.findOne({ _id: taskId, user: user._id });
+  const task = await docWithAccess(Task, taskId, user._id);
   if (!task) return;
 
   if (typeof input.title === "string" && input.title.trim()) task.title = input.title.trim();
@@ -324,7 +341,8 @@ export async function updateTask(
 export async function deleteTask(taskId: string) {
   await connectDB();
   const user = await requireUser();
-  const task = await Task.findOneAndDelete({ _id: taskId, user: user._id }).lean<{ project?: unknown } | null>();
+  const task = await docWithAccess(Task, taskId, user._id);
+  if (task) await task.deleteOne();
   if (!task?.project) return;
   await refreshCounts(task.project);
   revalidateProject(String(task.project));
@@ -334,7 +352,7 @@ export async function deleteTask(taskId: string) {
 export async function logProjectTime(projectId: string, minutes: number, taskId?: string) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, projectId);
+  await writableProject(user._id, projectId);
 
   const clamped = Math.max(1, Math.min(600, Math.round(minutes)));
   await TimeEntry.create({
@@ -346,7 +364,7 @@ export async function logProjectTime(projectId: string, minutes: number, taskId?
     task: taskId,
   });
   await Project.updateOne({ _id: projectId }, { $inc: { minutesSpent: clamped } });
-  if (taskId) await Task.updateOne({ _id: taskId, user: user._id }, { $inc: { actualMinutes: clamped } });
+  if (taskId) await Task.updateOne({ _id: taskId }, { $inc: { actualMinutes: clamped } });
 
   await recordActivity(user._id, { minutes: clamped });
   revalidateProject(projectId);
@@ -362,7 +380,7 @@ export async function createMilestone(input: {
 }) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, input.projectId);
+  await writableProject(user._id, input.projectId);
   if (!input.title?.trim()) return;
 
   const last = await Milestone.findOne({ project: input.projectId }).sort({ order: -1 }).lean<{ order?: number }>();
@@ -380,7 +398,7 @@ export async function createMilestone(input: {
 export async function setMilestoneStatus(milestoneId: string, status: string) {
   await connectDB();
   const user = await requireUser();
-  const milestone = await Milestone.findOne({ _id: milestoneId, user: user._id });
+  const milestone = await docWithAccess(Milestone, milestoneId, user._id);
   if (!milestone) return;
 
   milestone.status = status;
@@ -394,7 +412,8 @@ export async function setMilestoneStatus(milestoneId: string, status: string) {
 export async function deleteMilestone(milestoneId: string) {
   await connectDB();
   const user = await requireUser();
-  const m = await Milestone.findOneAndDelete({ _id: milestoneId, user: user._id }).lean<{ project?: unknown } | null>();
+  const m = await docWithAccess(Milestone, milestoneId, user._id);
+  if (m) await m.deleteOne();
   if (m?.project) {
     await Task.updateMany({ milestone: milestoneId }, { $unset: { milestone: 1 } });
     revalidateProject(String(m.project));
@@ -412,7 +431,7 @@ export async function createBug(input: {
 }) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, input.projectId);
+  await writableProject(user._id, input.projectId);
   if (!input.title?.trim()) return;
 
   await Bug.create({
@@ -430,7 +449,7 @@ export async function createBug(input: {
 export async function setBugStatus(bugId: string, status: string) {
   await connectDB();
   const user = await requireUser();
-  const bug = await Bug.findOne({ _id: bugId, user: user._id });
+  const bug = await docWithAccess(Bug, bugId, user._id);
   if (!bug) return;
 
   bug.status = status;
@@ -446,7 +465,8 @@ export async function setBugStatus(bugId: string, status: string) {
 export async function deleteBug(bugId: string) {
   await connectDB();
   const user = await requireUser();
-  const bug = await Bug.findOneAndDelete({ _id: bugId, user: user._id }).lean<{ project?: unknown } | null>();
+  const bug = await docWithAccess(Bug, bugId, user._id);
+  if (bug) await bug.deleteOne();
   if (bug?.project) {
     await refreshCounts(bug.project);
     revalidateProject(String(bug.project));
@@ -466,7 +486,7 @@ export async function createDeployment(input: {
 }) {
   await connectDB();
   const user = await requireUser();
-  const project = await ownedProject(user._id, input.projectId);
+  const project = await writableProject(user._id, input.projectId);
 
   await Deployment.create({
     project: input.projectId,
@@ -508,7 +528,7 @@ export async function saveEndpoint(input: {
 }) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, input.projectId);
+  await writableProject(user._id, input.projectId);
   if (!input.path?.trim()) return;
 
   const doc = {
@@ -524,7 +544,7 @@ export async function saveEndpoint(input: {
   };
 
   if (input.endpointId) {
-    await ApiEndpoint.updateOne({ _id: input.endpointId, user: user._id }, { $set: doc });
+    await ApiEndpoint.updateOne({ _id: input.endpointId }, { $set: doc });
   } else {
     const last = await ApiEndpoint.findOne({ project: input.projectId }).sort({ order: -1 }).lean<{ order?: number }>();
     await ApiEndpoint.create({ ...doc, project: input.projectId, user: user._id, order: (last?.order ?? -1) + 1 });
@@ -535,7 +555,8 @@ export async function saveEndpoint(input: {
 export async function deleteEndpoint(endpointId: string) {
   await connectDB();
   const user = await requireUser();
-  const e = await ApiEndpoint.findOneAndDelete({ _id: endpointId, user: user._id }).lean<{ project?: unknown } | null>();
+  const e = await docWithAccess(ApiEndpoint, endpointId, user._id);
+  if (e) await e.deleteOne();
   if (e?.project) revalidateProject(String(e.project));
 }
 
@@ -549,7 +570,7 @@ export async function saveSchemaDesign(input: {
 }) {
   await connectDB();
   const user = await requireUser();
-  await ownedProject(user._id, input.projectId);
+  await writableProject(user._id, input.projectId);
   if (!input.name?.trim()) return;
 
   const doc = {
@@ -560,7 +581,7 @@ export async function saveSchemaDesign(input: {
   };
 
   if (input.schemaId) {
-    await SchemaDesign.updateOne({ _id: input.schemaId, user: user._id }, { $set: doc });
+    await SchemaDesign.updateOne({ _id: input.schemaId }, { $set: doc });
   } else {
     const last = await SchemaDesign.findOne({ project: input.projectId }).sort({ order: -1 }).lean<{ order?: number }>();
     await SchemaDesign.create({ ...doc, project: input.projectId, user: user._id, order: (last?.order ?? -1) + 1 });
@@ -571,6 +592,7 @@ export async function saveSchemaDesign(input: {
 export async function deleteSchemaDesign(schemaId: string) {
   await connectDB();
   const user = await requireUser();
-  const s = await SchemaDesign.findOneAndDelete({ _id: schemaId, user: user._id }).lean<{ project?: unknown } | null>();
+  const s = await docWithAccess(SchemaDesign, schemaId, user._id);
+  if (s) await s.deleteOne();
   if (s?.project) revalidateProject(String(s.project));
 }

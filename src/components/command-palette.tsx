@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_LINKS, isExternal } from "@/lib/community-links";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -49,10 +50,10 @@ const PAGES: Page[] = [
   { label: "Projects", href: "/projects", icon: FolderKanban, keywords: "build kanban ship" },
   { label: "Find a project", href: "/projects/discover", icon: FolderKanban, keywords: "collaborate contribute join team open source" },
   { label: "AI Centre", href: "/ai", icon: Sparkles, keywords: "chat assistant claude" },
-  { label: "Discussions", href: "/community/discussions", icon: MessagesSquare, keywords: "community forum posts ask question help" },
-  { label: "Chat", href: "/community/chat", icon: MessagesSquare, keywords: "community rooms messages talk" },
+  { label: "Discussions", href: COMMUNITY_LINKS.discussions, icon: MessagesSquare, keywords: "community forum posts ask question help github" },
+  { label: "Chat", href: COMMUNITY_LINKS.discord, icon: MessagesSquare, keywords: "community rooms messages talk discord" },
   { label: "Arena", href: "/compete", icon: MessagesSquare, keywords: "compete duel ranked rating league leaderboard match" },
-  { label: "Groups", href: "/community/groups", icon: MessagesSquare, keywords: "community study group join rooms" },
+  
   { label: "Career", href: "/career", icon: Briefcase, keywords: "resume portfolio jobs ats" },
   { label: "Analytics", href: "/analytics", icon: BarChart3, keywords: "stats goals habits focus" },
   { label: "Calendar", href: "/calendar", icon: Calendar, keywords: "schedule events agenda" },
@@ -175,7 +176,14 @@ export function CommandPalette() {
 
   function go(row: Row) {
     setOpen(false);
-    router.push(row.kind === "page" ? row.href : row.hit.href);
+    const href = row.kind === "page" ? row.href : row.hit.href;
+    // Discord and GitHub are not routes. Pushing them through the App Router
+    // would 404 before the browser ever got a chance to leave.
+    if (isExternal(href)) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
+    router.push(href);
   }
 
   function onKeyDown(e: React.KeyboardEvent) {

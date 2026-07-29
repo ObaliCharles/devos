@@ -1,3 +1,4 @@
+import { COMMUNITY_LINKS } from "@/lib/community-links";
 import {
   BarChart3,
   BookOpen,
@@ -51,8 +52,9 @@ export const NAV_GROUPS: NavGroup[] = [
     // these two — one would just be a menu of the same links the sidebar is.
     heading: "Community",
     items: [
-      { href: "/community/discussions", label: "Discussions", icon: MessagesSquare },
-      { href: "/community/chat", label: "Chat", icon: Hash },
+      // Both leave the app. See lib/community-links.ts for why.
+      { href: COMMUNITY_LINKS.discussions, label: "Discussions", icon: MessagesSquare },
+      { href: COMMUNITY_LINKS.discord, label: "Chat", icon: Hash },
       { href: "/compete", label: "Arena", icon: Swords },
     ],
   },

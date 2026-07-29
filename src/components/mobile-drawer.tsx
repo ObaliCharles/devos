@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { isActive, navGroups, type SidebarUser } from "./nav-config";
+import { NavLink } from "./sidebar";
 import { Wordmark } from "./brand";
 
 /**
@@ -113,7 +114,7 @@ export function MobileDrawer({
                   const badge = href === "/review" && dueCount > 0 ? dueCount : null;
                   return (
                     <li key={href}>
-                      <Link
+                      <NavLink
                         href={href}
                         aria-current={active ? "page" : undefined}
                         className={`nav-row gap-3 px-2.5 text-[14px] ${
@@ -142,7 +143,7 @@ export function MobileDrawer({
                             {badge}
                           </span>
                         )}
-                      </Link>
+                      </NavLink>
                     </li>
                   );
                 })}

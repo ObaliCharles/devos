@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkButton } from "@/components/action-button";
 import { FileQuestion } from "lucide-react";
 import { StatusScreen } from "@/components/status-screens";
 
@@ -13,12 +14,12 @@ export default function NotFound() {
         body="The link may be stale or mistyped. Head back and start again."
         actions={
           <>
-            <Link href="/" className="btn btn-primary">
+            <LinkButton href="/" className="btn btn-primary">
               Back to home
-            </Link>
-            <Link href="/sign-in" className="btn btn-ghost">
+            </LinkButton>
+            <LinkButton href="/sign-in" className="btn btn-ghost">
               Sign in
-            </Link>
+            </LinkButton>
           </>
         }
       />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { LinkButton } from "@/components/action-button";
 import Link from "next/link";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import { StatusScreen } from "@/components/status-screens";
@@ -37,9 +38,9 @@ export default function AiError({
           <button onClick={reset} className="btn btn-primary">
             <RotateCw size={15} /> Try again
           </button>
-          <Link href="/dashboard" className="btn btn-ghost">
+          <LinkButton href="/dashboard" className="btn btn-ghost">
             Back to dashboard
-          </Link>
+          </LinkButton>
         </>
       }
     />

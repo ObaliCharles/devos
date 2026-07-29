@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ChevronsUpDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { LogoTile, Wordmark } from "./brand";
 import { isActive, navGroups, type SidebarUser } from "./nav-config";
+import { isExternal } from "@/lib/community-links";
 
 export type { SidebarUser };
 
@@ -126,7 +127,10 @@ export function Sidebar({
 
                 return (
                   <li key={href}>
-                    <Link
+                    {/* An external destination is a real anchor with a new tab,
+                        not a client-side Link: routing to Discord through the
+                        App Router would 404 before the browser ever saw it. */}
+                    <NavLink
                       href={href}
                       aria-current={active ? "page" : undefined}
                       // A CSS tooltip would be clipped by this nav's own scroll
@@ -181,7 +185,7 @@ export function Sidebar({
                             {badge}
                           </span>
                         ))}
-                    </Link>
+                    </NavLink>
                   </li>
                 );
               })}
@@ -261,5 +265,29 @@ export function Sidebar({
         </div>
       )}
     </aside>
+  );
+}
+
+/**
+ * One nav row, rendered as a `Link` inside the app and an `a` when it leaves it.
+ * Both navigations use this, so an external destination can never behave one way
+ * on desktop and another on a phone.
+ */
+export function NavLink({
+  href,
+  children,
+  ...rest
+}: React.ComponentProps<"a"> & { href: string }) {
+  if (isExternal(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} {...rest}>
+      {children}
+    </Link>
   );
 }

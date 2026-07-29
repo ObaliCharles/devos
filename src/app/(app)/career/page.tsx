@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkButton } from "@/components/action-button";
 import { Award, Briefcase, FileText, Globe, Route } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getCareerReadiness } from "@/lib/queries";
@@ -108,9 +109,9 @@ export default async function CareerOverviewPage() {
             Deploy two projects, publish a portfolio, and get your resume past 70%. The rest is
             applying.
           </p>
-          <Link href="/projects" className="btn btn-secondary mt-4">
+          <LinkButton href="/projects" className="btn btn-secondary mt-4">
             Go to projects
-          </Link>
+          </LinkButton>
         </div>
       </section>
     </div>

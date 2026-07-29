@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkButton } from "@/components/action-button";
 import type { ReactNode } from "react";
 
 /**
@@ -228,8 +229,8 @@ export function PageSkeleton() {
 
 export function HomeLink() {
   return (
-    <Link href="/dashboard" className="btn btn-primary">
+    <LinkButton href="/dashboard" className="btn btn-primary">
       Back to dashboard
-    </Link>
+    </LinkButton>
   );
 }
