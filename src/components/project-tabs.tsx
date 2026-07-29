@@ -11,6 +11,8 @@ const TABS = [
   { segment: "api", label: "API" },
   { segment: "bugs", label: "Bugs" },
   { segment: "deployments", label: "Deployments" },
+  { segment: "team", label: "Team" },
+  { segment: "chat", label: "Chat" },
   { segment: "settings", label: "Settings" },
 ];
 

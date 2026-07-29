@@ -32,3 +32,5 @@ export * from "./admin";
 export * from "./platform";
 export * from "./community";
 export * from "./profile";
+export * from "./collaboration";
+export * from "./people";

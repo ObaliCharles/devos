@@ -1,4 +1,5 @@
 import { connectDB } from "../db";
+import { getProjectAccess } from "../project-access";
 import {
   ActivityLog,
   ApiEndpoint,
@@ -10,6 +11,7 @@ import {
   Skill,
   Task,
   FileAsset,
+  ProjectMember,
 } from "../models";
 
 /**
@@ -60,7 +62,13 @@ function toCard(p: Record<string, unknown>): ProjectCard {
 
 export async function getProjects(userId: unknown, opts: { archived?: boolean } = {}) {
   await connectDB();
-  const rows = await Project.find({ user: userId, archived: opts.archived ?? false })
+  // Projects you own *or* joined. Two ids in one $or beats two queries stitched
+  // together, and keeps the sort a single indexed pass.
+  const joined = await ProjectMember.find({ user: userId }).select("project").lean();
+  const rows = await Project.find({
+    $or: [{ user: userId }, { _id: { $in: joined.map((m) => m.project) } }],
+    archived: opts.archived ?? false,
+  })
     .sort({ pinned: -1, updatedAt: -1 })
     .populate({ path: "skills", model: Skill, select: "title" })
     .lean();
@@ -111,7 +119,11 @@ export type ProjectDoc = {
 /** The project workspace header, one read, used by every sub-page. */
 export async function getProject(userId: unknown, projectId: string) {
   await connectDB();
-  const project = await Project.findOne({ _id: projectId, user: userId })
+  // Membership, not ownership. `getProjectAccess` self-heals older projects
+  // that predate ProjectMember, so this stays true for every existing row.
+  const access = await getProjectAccess(userId, projectId);
+  if (!access) return null;
+  const project = await Project.findOne({ _id: projectId })
     .populate({ path: "skills", model: Skill, select: "title difficulty" })
     .lean<ProjectDoc | null>();
   return project;
@@ -119,7 +131,7 @@ export async function getProject(userId: unknown, projectId: string) {
 
 export async function getProjectBoard(userId: unknown, projectId: string) {
   await connectDB();
-  const tasks = await Task.find({ project: projectId, user: userId })
+  const tasks = await Task.find({ project: projectId })
     .sort({ status: 1, order: 1 })
     .lean();
   return tasks;
@@ -128,13 +140,13 @@ export async function getProjectBoard(userId: unknown, projectId: string) {
 export async function getProjectOverview(userId: unknown, projectId: string) {
   await connectDB();
   const [milestones, activity, openBugs, deployments, endpoints, schemas, files] = await Promise.all([
-    Milestone.find({ project: projectId, user: userId }).sort({ order: 1 }).lean(),
-    ActivityLog.find({ project: projectId, user: userId }).sort({ createdAt: -1 }).limit(12).lean(),
-    Bug.countDocuments({ project: projectId, user: userId, status: { $in: ["open", "confirmed", "fixing"] } }),
-    Deployment.find({ project: projectId, user: userId }).sort({ deployedAt: -1 }).limit(5).lean(),
-    ApiEndpoint.countDocuments({ project: projectId, user: userId }),
-    SchemaDesign.countDocuments({ project: projectId, user: userId }),
-    FileAsset.countDocuments({ project: projectId, user: userId }),
+    Milestone.find({ project: projectId }).sort({ order: 1 }).lean(),
+    ActivityLog.find({ project: projectId }).sort({ createdAt: -1 }).limit(12).lean(),
+    Bug.countDocuments({ project: projectId, status: { $in: ["open", "confirmed", "fixing"] } }),
+    Deployment.find({ project: projectId }).sort({ deployedAt: -1 }).limit(5).lean(),
+    ApiEndpoint.countDocuments({ project: projectId }),
+    SchemaDesign.countDocuments({ project: projectId }),
+    FileAsset.countDocuments({ project: projectId }),
   ]);
   return { milestones, activity, openBugs, deployments, endpoints, schemas, files };
 }

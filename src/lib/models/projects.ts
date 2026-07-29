@@ -53,6 +53,8 @@ const ProjectSchema = new Schema(
     skills: [{ type: Schema.Types.ObjectId, ref: "Skill", index: true }],
 
     repoUrl: String,
+    /** Shows the project in Discover and lets strangers ask to join. */
+    openToContributors: { type: Boolean, default: false },
     liveUrl: String,
     figmaUrl: String,
 
@@ -237,3 +239,66 @@ export const Deployment = models.Deployment ?? model("Deployment", DeploymentSch
 export const ApiEndpoint = models.ApiEndpoint ?? model("ApiEndpoint", ApiEndpointSchema);
 export const SchemaDesign = models.SchemaDesign ?? model("SchemaDesign", SchemaDesignSchema);
 export const ActivityLog = models.ActivityLog ?? model("ActivityLog", ActivityLogSchema);
+
+/* ==================================================== collaboration ====== */
+
+/**
+ * Who can see and change a project.
+ *
+ * The owner is a row here too, created with the project. Deriving ownership from
+ * `Project.user` instead would mean every access check is two rules — "are you
+ * the owner, or are you a member" — and two rules is where authorisation bugs
+ * live. One collection, one lookup, one answer.
+ */
+const ProjectMemberSchema = new Schema(
+  {
+    project: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    /** owner: everything, including deletion. maintainer: everything but that.
+        contributor: writes tasks and bugs. viewer: reads. */
+    role: {
+      type: String,
+      enum: ["owner", "maintainer", "contributor", "viewer"],
+      default: "contributor",
+    },
+  },
+  { timestamps: true },
+);
+ProjectMemberSchema.index({ project: 1, user: 1 }, { unique: true });
+
+/**
+ * One collection for invites *and* join requests, distinguished by `direction`.
+ * They are the same object seen from two ends — a pending edge between a person
+ * and a project — and splitting them would duplicate every accept/decline path.
+ */
+const ProjectInviteSchema = new Schema(
+  {
+    project: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    direction: { type: String, enum: ["invite", "request"], required: true },
+    role: { type: String, enum: ["maintainer", "contributor", "viewer"], default: "contributor" },
+    message: { type: String, default: "", maxlength: 400 },
+    status: { type: String, enum: ["pending", "accepted", "declined"], default: "pending", index: true },
+  },
+  { timestamps: true },
+);
+ProjectInviteSchema.index({ project: 1, user: 1, status: 1 });
+
+/** Project chat. Same shape as room chat, scoped to a project instead. */
+const ProjectMessageSchema = new Schema(
+  {
+    project: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
+    author: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    body: { type: String, required: true },
+  },
+  { timestamps: true },
+);
+ProjectMessageSchema.index({ project: 1, createdAt: -1 });
+
+export const ProjectMember =
+  models.ProjectMember || model("ProjectMember", ProjectMemberSchema);
+export const ProjectInvite =
+  models.ProjectInvite || model("ProjectInvite", ProjectInviteSchema);
+export const ProjectMessage =
+  models.ProjectMessage || model("ProjectMessage", ProjectMessageSchema);

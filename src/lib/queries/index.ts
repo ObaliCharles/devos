@@ -25,3 +25,4 @@ export * from "./platform";
 export * from "./search";
 export * from "./community";
 export * from "./profile";
+export * from "./collaboration";

@@ -47,6 +47,7 @@ const PAGES: Page[] = [
   { label: "Flashcards", href: "/notes/flashcards", icon: Layers, keywords: "cards memorise" },
   { label: "Graph", href: "/notes/graph", icon: Sparkles, keywords: "backlinks connections" },
   { label: "Projects", href: "/projects", icon: FolderKanban, keywords: "build kanban ship" },
+  { label: "Find a project", href: "/projects/discover", icon: FolderKanban, keywords: "collaborate contribute join team open source" },
   { label: "AI Centre", href: "/ai", icon: Sparkles, keywords: "chat assistant claude" },
   { label: "Discussions", href: "/community/discussions", icon: MessagesSquare, keywords: "community forum posts ask question help" },
   { label: "Chat", href: "/community/chat", icon: MessagesSquare, keywords: "community rooms messages talk" },
