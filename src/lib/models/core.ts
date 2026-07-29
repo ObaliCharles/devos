@@ -10,6 +10,21 @@ const UserSchema = new Schema(
     name: String,
     email: String,
     avatarUrl: String,
+
+    /* ---- Public profile -------------------------------------------------
+       Everything below is what other people see at /u/<username>. It is all
+       optional: a profile with nothing filled in still renders, because the
+       parts worth reading — level, streak, contributions, solved challenges —
+       are earned rather than typed. */
+    /** URL handle. Sparse so the unique index tolerates the many users who
+        have not claimed one yet; those resolve by id instead. */
+    username: { type: String, unique: true, sparse: true, trim: true },
+    bio: { type: String, default: "", maxlength: 280 },
+    location: { type: String, default: "", maxlength: 80 },
+    website: { type: String, default: "", maxlength: 200 },
+    githubUsername: { type: String, default: "", maxlength: 60 },
+    /** Self-declared, distinct from the skills the roadmap tracks. */
+    skills: { type: [String], default: [] },
     /** "user" for everyone; "admin" unlocks /admin. First user is promoted. */
     role: { type: String, enum: ["user", "admin"], default: "user" },
 

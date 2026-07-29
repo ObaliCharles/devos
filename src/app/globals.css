@@ -59,8 +59,11 @@
      Desktop: 1600px max, 32px content padding, 280px sidebar, 80px collapsed,
      72px top navigation. Tablet drops to 24px margins, mobile to 16px. */
   --topbar-h: 72px;
-  --sidebar-w: 280px;
-  --sidebar-w-collapsed: 80px;
+  /* 232px fits the longest label ("AI Workspace") with room to spare and gives
+     the content back ~48px. 280px was sized for a label that does not exist.
+     Collapsed is 60px: an icon rail is an icon plus its target, nothing more. */
+  --sidebar-w: 232px;
+  --sidebar-w-collapsed: 60px;
   --page-max: 1600px;
   --page-pad: 32px;
   --page-top: 32px;

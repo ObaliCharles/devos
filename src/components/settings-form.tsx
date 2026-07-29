@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Save, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Download, ExternalLink, Save, Trash2 } from "lucide-react";
 import { deleteAccount, exportData, updatePreferences, updateProfile } from "@/lib/actions";
 
 type Prefs = {
@@ -16,20 +17,46 @@ type Prefs = {
   pomodoroMinutes: number;
 };
 
-export function SettingsForm({ name, email, prefs }: { name: string; email: string; prefs: Prefs }) {
+export type PublicProfile = {
+  username: string;
+  bio: string;
+  location: string;
+  website: string;
+  githubUsername: string;
+  skills: string[];
+};
+
+export function SettingsForm({
+  name,
+  email,
+  prefs,
+  profile,
+}: {
+  name: string;
+  email: string;
+  prefs: Prefs;
+  profile: PublicProfile;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [displayName, setDisplayName] = useState(name);
   const [p, setP] = useState<Prefs>(prefs);
   const [saved, setSaved] = useState(false);
   const [confirm, setConfirm] = useState("");
+  const [pub, setPub] = useState({ ...profile, skills: profile.skills.join(", ") });
+  const [error, setError] = useState("");
 
   function save() {
     start(async () => {
-      await Promise.all([
-        updateProfile({ name: displayName }),
+      setError("");
+      const [result] = await Promise.all([
+        updateProfile({ name: displayName, ...pub }),
         updatePreferences({ ...p }),
       ]);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       router.refresh();
@@ -64,6 +91,100 @@ export function SettingsForm({ name, email, prefs }: { name: string; email: stri
             <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>Managed by your sign-in provider.</p>
           </div>
         </div>
+      </section>
+
+      {/* Public profile. Kept separate from the account block above because
+          everything here is read by other people, and that is the only thing
+          worth knowing before typing into it. */}
+      <section className="card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="eyebrow">Public profile</p>
+          {pub.username && (
+            <Link
+              href={`/u/${pub.username}`}
+              className="flex items-center gap-1.5 text-[13px]"
+              style={{ color: "var(--primary)" }}
+            >
+              View profile <ExternalLink size={12} />
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium" htmlFor="s-username">Handle</label>
+            <input
+              id="s-username"
+              className="input mt-1.5"
+              placeholder="your-handle"
+              value={pub.username}
+              onChange={(e) => setPub({ ...pub, username: e.target.value })}
+            />
+            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
+              Your profile lives at /u/{pub.username || "your-handle"}.
+            </p>
+          </div>
+          <div>
+            <label className="text-sm font-medium" htmlFor="s-location">Location</label>
+            <input
+              id="s-location"
+              className="input mt-1.5"
+              placeholder="Kampala, Uganda"
+              value={pub.location}
+              onChange={(e) => setPub({ ...pub, location: e.target.value })}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium" htmlFor="s-bio">Bio</label>
+            <textarea
+              id="s-bio"
+              className="textarea mt-1.5 min-h-20"
+              maxLength={280}
+              placeholder="What are you building?"
+              value={pub.bio}
+              onChange={(e) => setPub({ ...pub, bio: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium" htmlFor="s-website">Website</label>
+            <input
+              id="s-website"
+              className="input mt-1.5"
+              placeholder="example.com"
+              value={pub.website}
+              onChange={(e) => setPub({ ...pub, website: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium" htmlFor="s-github">GitHub</label>
+            <input
+              id="s-github"
+              className="input mt-1.5"
+              placeholder="username"
+              value={pub.githubUsername}
+              onChange={(e) => setPub({ ...pub, githubUsername: e.target.value })}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium" htmlFor="s-skills">Skills</label>
+            <input
+              id="s-skills"
+              className="input mt-1.5"
+              placeholder="TypeScript, React, Postgres"
+              value={pub.skills}
+              onChange={(e) => setPub({ ...pub, skills: e.target.value })}
+            />
+            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
+              Comma separated, up to twelve.
+            </p>
+          </div>
+        </div>
+
+        {error && (
+          <p className="mt-3 text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+            {error}
+          </p>
+        )}
       </section>
 
       <section className="card p-5">

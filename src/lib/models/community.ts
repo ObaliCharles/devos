@@ -143,3 +143,18 @@ const ChatMessageSchema = new Schema(
 ChatMessageSchema.index({ group: 1, createdAt: -1 });
 
 export const ChatMessage = models.ChatMessage || model("ChatMessage", ChatMessageSchema);
+
+/**
+ * Following. A directed edge, not a friendship — asymmetric follow is what
+ * lets a profile be interesting before anyone has agreed to anything.
+ */
+const FollowSchema = new Schema(
+  {
+    follower: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    following: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+  },
+  { timestamps: true },
+);
+FollowSchema.index({ follower: 1, following: 1 }, { unique: true });
+
+export const Follow = models.Follow || model("Follow", FollowSchema);

@@ -24,6 +24,14 @@ export default async function SettingsPage() {
           notifyReviews: prefs.notifyReviews !== false,
           pomodoroMinutes: Number(prefs.pomodoroMinutes ?? 25),
         }}
+        profile={{
+          username: String(user.username ?? ""),
+          bio: String(user.bio ?? ""),
+          location: String(user.location ?? ""),
+          website: String(user.website ?? ""),
+          githubUsername: String(user.githubUsername ?? ""),
+          skills: (user.skills ?? []) as string[],
+        }}
       />
     </div>
   );

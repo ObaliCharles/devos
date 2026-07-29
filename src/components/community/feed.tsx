@@ -180,7 +180,7 @@ function Composer({ groupId, onClose }: { groupId?: string; onClose: () => void 
       return;
     }
     onClose();
-    router.push(`/community/${result.id}`);
+    router.push(`/community/discussions/${result.id}`);
   }
 
   return (
@@ -258,9 +258,13 @@ function PostRow({ post }: { post: PostCard }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[12px]">
-            <span className="font-medium" style={{ color: "var(--text-muted)" }}>
+            <Link
+              href={`/u/${post.author.id}`}
+              className="relative font-medium hover:underline"
+              style={{ color: "var(--text-muted)" }}
+            >
               {post.author.name}
-            </span>
+            </Link>
             <span style={{ color: "var(--text-faint)" }}>{ago(post.lastActivityAt)}</span>
             {post.group && (
               <Link

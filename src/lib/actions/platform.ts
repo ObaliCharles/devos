@@ -41,14 +41,8 @@ import { requireUser } from "../user";
 
 /* ---------------------------------------------------------------- settings */
 
-export async function updateProfile(input: { name?: string }) {
-  await connectDB();
-  const user = await requireUser();
-  if (typeof input.name === "string" && input.name.trim()) {
-    await User.updateOne({ _id: user._id }, { $set: { name: input.name.trim() } });
-  }
-  revalidatePath("/settings");
-}
+/* updateProfile moved to actions/profile.ts when the public profile arrived —
+   there is one identity, so there is one action that writes it. */
 
 export async function updatePreferences(prefs: Record<string, unknown>) {
   await connectDB();

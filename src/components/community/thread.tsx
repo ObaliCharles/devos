@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, CheckCircle2, Heart, MessageSquare, Trash2 } from "lucide-react";
 import Markdown from "react-markdown";
@@ -206,9 +207,13 @@ function Reply({
         <Avatar author={reply.author} size={32} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[12px]">
-            <span className="font-medium" style={{ color: "var(--text-muted)" }}>
+            <Link
+              href={`/u/${reply.author.id}`}
+              className="font-medium hover:underline"
+              style={{ color: "var(--text-muted)" }}
+            >
               {reply.author.name}
-            </span>
+            </Link>
             <span style={{ color: "var(--text-faint)" }}>{ago(reply.createdAt)}</span>
             {reply.accepted && (
               <span className="flex items-center gap-1" style={{ color: "var(--success)" }}>
