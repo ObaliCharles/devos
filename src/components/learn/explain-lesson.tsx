@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
+import { AiMark } from "@/components/ai-mark";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -54,7 +55,7 @@ export function ExplainLesson({
           className="btn btn-tonal btn-xs"
           aria-label={`Ask AI to explain ${topic}`}
         >
-          <Sparkles size={12} /> Ask AI to explain
+          <AiMark size={13} /> Ask AI to explain
         </button>
       ) : (
         <div

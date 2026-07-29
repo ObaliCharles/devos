@@ -19,6 +19,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { AiMark } from "@/components/ai-mark";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createConversation, deleteConversation, togglePinConversation } from "@/lib/actions";
@@ -356,7 +357,7 @@ export function AiChat({
             <div className="grid h-full place-items-center py-8 text-center">
               <div className="max-w-md">
                 <span className="icon-tile icon-tile-lg mx-auto">
-                  <Sparkles size={20} />
+                  <AiMark size={20} />
                 </span>
                 <p className="mt-4 text-[16px] font-semibold tracking-tight">
                   Ask about anything in your workspace

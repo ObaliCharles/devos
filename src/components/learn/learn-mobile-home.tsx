@@ -10,7 +10,6 @@ import {
   Code2,
   FolderGit2,
   Play,
-  Sparkles,
   Target,
   Trophy,
   Zap,
@@ -19,6 +18,7 @@ import { ContentIcon } from "./icon";
 import { PathRail, type PathStep } from "./path-rail";
 import { TechLogo, TECH_WITH_LOGO } from "./tech-logo";
 import { Reveal } from "@/components/reveal";
+import { AiMark } from "@/components/ai-mark";
 
 /**
  * The Learn page as it reads on a phone.
@@ -524,7 +524,7 @@ export function LearnMobileHome({
       <Reveal>
         <Link href="/ai/chat" className="card card-link flex items-center gap-3.5 p-4">
           <span className="icon-tile icon-tile-lg icon-tile-primary">
-            <Sparkles size={18} />
+            <AiMark size={18} />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[14px] font-semibold">Ask the AI mentor</span>

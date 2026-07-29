@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, Layers, Sparkles } from "lucide-react";
+import { AiMark } from "@/components/ai-mark";
 import { RoadmapModes, type RoadmapSummary } from "./roadmap-modes";
 
 /**
@@ -39,7 +40,7 @@ export function LearningModePanel({
           </span>
         </span>
         <span className="badge badge-primary shrink-0">
-          <Sparkles size={10} /> AI
+          <AiMark size={11} /> AI
         </span>
         <ChevronDown
           size={16}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send, Sparkles } from "lucide-react";
+import { AiMark } from "@/components/ai-mark";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -75,7 +76,7 @@ export function AiPanel({ lessonId }: { lessonId: string }) {
 
       {loading && (
         <p className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
-          <Sparkles size={14} className="animate-pulse" /> Thinking…
+          <AiMark size={14} className="animate-pulse" /> Thinking…
         </p>
       )}
 
