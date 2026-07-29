@@ -26,3 +26,4 @@ export * from "./search";
 export * from "./community";
 export * from "./profile";
 export * from "./collaboration";
+export * from "./compete";

@@ -29,8 +29,10 @@
   --radius-xs: 8px;
   --radius-control: 10px;
   --radius-tile: 10px;
-  --radius-card: 10px;
-  --radius-panel: 10px;
+  /* Near-square. GitHub and Linear both sit at 6px; below that the corner stops
+     reading as a corner and starts reading as an aliasing artefact. */
+  --radius-card: 6px;
+  --radius-panel: 6px;
   --radius-dialog: 14px;
   --radius-pill: 999px;
 
@@ -73,12 +75,14 @@
 :root {
   /* Four greys and nothing else. Every surface in the product is one of
      these, which is what makes depth read as depth rather than as noise. */
-  --bg: #0b0d12;
+  --bg: #0a0c11;
   --bg-elevated: #0e1016;
-  --surface: #11131a;
-  --surface-2: #161923;
-  --surface-3: #1b1f29;
-  --surface-4: #242936;
+  /* Lifted from #11131a. With the border down to a hairline the *colour* has to
+     carry the edge, and a 3% delta was not enough to do that on its own. */
+  --surface: #15171f;
+  --surface-2: #1a1d27;
+  --surface-3: #202430;
+  --surface-4: #2a2f3d;
 
   /* Borders are white at 5-6%, never a solid grey. A tinted hairline sits on
      whatever is behind it, so a card on the page and a card on a panel read as
@@ -361,12 +365,12 @@ samp {
   .page-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-6);
   }
   .section-stack {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 
   /* A page that fills the viewport instead of growing the document, chat is
@@ -392,13 +396,13 @@ samp {
      its own. It separates from the page because it is lighter than it, which
      is a cleaner signal than a blur ever is. */
   /* A surface, not a floating card.
-     The border separates it from the page; the shadow used to, and that is what
-     made every list read as a stack of tiles rather than one workspace. The
-     background sits ~3% off --bg, which is enough contrast to group content and
-     not enough to draw the eye on its own. */
+     Separation is done by *colour* now, not by a drawn line: the background
+     carries the edge and the hairline only firms it up where two surfaces meet
+     at the same tone. A visible border on every card turns a page into a wire
+     diagram — you end up reading the boxes instead of what is in them. */
   .card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-faint);
     border-radius: var(--radius-card);
     transition:
       border-color var(--dur-fast) var(--ease-out),
@@ -408,7 +412,7 @@ samp {
   /* Larger container for a whole region of the page */
   .panel {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-faint);
     border-radius: var(--radius-panel);
   }
 

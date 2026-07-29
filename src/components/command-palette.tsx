@@ -51,6 +51,7 @@ const PAGES: Page[] = [
   { label: "AI Centre", href: "/ai", icon: Sparkles, keywords: "chat assistant claude" },
   { label: "Discussions", href: "/community/discussions", icon: MessagesSquare, keywords: "community forum posts ask question help" },
   { label: "Chat", href: "/community/chat", icon: MessagesSquare, keywords: "community rooms messages talk" },
+  { label: "Arena", href: "/compete", icon: MessagesSquare, keywords: "compete duel ranked rating league leaderboard match" },
   { label: "Groups", href: "/community/groups", icon: MessagesSquare, keywords: "community study group join rooms" },
   { label: "Career", href: "/career", icon: Briefcase, keywords: "resume portfolio jobs ats" },
   { label: "Analytics", href: "/analytics", icon: BarChart3, keywords: "stats goals habits focus" },

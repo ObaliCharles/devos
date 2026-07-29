@@ -13,6 +13,7 @@ import {
   Settings,
   Shield,
   Sparkles,
+  Swords,
   type LucideIcon,
 } from "lucide-react";
 
@@ -52,6 +53,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/community/discussions", label: "Discussions", icon: MessagesSquare },
       { href: "/community/chat", label: "Chat", icon: Hash },
+      { href: "/compete", label: "Arena", icon: Swords },
     ],
   },
   {

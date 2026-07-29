@@ -6,6 +6,7 @@ import { dayKey } from "../day";
 import { runChallenge, type RunOutcome } from "../runner";
 import { Challenge, ChallengeAttempt, ChallengeProgress, DailyChallenge, TimeEntry } from "../models";
 import { addXp, recordActivity, requireUser } from "../user";
+import { recordMatchSubmission } from "./compete";
 
 /**
  * Run the visible tests without recording anything. This is the "Run" button, 
@@ -85,9 +86,21 @@ export async function submitCode(challengeId: string, code: string, minutes = 0)
     );
   }
 
+  // A duel is scored off the same submission, so competing never means using a
+  // second, parallel runner. If you are not in one this is a single indexed miss.
+  const duel = await recordMatchSubmission(challengeId, outcome.ok, outcome.passedCount).catch(
+    () => ({ matched: false as const }),
+  );
+
   revalidatePath(`/learning/challenges/${challengeId}`);
   revalidatePath("/practice");
-  return { ok: outcome.ok, outcome, firstSolve, xp: firstSolve ? challenge.xp ?? 30 : 0 };
+  return {
+    ok: outcome.ok,
+    outcome,
+    firstSolve,
+    xp: firstSolve ? challenge.xp ?? 30 : 0,
+    duel: Boolean(duel.matched),
+  };
 }
 
 /** Persist the editor buffer so re-opening a challenge restores your work. */

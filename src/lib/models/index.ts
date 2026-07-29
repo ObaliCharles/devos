@@ -43,3 +43,4 @@ export * from "./ai";
 export * from "./career";
 export * from "./productivity";
 export * from "./community";
+export * from "./compete";
