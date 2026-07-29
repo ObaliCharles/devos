@@ -156,7 +156,7 @@ export async function search(userId: unknown, q: string): Promise<SearchHit[]> {
       id: String(c._id),
       title: String(c.title),
       subtitle: String(c.difficulty),
-      href: `/practice/challenges/${c._id}`,
+      href: `/learning/challenges/${c._id}`,
     });
   for (const s of snippets)
     hits.push({

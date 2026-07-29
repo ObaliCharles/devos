@@ -70,11 +70,13 @@ type ChallengeDoc = {
   title: string;
   category?: string;
   difficulty?: string;
+  technology?: string[];
   prompt?: string;
   language?: string;
   starterCode?: string;
   hints?: string[];
   xp?: number;
+  estimatedMinutes?: number;
   tests?: { call: string; expected: string; hidden?: boolean; label?: string }[];
 };
 
@@ -84,12 +86,20 @@ export async function getChallenge(userId: unknown, challengeId: string) {
   const challenge = await Challenge.findById(challengeId).lean<ChallengeDoc | null>();
   if (!challenge) return null;
 
-  const progress = await ChallengeProgress.findOne({ user: userId, challenge: challengeId }).lean<{
-    solved?: boolean;
-    lastCode?: string;
-    bookmarked?: boolean;
-    attempts?: number;
-  } | null>();
+  // Cohort numbers for the stats panel. These are counts over real rows, so a
+  // brand-new challenge honestly reads zero rather than inventing a baseline.
+  const [progress, attemptedBy, solvedBy, runs, passedRuns] = await Promise.all([
+    ChallengeProgress.findOne({ user: userId, challenge: challengeId }).lean<{
+      solved?: boolean;
+      lastCode?: string;
+      bookmarked?: boolean;
+      attempts?: number;
+    } | null>(),
+    ChallengeProgress.countDocuments({ challenge: challengeId }),
+    ChallengeProgress.countDocuments({ challenge: challengeId, solved: true }),
+    ChallengeAttempt.countDocuments({ challenge: challengeId }),
+    ChallengeAttempt.countDocuments({ challenge: challengeId, passed: true }),
+  ]);
 
   // Hidden test bodies never leave the server; the client only learns how many
   // there are, so it cannot be gamed by reading them.
@@ -100,17 +110,27 @@ export async function getChallenge(userId: unknown, challengeId: string) {
     title: String(challenge.title),
     category: String(challenge.category ?? "algorithms"),
     difficulty: String(challenge.difficulty ?? "easy"),
+    technology: (challenge.technology ?? []) as string[],
     prompt: String(challenge.prompt ?? ""),
     language: String(challenge.language ?? "javascript"),
     starterCode: String(challenge.starterCode ?? ""),
     hints: (challenge.hints ?? []) as string[],
     xp: Number(challenge.xp ?? 30),
+    estimatedMinutes: Number(challenge.estimatedMinutes ?? 20),
     visibleTests: tests.filter((t) => !t.hidden).map((t) => ({ call: t.call, expected: t.expected, label: t.label })),
     hiddenCount: tests.filter((t) => t.hidden).length,
     solved: Boolean(progress?.solved),
     lastCode: progress?.lastCode,
     bookmarked: Boolean(progress?.bookmarked),
     attempts: Number(progress?.attempts ?? 0),
+    stats: {
+      attemptedBy,
+      solvedBy,
+      /** Share of people who opened it and got there. */
+      solveRate: attemptedBy > 0 ? Math.round((solvedBy / attemptedBy) * 100) : null,
+      /** Share of all submissions that passed — the LeetCode-style number. */
+      acceptance: runs > 0 ? Math.round((passedRuns / runs) * 100) : null,
+    },
   };
 }
 

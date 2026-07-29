@@ -85,7 +85,7 @@ export async function submitCode(challengeId: string, code: string, minutes = 0)
     );
   }
 
-  revalidatePath(`/practice/challenges/${challengeId}`);
+  revalidatePath(`/learning/challenges/${challengeId}`);
   revalidatePath("/practice");
   return { ok: outcome.ok, outcome, firstSolve, xp: firstSolve ? challenge.xp ?? 30 : 0 };
 }
@@ -111,7 +111,7 @@ export async function toggleChallengeBookmark(challengeId: string) {
   } else {
     await ChallengeProgress.create({ user: user._id, challenge: challengeId, bookmarked: true });
   }
-  revalidatePath("/practice/challenges");
+  revalidatePath("/learning/challenges");
 }
 
 /**

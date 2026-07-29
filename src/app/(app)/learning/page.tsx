@@ -21,6 +21,7 @@ import {
   getActivityStrip,
   getCatalogProgressMap,
   getCertificates,
+  getChallenges,
   getProjectStats,
   getProjects,
   getRoadmap,
@@ -72,7 +73,7 @@ export default async function LearningPage() {
 
   // One coordinated read across the learning, analytics, project and career
   // modules. Each is defensive so a missing collection never blanks the page.
-  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress, dueCount, projects] =
+  const [roadmap, roadmaps, activity, achievements, counts, projectStats, certs, catalogProgress, dueCount, projects, challenges] =
     await Promise.all([
       getRoadmap(user._id).catch(() => null),
       listRoadmaps(user._id).catch(() => []),
@@ -86,6 +87,7 @@ export default async function LearningPage() {
       ),
       countDueReviews(user._id).catch(() => 0),
       getProjects(user._id).catch(() => []),
+      getChallenges(user._id).catch(() => []),
     ]);
 
   const next = findNextLesson(roadmap);
@@ -361,6 +363,67 @@ export default async function LearningPage() {
         <CurriculumBuilder configured={configured} />
       </section>
 
+      {/* ==================================================== 5. Challenges
+          Practice belongs on Learn: reading a lesson and passing its tests are
+          the same loop. Unsolved first, because a solved one teaches nothing. */}
+      <section className="section-stack">
+        <SectionTitle
+          title="Challenges"
+          sub="Short problems graded against real tests. Run them in the browser, submit when the hidden cases pass."
+          href="/learning/challenges"
+          hrefLabel="View all"
+        />
+        {challenges.length === 0 ? (
+          <div className="card p-5 text-center">
+            <p className="text-[14px] font-medium">No challenges loaded yet</p>
+            <p className="text-body mt-1 text-[14px]">
+              Run the seed script to load the practice library.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {[...challenges]
+              .sort((a, b) => Number(a.solved) - Number(b.solved))
+              .slice(0, 6)
+              .map((c, i) => (
+                <Reveal key={c.id} index={i}>
+                  <Link
+                    href={`/learning/challenges/${c.id}`}
+                    className="card card-link flex h-full items-start gap-3.5 p-4"
+                  >
+                    <span className={`icon-tile icon-tile-lg ${c.solved ? "icon-tile-success" : ""}`}>
+                      {c.solved ? <CheckCircle2 size={18} /> : <Dumbbell size={18} />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[14px] font-semibold">{c.title}</span>
+                      <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <span
+                          className="chip chip-sm capitalize"
+                          style={{
+                            color: DIFFICULTY_COLOR[c.difficulty] ?? "var(--text-muted)",
+                            borderColor: `color-mix(in srgb, ${
+                              DIFFICULTY_COLOR[c.difficulty] ?? "var(--border)"
+                            } 35%, transparent)`,
+                          }}
+                        >
+                          {c.difficulty}
+                        </span>
+                        <span className="chip chip-sm capitalize">{c.category}</span>
+                      </span>
+                    </span>
+                    <span
+                      className="num flex shrink-0 items-center gap-1 text-[12px]"
+                      style={{ color: "var(--text-faint)" }}
+                    >
+                      <Zap size={12} style={{ color: "var(--warning)" }} /> {c.xp}
+                    </span>
+                  </Link>
+                </Reveal>
+              ))}
+          </div>
+        )}
+      </section>
+
       {/* ===================================================== 6. Discover */}
       <section id="discover" className="section-stack scroll-mt-4">
         <SectionTitle
@@ -393,6 +456,13 @@ export default async function LearningPage() {
 }
 
 /* ======================================================== Section heading */
+
+/** Difficulty is signage, not decoration — three states, three status tokens. */
+const DIFFICULTY_COLOR: Record<string, string> = {
+  easy: "var(--success)",
+  medium: "var(--warning)",
+  hard: "var(--danger)",
+};
 
 function SectionTitle({
   title,

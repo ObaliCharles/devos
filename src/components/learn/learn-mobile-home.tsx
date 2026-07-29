@@ -8,6 +8,7 @@ import {
   ClipboardCheck,
   Clock,
   Code2,
+  Dumbbell,
   FolderGit2,
   Play,
   Target,
@@ -530,6 +531,22 @@ export function LearnMobileHome({
             <span className="block text-[14px] font-semibold">Ask the AI mentor</span>
             <span className="text-meta mt-0.5 block text-[12px]">
               It can see your lessons, notes and projects.
+            </span>
+          </span>
+          <ChevronRight size={18} style={{ color: "var(--text-faint)" }} />
+        </Link>
+      </Reveal>
+
+      {/* Challenges — practice lives under Learning, so it needs a door here. */}
+      <Reveal>
+        <Link href="/learning/challenges" className="card card-link flex items-center gap-3.5 p-4">
+          <span className="icon-tile icon-tile-lg">
+            <Dumbbell size={18} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[14px] font-semibold">Challenges</span>
+            <span className="text-meta mt-0.5 block text-[12px]">
+              Solve problems against real tests and earn XP.
             </span>
           </span>
           <ChevronRight size={18} style={{ color: "var(--text-faint)" }} />

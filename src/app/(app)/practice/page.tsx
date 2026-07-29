@@ -34,7 +34,7 @@ export default async function PracticePage() {
         title="Practice centre"
         description="Reading about code does not make you a developer. Writing it does. Every challenge runs your code against real tests."
         actions={
-          <Link href="/practice/challenges" className="btn btn-primary">
+          <Link href="/learning/challenges" className="btn btn-primary">
             <Dumbbell size={15} /> All challenges
           </Link>
         }
@@ -95,7 +95,7 @@ export default async function PracticePage() {
                 {recommended.map((c) => (
                   <Link
                     key={c.id}
-                    href={`/practice/challenges/${c.id}`}
+                    href={`/learning/challenges/${c.id}`}
                     className="card card-link flex flex-col p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -144,7 +144,7 @@ export default async function PracticePage() {
                       {group.map((c) => (
                         <li key={c.id}>
                           <Link
-                            href={`/practice/challenges/${c.id}`}
+                            href={`/learning/challenges/${c.id}`}
                             className="card card-link flex items-center gap-3.5 p-3.5"
                           >
                             <span
