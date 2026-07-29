@@ -9,17 +9,15 @@ import {
   Bot,
   Check,
   Copy,
-  FileText,
   MessagesSquare,
-  Paperclip,
   Pin,
   Plus,
-  Send,
   Sparkles,
   Trash2,
   X,
 } from "lucide-react";
 import { AiMark } from "@/components/ai-mark";
+import { PromptInput, type PromptEffort } from "@/components/ai/prompt-input";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createConversation, deleteConversation, togglePinConversation } from "@/lib/actions";
@@ -34,7 +32,16 @@ type ConversationSummary = {
 };
 type ActiveConversation = { id: string; title: string; messages: Message[] } | null;
 
-type Attachment = { name: string; size: number; text: string | null };
+type Attachment = {
+  id: string;
+  file: File;
+  /** Object URL for images, empty otherwise — the tray shows an extension chip. */
+  url: string;
+  name: string;
+  size: number;
+  /** Inlined into the prompt for text files; null for binaries. */
+  text: string | null;
+};
 
 /**
  * The chat workspace: the thread holds the centre, the conversation list sits
@@ -81,6 +88,12 @@ const TEXT_EXT =
   /\.(txt|md|markdown|json|jsonc|ya?ml|toml|csv|tsv|log|env|ini|conf|js|jsx|ts|tsx|mjs|cjs|py|rb|go|rs|java|kt|c|h|cpp|cc|hpp|cs|php|swift|sql|sh|bash|zsh|html?|css|scss|less|vue|svelte|xml|graphql|gql|prisma|dockerfile|gitignore)$/i;
 const MAX_ATTACH_CHARS = 24_000;
 
+/** The providers this build can talk to. `available` is what greys one out. */
+const MODELS = [
+  { id: "anthropic", label: "Claude Opus 5", available: true },
+  { id: "groq", label: "Llama 3.3 70B", available: true },
+];
+
 function isTextFile(f: File) {
   return f.type.startsWith("text/") || TEXT_EXT.test(f.name) || f.type === "application/json";
 }
@@ -119,10 +132,13 @@ export function AiChat({
   // The conversation list is a slide-in drawer on phones (ChatGPT-style) and a
   // fixed rail on desktop. One piece of state drives the mobile drawer.
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Which provider to prefer, and how hard it should think. Both ride along on
+  // the request; the server treats provider as a preference and still fails
+  // over, so picking one can never strand you on an unreachable model.
+  const [provider, setProvider] = useState<"anthropic" | "groq">("anthropic");
+  const [effort, setEffort] = useState<PromptEffort>("medium");
 
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   // Which conversation the local `messages` belong to, and whether a send is
   // in flight. Together these stop a background server refresh from resetting
@@ -166,25 +182,32 @@ export function AiChat({
     };
   }, [drawerOpen]);
 
-  function autosize(el: HTMLTextAreaElement | null) {
-    if (!el) return;
-    el.style.height = "0px";
-    el.style.height = `${Math.min(el.scrollHeight, 168)}px`;
-  }
 
   /* ------------------------------------------------------------ Attachments */
 
-  async function pickFiles(list: FileList | null) {
-    if (!list?.length) return;
+  async function pickFiles(files: File[]) {
+    if (files.length === 0) return;
     const read = await Promise.all(
-      Array.from(list).map(async (f) => ({
+      files.map(async (f) => ({
+        id: `${f.name}-${f.lastModified}-${Math.random().toString(36).slice(2, 8)}`,
+        file: f,
+        url: f.type.startsWith("image/") ? URL.createObjectURL(f) : "",
         name: f.name,
         size: f.size,
         text: isTextFile(f) ? (await f.text()).slice(0, MAX_ATTACH_CHARS) : null,
       })),
     );
     setAttachments((prev) => [...prev, ...read]);
-    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((prev) => {
+      const gone = prev.find((a) => a.id === id);
+      // An object URL is held by the document until revoked; dropping the React
+      // reference alone leaks the whole image.
+      if (gone?.url) URL.revokeObjectURL(gone.url);
+      return prev.filter((a) => a.id !== id);
+    });
   }
 
   /** The text actually sent to the model: the message, then each readable file
@@ -227,7 +250,6 @@ export function AiChat({
 
     setInput("");
     setAttachments([]);
-    autosize(inputRef.current);
     setError(null);
     setMessages((m) => [...m, { id: `local-${Date.now()}`, role: "user", content: shownText }]);
     setStreaming(true);
@@ -237,7 +259,7 @@ export function AiChat({
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: convoId, message: payload }),
+        body: JSON.stringify({ conversationId: convoId, message: payload, provider, effort }),
       });
 
       if (!res.ok || !res.body) {
@@ -415,81 +437,20 @@ export function AiChat({
             </p>
           )}
 
-          {/* Selected attachments, above the input as removable chips */}
-          {attachments.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {attachments.map((a, i) => (
-                <span
-                  key={`${a.name}-${i}`}
-                  className="flex items-center gap-1.5 rounded-[var(--radius-control)] px-2 py-1 text-[12px]"
-                  style={{ background: "var(--surface-3)" }}
-                >
-                  <FileText size={12} style={{ color: "var(--text-faint)" }} />
-                  <span className="max-w-[160px] truncate">{a.name}</span>
-                  <span style={{ color: "var(--text-faint)" }}>{fmtSize(a.size)}</span>
-                  <button
-                    onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
-                    className="opacity-60 transition-opacity hover:opacity-100"
-                    aria-label={`Remove ${a.name}`}
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div
-            className="flex items-end gap-2 rounded-[var(--radius-tile)] border p-1.5"
-            style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
-          >
-            <input
-              ref={fileRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => pickFiles(e.target.files)}
-            />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="btn-icon btn-icon-sm mb-0.5 shrink-0"
-              title="Attach files"
-              aria-label="Attach files"
-              disabled={streaming}
-            >
-              <Paperclip size={15} />
-            </button>
-
-            <textarea
-              ref={inputRef}
-              rows={1}
-              className="max-h-[168px] flex-1 resize-none bg-transparent py-2 text-[14px] leading-relaxed outline-none"
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                autosize(e.currentTarget);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  send();
-                }
-              }}
-              placeholder="Ask anything…"
-              aria-label="Message"
-              disabled={streaming}
-            />
-
-            <button
-              className="btn btn-primary btn-icon mb-0.5 h-8 w-8 shrink-0"
-              onClick={() => send()}
-              disabled={streaming || (!input.trim() && attachments.length === 0)}
-              aria-label="Send message"
-            >
-              <Send size={14} />
-            </button>
-          </div>
+          <PromptInput
+            value={input}
+            onChange={setInput}
+            onSubmit={() => send()}
+            attachments={attachments}
+            onAttach={pickFiles}
+            onRemoveAttachment={removeAttachment}
+            models={MODELS}
+            model={provider}
+            onModelChange={(id) => setProvider(id as "anthropic" | "groq")}
+            effort={effort}
+            onEffortChange={setEffort}
+            busy={streaming}
+          />
 
           <p className="text-meta mt-2 text-center text-[12px]">
             AI can make mistakes. Consider checking important information.

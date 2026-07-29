@@ -11,6 +11,10 @@ export const runtime = "nodejs";
 const Body = z.object({
   conversationId: z.string(),
   message: z.string().min(1).max(8000),
+  /* Both optional: an older client that does not send them still works, and an
+     unknown value is rejected here rather than reaching the SDK. */
+  provider: z.enum(["anthropic", "groq"]).optional(),
+  effort: z.enum(["low", "medium", "high"]).optional(),
 });
 
 /**
@@ -32,7 +36,7 @@ export async function POST(req: Request) {
 
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Bad request." }, { status: 400 });
-  const { conversationId, message } = parsed.data;
+  const { conversationId, message, provider: wanted, effort } = parsed.data;
 
   if (!isConfigured()) {
     return Response.json(
@@ -80,6 +84,8 @@ export async function POST(req: Request) {
         const { text, usage, provider } = await streamChat({
           system,
           maxTokens: 1200,
+          provider: wanted,
+          effort,
           messages: history.map((m) => ({
             role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
             content: String(m.content),

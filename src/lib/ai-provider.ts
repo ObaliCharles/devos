@@ -98,26 +98,45 @@ function describe(err: unknown) {
  * browser, switching providers mid-answer would splice two different replies
  * together, so a mid-stream failure is surfaced as an error instead.
  */
+/**
+ * Which provider to talk to, and how hard it should think.
+ *
+ * `provider` is a *preference*, not a command: asking for Anthropic without a
+ * key falls through to Groq exactly as the automatic path does, because a
+ * picker that can strand you on an unreachable model is worse than one that
+ * quietly does the reachable thing.
+ *
+ * Effort only reaches Anthropic — Groq has no equivalent knob, and inventing
+ * one by fiddling with temperature would make the setting mean two different
+ * things depending on which key happened to be set.
+ */
+export type ChatEffort = "low" | "medium" | "high";
+
 export async function streamChat({
   system,
   messages,
   maxTokens = 1200,
+  provider,
+  effort = "medium",
   onDelta,
 }: {
   system: string;
   messages: ChatMessage[];
   maxTokens?: number;
+  provider?: "anthropic" | "groq";
+  effort?: ChatEffort;
   onDelta: (delta: string) => void;
 }): Promise<StreamResult> {
   const errors: string[] = [];
 
-  if (hasAnthropic()) {
+  if (hasAnthropic() && provider !== "groq") {
     let emitted = false;
     try {
       return await streamAnthropic({
         system,
         messages,
         maxTokens,
+        effort,
         onDelta: (d) => {
           emitted = true;
           onDelta(d);
@@ -143,11 +162,13 @@ async function streamAnthropic({
   system,
   messages,
   maxTokens,
+  effort = "medium",
   onDelta,
 }: {
   system: string;
   messages: ChatMessage[];
   maxTokens: number;
+  effort?: ChatEffort;
   onDelta: (delta: string) => void;
 }): Promise<StreamResult> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, maxRetries: 0 });
@@ -157,6 +178,7 @@ async function streamAnthropic({
     max_tokens: maxTokens,
     system,
     messages,
+    output_config: { effort },
   });
 
   let text = "";
