@@ -15,6 +15,7 @@ type Prefs = {
   notifyProjects: boolean;
   notifyReviews: boolean;
   pomodoroMinutes: number;
+  weeklyChallengeGoal: number;
 };
 
 export type PublicProfile = {
@@ -212,6 +213,21 @@ export function SettingsForm({
           <div>
             <label className="text-sm font-medium" htmlFor="s-pom">Pomodoro length (min)</label>
             <input id="s-pom" type="number" min={5} max={90} className="input mt-1.5" value={p.pomodoroMinutes} onChange={(e) => setP({ ...p, pomodoroMinutes: Number(e.target.value) })} />
+          </div>
+          <div>
+            <label className="text-sm font-medium" htmlFor="s-weekly">Challenges per week</label>
+            <input
+              id="s-weekly"
+              type="number"
+              min={1}
+              max={50}
+              className="input mt-1.5"
+              value={p.weeklyChallengeGoal}
+              onChange={(e) => setP({ ...p, weeklyChallengeGoal: Number(e.target.value) })}
+            />
+            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
+              The target the week strip on Practice measures against.
+            </p>
           </div>
         </div>
       </section>

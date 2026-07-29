@@ -27,3 +27,4 @@ export * from "./community";
 export * from "./profile";
 export * from "./collaboration";
 export * from "./compete";
+export * from "./practice-home";

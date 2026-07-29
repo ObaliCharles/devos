@@ -55,6 +55,8 @@ const UserSchema = new Schema(
       notifyReviews: { type: Boolean, default: true },
       editorFontSize: { type: Number, default: 13 },
       pomodoroMinutes: { type: Number, default: 25 },
+      /** Challenges to solve per week. Drives the week strip on Practice. */
+      weeklyChallengeGoal: { type: Number, default: 5 },
       pomodoroBreakMinutes: { type: Number, default: 5 },
     },
 

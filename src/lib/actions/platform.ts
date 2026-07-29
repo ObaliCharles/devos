@@ -51,7 +51,13 @@ export async function updatePreferences(prefs: Record<string, unknown>) {
   // Whitelist each preference; never $set the whole object.
   const patch: Record<string, unknown> = {};
   const strings = ["theme", "locale", "timezone"] as const;
-  const numbers = ["reminderHour", "editorFontSize", "pomodoroMinutes", "pomodoroBreakMinutes"] as const;
+  const numbers = [
+    "reminderHour",
+    "editorFontSize",
+    "pomodoroMinutes",
+    "pomodoroBreakMinutes",
+    "weeklyChallengeGoal",
+  ] as const;
   const bools = ["emailDigest", "notifyLearning", "notifyProjects", "notifyReviews"] as const;
   for (const k of strings) if (typeof prefs[k] === "string") patch[`preferences.${k}`] = prefs[k];
   for (const k of numbers) if (typeof prefs[k] === "number") patch[`preferences.${k}`] = prefs[k];

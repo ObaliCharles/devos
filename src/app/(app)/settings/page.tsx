@@ -23,6 +23,7 @@ export default async function SettingsPage() {
           notifyProjects: prefs.notifyProjects !== false,
           notifyReviews: prefs.notifyReviews !== false,
           pomodoroMinutes: Number(prefs.pomodoroMinutes ?? 25),
+          weeklyChallengeGoal: Number(prefs.weeklyChallengeGoal ?? 5),
         }}
         profile={{
           username: String(user.username ?? ""),

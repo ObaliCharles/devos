@@ -1,8 +1,16 @@
-import { Check, Dumbbell, Target, Zap } from "lucide-react";
 import { requireUser } from "@/lib/user";
-import { getChallengePage, getPracticeStats } from "@/lib/queries";
+import {
+  getChallengePage,
+  getCollections,
+  getContinuePractice,
+  getDailyChallenge,
+  getPracticeActivity,
+  getRecentAttempts,
+  getWeekProgress,
+} from "@/lib/queries";
 import { parseLibraryParams, toChallengeQuery, type RawParams } from "@/lib/library-params";
-import { PageHeader, StatTile } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
+import { PracticeHome } from "@/components/practice/practice-home";
 import { ChallengeLibrary } from "@/components/practice/challenge-library";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +18,14 @@ export const dynamic = "force-dynamic";
 /**
  * The practice centre.
  *
- * Same library as `/learning/challenges`, one component, two doors: Learning
- * reaches it as part of a path, Practice reaches it as a place to grind. The
- * difference is what sits around it — here the four summary tiles and the
- * progress ring, because this is the page you open to answer "how am I doing".
+ * Two halves. The top answers "what should I solve next" — today's pick, the
+ * one you abandoned, the week, your topics. The bottom is the full library, the
+ * same component `/learning/challenges` renders: one implementation, two doors.
+ *
+ * The summary tiles that used to sit here are gone. Solved / attempts /
+ * accuracy / remaining is a statistics panel, and putting one above the
+ * challenges said the numbers mattered more than the practice. What survived —
+ * the week strip, the heatmap — is there because it points at an action.
  */
 export default async function PracticePage({
   searchParams,
@@ -22,9 +34,17 @@ export default async function PracticePage({
 }) {
   const params = parseLibraryParams(await searchParams);
   const user = await requireUser();
-  const [data, stats] = await Promise.all([
+  const prefs = (user.preferences ?? {}) as Record<string, unknown>;
+  const weeklyGoal = Number(prefs.weeklyChallengeGoal ?? 5);
+
+  const [data, daily, continueWith, week, collections, attempts, activity] = await Promise.all([
     getChallengePage(user._id, toChallengeQuery(params)),
-    getPracticeStats(user._id),
+    getDailyChallenge(user._id).catch(() => ({ completed: false, challenge: null })),
+    getContinuePractice(user._id).catch(() => null),
+    getWeekProgress(user._id, weeklyGoal).catch(() => ({ solved: 0, goal: weeklyGoal, days: [] })),
+    getCollections(user._id).catch(() => []),
+    getRecentAttempts(user._id).catch(() => []),
+    getPracticeActivity(user._id).catch(() => []),
   ]);
 
   return (
@@ -35,35 +55,22 @@ export default async function PracticePage({
         description="Sharpen your skills by solving real coding challenges. Every one runs your code against real tests."
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Practice summary">
-        <StatTile
-          label="Solved"
-          value={stats.solved}
-          sub={`of ${stats.total} challenges`}
-          icon={<Check size={17} />}
-        />
-        <StatTile label="Attempts" value={stats.attempts} sub="all time" icon={<Target size={17} />} />
-        <StatTile
-          label="Accuracy"
-          value={`${stats.accuracy}%`}
-          sub="passed / attempted"
-          icon={<Zap size={17} />}
-          trend={stats.accuracy >= 60 ? "up" : stats.accuracy > 0 ? "flat" : undefined}
-        />
-        <StatTile
-          label="Remaining"
-          value={stats.total - stats.solved}
-          sub={stats.total === stats.solved ? "all done" : "to solve"}
-          icon={<Dumbbell size={17} />}
-        />
-      </section>
+      <PracticeHome
+        daily={daily.challenge}
+        dailyDone={daily.completed}
+        continueWith={continueWith}
+        week={week}
+        collections={collections}
+        attempts={attempts}
+        activity={activity}
+        streak={user.currentStreak ?? 0}
+      />
 
       <ChallengeLibrary
         data={data}
         params={params}
         basePath="/practice"
         streak={user.currentStreak ?? 0}
-        progress={{ solved: stats.solved, total: stats.total, accuracy: stats.accuracy }}
       />
     </div>
   );
