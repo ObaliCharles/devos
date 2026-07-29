@@ -1,4 +1,6 @@
+import type React from "react";
 import { COMMUNITY_LINKS } from "@/lib/community-links";
+import { DiscordMark } from "@/components/brand-icons";
 import {
   BarChart3,
   BookOpen,
@@ -6,7 +8,6 @@ import {
   Calendar,
   Dumbbell,
   FolderKanban,
-  Hash,
   LayoutDashboard,
   MessagesSquare,
   NotebookPen,
@@ -15,7 +16,6 @@ import {
   Shield,
   Sparkles,
   Swords,
-  type LucideIcon,
 } from "lucide-react";
 
 /**
@@ -24,7 +24,9 @@ import {
  * other. Grouped by intent, Learn / Build / Grow, which is how the whole
  * product is organised.
  */
-export type NavItem = { href: string; label: string; icon: LucideIcon };
+/** Lucide icons satisfy this, and so does a hand-drawn brand mark. */
+export type NavIcon = React.ComponentType<{ size?: number; className?: string }>;
+export type NavItem = { href: string; label: string; icon: NavIcon };
 export type NavGroup = { heading?: string; items: NavItem[] };
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -54,7 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       // Both leave the app. See lib/community-links.ts for why.
       { href: COMMUNITY_LINKS.discussions, label: "Discussions", icon: MessagesSquare },
-      { href: COMMUNITY_LINKS.discord, label: "Chat", icon: Hash },
+      { href: COMMUNITY_LINKS.discord, label: "Chat", icon: DiscordMark },
       { href: "/compete", label: "Arena", icon: Swords },
     ],
   },
