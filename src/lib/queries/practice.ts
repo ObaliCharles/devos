@@ -11,6 +11,8 @@ export type ChallengeCard = {
   id: string;
   slug: string;
   title: string;
+  /** One-line summary lifted from the prompt, for the library card. */
+  description: string;
   category: string;
   difficulty: string;
   technology: string[];
@@ -19,23 +21,64 @@ export type ChallengeCard = {
   solved: boolean;
   attempts: number;
   bookmarked: boolean;
+  /** How many people have solved it, across everyone. */
+  solvedBy: number;
+  /** Share of everyone who opened it and got there, or null if nobody has. */
+  solveRate: number | null;
+  /** Freshly added, before anyone has opened it. Drives the "New" flag. */
+  createdAt: string;
 };
+
+/**
+ * The card blurb. A prompt is markdown with a statement, constraints and worked
+ * examples; only the opening sentence belongs on a card, so take the first real
+ * paragraph, strip the markdown that would render as literal punctuation, and
+ * clamp it. Anything longer competes with the title for the same glance.
+ */
+function summarise(prompt: string): string {
+  const firstPara =
+    prompt
+      .split(/\n{2,}/)
+      .map((p) => p.trim())
+      .find((p) => p.length > 0 && !p.startsWith("#") && !p.startsWith("```")) ?? "";
+  const plain = firstPara
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/\*\*([^*]*)\*\*/g, "$1")
+    .replace(/[*_>#]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return plain.length > 160 ? `${plain.slice(0, 157).trimEnd()}…` : plain;
+}
 
 export async function getChallenges(userId: unknown) {
   await connectDB();
-  const [challenges, progress] = await Promise.all([
+  const [challenges, progress, cohort] = await Promise.all([
     Challenge.find().sort({ difficulty: 1, createdAt: 1 }).select("-tests -starterCode").lean(),
     ChallengeProgress.find({ user: userId }).lean(),
+    // One grouped read for everyone's numbers, rather than two counts per row.
+    ChallengeProgress.aggregate<{ _id: unknown; attempted: number; solved: number }>([
+      {
+        $group: {
+          _id: "$challenge",
+          attempted: { $sum: 1 },
+          solved: { $sum: { $cond: ["$solved", 1, 0] } },
+        },
+      },
+    ]).catch(() => []),
   ]);
 
   const byChallenge = new Map(progress.map((p) => [String(p.challenge), p]));
+  const byCohort = new Map(cohort.map((c) => [String(c._id), c]));
 
   const cards: ChallengeCard[] = challenges.map((c) => {
     const p = byChallenge.get(String(c._id));
+    const co = byCohort.get(String(c._id));
+    const attempted = co?.attempted ?? 0;
     return {
       id: String(c._id),
       slug: String(c.slug),
       title: String(c.title),
+      description: summarise(String(c.prompt ?? "")),
       category: String(c.category ?? "algorithms"),
       difficulty: String(c.difficulty ?? "easy"),
       technology: (c.technology ?? []) as string[],
@@ -44,6 +87,9 @@ export async function getChallenges(userId: unknown) {
       solved: Boolean(p?.solved),
       attempts: Number(p?.attempts ?? 0),
       bookmarked: Boolean(p?.bookmarked),
+      solvedBy: co?.solved ?? 0,
+      solveRate: attempted > 0 ? Math.round(((co?.solved ?? 0) / attempted) * 100) : null,
+      createdAt: (c.createdAt instanceof Date ? c.createdAt : new Date(0)).toISOString(),
     };
   });
 
