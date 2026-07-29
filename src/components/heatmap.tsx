@@ -17,12 +17,26 @@ const SHADES = [
 
 const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
 
+type Cell = { day: string; minutes: number } | null;
+
 export function Heatmap({ days }: { days: { day: string; minutes: number }[] }) {
   const max = Math.max(30, ...days.map((d) => d.minutes));
 
-  // Chunk into weeks of 7, oldest first. The data is already oldest-first.
-  const weeks: { day: string; minutes: number }[][] = [];
-  for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
+  /* Columns are calendar weeks, so row 0 must be Sunday for the Mon/Wed/Fri
+     gutter beside it to mean anything.
+
+     Chunking the array in naive sevens does not do that — the range starts 83
+     days ago, which is whatever weekday it happens to be, so every label was
+     wrong by that offset and the grid drifted by one row each time the page was
+     opened on a different day. Padding the head to the first day's real weekday
+     is what pins the rows; padding the tail keeps the last column full height so
+     it does not read as a short week. */
+  const first = days[0] ? new Date(`${days[0].day}T00:00:00`).getDay() : 0;
+  const cells: Cell[] = [...Array<Cell>(first).fill(null), ...days];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const weeks: Cell[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   function shade(minutes: number) {
     if (minutes === 0) return SHADES[0];
@@ -53,17 +67,24 @@ export function Heatmap({ days }: { days: { day: string; minutes: number }[] }) 
         <div className="flex gap-[3px]">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-[3px]">
-              {week.map((d) => (
-                <span
-                  key={d.day}
-                  className="h-[13px] w-[13px] rounded-[3px]"
-                  style={{ background: shade(d.minutes) }}
-                  // Native title rather than the CSS tooltip: this grid scrolls
-                  // horizontally, and an absolutely-positioned bubble would be
-                  // clipped by that same overflow.
-                  title={`${d.day}: ${d.minutes} min`}
-                />
-              ))}
+              {week.map((d, di) =>
+                d === null ? (
+                  // A day outside the range. It holds the row open so the grid
+                  // stays square, but draws nothing — an empty square here would
+                  // read as "studied nothing", which is a different claim.
+                  <span key={`pad-${di}`} className="h-[13px] w-[13px]" />
+                ) : (
+                  <span
+                    key={d.day}
+                    className="h-[13px] w-[13px] rounded-[3px]"
+                    style={{ background: shade(d.minutes) }}
+                    // Native title rather than the CSS tooltip: this grid scrolls
+                    // horizontally, and an absolutely-positioned bubble would be
+                    // clipped by that same overflow.
+                    title={`${d.day}: ${d.minutes} min`}
+                  />
+                ),
+              )}
             </div>
           ))}
         </div>

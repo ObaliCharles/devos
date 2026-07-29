@@ -23,6 +23,7 @@ import {
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { runCode, saveDraft, submitCode, toggleChallengeBookmark } from "@/lib/actions";
+import { ActionButton } from "@/components/action-button";
 import type { RunOutcome, TestResult } from "@/lib/runner";
 
 export type ChallengeData = {
@@ -719,12 +720,12 @@ function ActionBar({
           "linear-gradient(to top, var(--bg) 55%, color-mix(in srgb, var(--bg) 0%, transparent))",
       }}
     >
-      <button className="btn btn-secondary" onClick={onRun} disabled={pending}>
-        <Play size={15} /> Run code
-      </button>
-      <button className="btn btn-primary" onClick={onSubmit} disabled={pending}>
-        <Send size={15} /> {solved ? "Submit again" : "Submit solution"}
-      </button>
+      <ActionButton className="btn btn-secondary" icon={<Play size={15} />} loading={pending} onClick={onRun}>
+        Run code
+      </ActionButton>
+      <ActionButton className="btn btn-primary" icon={<Send size={15} />} loading={pending} onClick={onSubmit}>
+        {solved ? "Submit again" : "Submit solution"}
+      </ActionButton>
       <span className="num ml-auto text-[12px]" style={{ color: "var(--text-faint)" }}>
         {pending ? "Running…" : summary}
       </span>

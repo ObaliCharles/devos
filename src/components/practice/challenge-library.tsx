@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import {
   Binary,
   Bookmark,
@@ -13,6 +13,7 @@ import {
   Dumbbell,
   Filter,
   Layout,
+  Loader2,
   RotateCcw,
   Search,
   Server,
@@ -73,12 +74,18 @@ type Status = "all" | "unsolved" | "solved";
 
 const DIFFICULTY_RANK: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
 
+export type LibraryProgress = { solved: number; total: number; accuracy: number };
+
 export function ChallengeLibrary({
   challenges,
   streak,
+  progress,
 }: {
   challenges: ChallengeCard[];
   streak: number;
+  /** Renders the progress ring under the filters. Omitted where the page
+      already carries its own summary above the fold. */
+  progress?: LibraryProgress;
 }) {
   const [tab, setTab] = useState<"library" | "saved">("library");
   const [query, setQuery] = useState("");
@@ -169,7 +176,10 @@ export function ChallengeLibrary({
 
       <div className="grid gap-5 lg:grid-cols-[264px_minmax(0,1fr)] lg:items-start">
         {/* --------------------------------------------------- filter rail */}
-        <div className="hidden lg:sticky lg:top-5 lg:block">{filters}</div>
+        <div className="hidden lg:sticky lg:top-5 lg:flex lg:flex-col lg:gap-5">
+          {filters}
+          {progress && <ProgressCard {...progress} />}
+        </div>
 
         {/* ------------------------------------------------------- results */}
         <div className="flex min-w-0 flex-col gap-4">
@@ -411,6 +421,9 @@ function Row({ challenge: c }: { challenge: ChallengeCard }) {
           and the bookmark button still gets its own hit area above it. */}
       <Link href={`/learning/challenges/${c.id}`} className="absolute inset-0 rounded-[inherit]">
         <span className="sr-only">{c.title}</span>
+        {/* Opening a challenge is a server round trip. Without this the card
+            looks unpressed for as long as that takes, and people press again. */}
+        <Opening />
       </Link>
 
       <div className="flex items-start gap-3.5">
@@ -505,7 +518,65 @@ function Row({ challenge: c }: { challenge: ChallengeCard }) {
   );
 }
 
+/** Must live inside the Link — that is where `useLinkStatus` reads from. */
+function Opening() {
+  const { pending } = useLinkStatus();
+  if (!pending) return null;
+  return (
+    <span
+      className="absolute inset-0 grid place-items-center rounded-[inherit]"
+      style={{ background: "color-mix(in srgb, var(--bg) 55%, transparent)" }}
+    >
+      <Loader2 size={18} className="animate-spin" style={{ color: "var(--primary)" }} />
+    </span>
+  );
+}
+
 /* ------------------------------------------------------------------- pieces */
+
+/**
+ * The progress ring. A ring rather than a bar because it sits in a narrow rail
+ * where a bar would be four pixels of signal in a 264px column, and because the
+ * number in the middle is the thing being read — the arc is its frame.
+ */
+function ProgressCard({ solved, total, accuracy }: LibraryProgress) {
+  const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+  const r = 42;
+  const circumference = 2 * Math.PI * r;
+
+  return (
+    <section className="card flex flex-col items-center gap-3 p-4">
+      <h2 className="eyebrow self-start">Your progress</h2>
+
+      <div className="relative grid place-items-center">
+        <svg width={104} height={104} viewBox="0 0 104 104" className="-rotate-90">
+          <circle cx="52" cy="52" r={r} fill="none" stroke="var(--surface-3)" strokeWidth="8" />
+          <circle
+            cx="52"
+            cy="52"
+            r={r}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - pct / 100)}
+          />
+        </svg>
+        <span className="num absolute text-[20px] font-bold">{pct}%</span>
+      </div>
+
+      <p className="text-meta text-center text-[12px]">
+        {solved} of {total} solved
+        {accuracy > 0 && ` · ${accuracy}% accuracy`}
+      </p>
+
+      <Link href="/learning" className="btn btn-ghost btn-sm w-full">
+        View roadmap
+      </Link>
+    </section>
+  );
+}
 
 function DailyBanner({ streak }: { streak: number }) {
   return (

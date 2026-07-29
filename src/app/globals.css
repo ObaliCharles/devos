@@ -523,6 +523,40 @@ samp {
     flex-shrink: 0;
   }
 
+  /* Busy state.
+     The label stays put and the leading icon becomes a spinner, so the button
+     never changes width mid-press — a button that resizes while you are still
+     looking at it reads as a different button. Clicks are swallowed rather than
+     queued, because the work is already running. */
+  .btn[data-busy="true"],
+  .btn-icon[data-busy="true"],
+  .btn-icon-sm[data-busy="true"] {
+    pointer-events: none;
+  }
+  .btn[data-busy="true"] {
+    opacity: 0.75;
+  }
+  /* For buttons with no icon slot to borrow: a spinner appended in place. */
+  .btn[data-busy="true"]:not(:has(svg))::after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    animation: dos-spin 640ms linear infinite;
+  }
+  @keyframes dos-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn[data-busy="true"]:not(:has(svg))::after {
+      animation-duration: 1800ms;
+    }
+  }
+
   /* Flat accent, no shadow, no sheen. A raised button is a 2014 button. */
   .btn-primary {
     background: var(--primary);

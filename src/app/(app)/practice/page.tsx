@@ -1,23 +1,20 @@
-import Link from "next/link";
-import { Check, Dumbbell, Target, Timer, Zap } from "lucide-react";
+import { Check, Dumbbell, Target, Zap } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getChallenges, getPracticeStats } from "@/lib/queries";
-import { Badge, EmptyState, PageHeader, StatTile, type Tone } from "@/components/ui";
+import { PageHeader, StatTile } from "@/components/ui";
+import { ChallengeLibrary } from "@/components/practice/challenge-library";
 
 export const dynamic = "force-dynamic";
 
-const LEVELS: { key: string; label: string; tone: Tone }[] = [
-  { key: "easy", label: "Easy", tone: "success" },
-  { key: "medium", label: "Medium", tone: "warning" },
-  { key: "hard", label: "Hard", tone: "danger" },
-];
-
-const TONE_BY_LEVEL: Record<string, Tone> = {
-  easy: "success",
-  medium: "warning",
-  hard: "danger",
-};
-
+/**
+ * The practice centre.
+ *
+ * Same library as `/learning/challenges`, one component, two doors: Learning
+ * reaches it as part of a path, Practice reaches it as a place to grind. The
+ * difference is what sits around it — here the four summary tiles and the
+ * progress ring, because this is the page you open to answer "how am I doing",
+ * not "what should I learn next".
+ */
 export default async function PracticePage() {
   const user = await requireUser();
   const [challenges, stats] = await Promise.all([
@@ -25,19 +22,12 @@ export default async function PracticePage() {
     getPracticeStats(user._id),
   ]);
 
-  const recommended = challenges.filter((c) => !c.solved).slice(0, 3);
-
   return (
     <div className="page-body">
       <PageHeader
         eyebrow="Practice"
-        title="Practice centre"
-        description="Reading about code does not make you a developer. Writing it does. Every challenge runs your code against real tests."
-        actions={
-          <Link href="/learning/challenges" className="btn btn-primary">
-            <Dumbbell size={15} /> All challenges
-          </Link>
-        }
+        title="Practice"
+        description="Sharpen your skills by solving real coding challenges. Every one runs your code against real tests."
       />
 
       <section
@@ -50,12 +40,7 @@ export default async function PracticePage() {
           sub={`of ${stats.total} challenges`}
           icon={<Check size={17} />}
         />
-        <StatTile
-          label="Attempts"
-          value={stats.attempts}
-          sub="all time"
-          icon={<Target size={17} />}
-        />
+        <StatTile label="Attempts" value={stats.attempts} sub="all time" icon={<Target size={17} />} />
         <StatTile
           label="Accuracy"
           value={`${stats.accuracy}%`}
@@ -71,119 +56,11 @@ export default async function PracticePage() {
         />
       </section>
 
-      {challenges.length === 0 ? (
-        <EmptyState
-          icon={<Dumbbell size={22} />}
-          title="No challenges loaded"
-          body="Run npm run seed to load the starter challenge set, then refresh this page."
-          action={
-            <Link href="/learning" className="btn btn-primary">
-              Go to the roadmap
-              </Link>
-          }
-        />
-      ) : (
-        <>
-          {/* --------------------------------------------------- Recommended */}
-          {recommended.length > 0 && (
-            <section className="section-stack">
-              <div className="flex items-center gap-2.5">
-                <Target size={17} style={{ color: "var(--primary)" }} />
-                <h2 className="title-section">Recommended next</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {recommended.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/learning/challenges/${c.id}`}
-                    className="card card-link flex flex-col p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <Badge tone={TONE_BY_LEVEL[c.difficulty] ?? "neutral"}>{c.difficulty}</Badge>
-                      <span
-                        className="num flex items-center gap-1 text-[12px] font-medium"
-                        style={{ color: "var(--text-faint)" }}
-                      >
-                        <Zap size={12} style={{ color: "var(--warning)" }} /> {c.xp} XP
-                      </span>
-                    </div>
-                    <h3 className="title-card mt-3">{c.title}</h3>
-                    <p className="text-meta mt-1.5 flex items-center gap-1.5">
-                      <Timer size={12} /> ~{c.estimatedMinutes} min · {c.category}
-                    </p>
-                    <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
-                      {c.technology.slice(0, 3).map((t) => (
-                        <Badge key={t}>{t}</Badge>
-                      ))}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ------------------------------------------------- By difficulty */}
-          <section className="section-stack">
-            <h2 className="title-section">By difficulty</h2>
-            <div className="flex flex-col gap-6">
-              {LEVELS.map(({ key, label, tone }) => {
-                const group = challenges.filter((c) => c.difficulty === key);
-                if (group.length === 0) return null;
-                const solved = group.filter((c) => c.solved).length;
-
-                return (
-                  <div key={key}>
-                    <div className="mb-3 flex items-center gap-3">
-                      <Badge tone={tone}>{label}</Badge>
-                      <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
-                        {solved}/{group.length} solved
-                      </span>
-                    </div>
-
-                    <ul className="flex flex-col gap-1.5">
-                      {group.map((c) => (
-                        <li key={c.id}>
-                          <Link
-                            href={`/learning/challenges/${c.id}`}
-                            className="card card-link flex items-center gap-3.5 p-3.5"
-                          >
-                            <span
-                              className={`icon-tile h-8 w-8 ${c.solved ? "icon-tile-success" : ""}`}
-                            >
-                              {c.solved ? (
-                                <Check size={15} strokeWidth={2.6} />
-                              ) : (
-                                <Dumbbell size={14} />
-                              )}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate text-[14px] font-medium">
-                                {c.title}
-                              </span>
-                              <span className="text-meta block truncate">
-                                {c.category} · ~{c.estimatedMinutes} min
-                                {c.attempts > 0
-                                  ? ` · ${c.attempts} attempt${c.attempts === 1 ? "" : "s"}`
-                                  : ""}
-                              </span>
-                            </span>
-                            <span
-                              className="num flex shrink-0 items-center gap-1 text-[12px]"
-                              style={{ color: "var(--text-faint)" }}
-                            >
-                              <Zap size={12} style={{ color: "var(--warning)" }} /> {c.xp}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        </>
-      )}
+      <ChallengeLibrary
+        challenges={challenges}
+        streak={user.currentStreak ?? 0}
+        progress={{ solved: stats.solved, total: stats.total, accuracy: stats.accuracy }}
+      />
     </div>
   );
 }
