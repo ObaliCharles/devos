@@ -39,8 +39,8 @@ export default async function CommunityPage({
     <div className="page-body">
       <PageHeader
         eyebrow="Community"
-        title="Community"
-        description="Ask, answer, and show what you are building. Every thread here is written by someone learning the same things you are."
+        title="Discussions"
+        description="Ask, answer, and show what you are building. Questions can be marked answered, so a good thread stays useful long after it scrolls away."
         meta={
           <>
             <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
@@ -56,7 +56,7 @@ export default async function CommunityPage({
         }
       />
 
-      <Feed posts={posts} groups={groups} tags={tags} sort={sort} tag={tag} basePath="/community" />
+      <Feed posts={posts} groups={groups} tags={tags} sort={sort} tag={tag} basePath="/community/discussions" />
     </div>
   );
 }

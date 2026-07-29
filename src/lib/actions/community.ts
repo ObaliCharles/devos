@@ -2,7 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { connectDB } from "../db";
-import { CommunityReply, Group, GroupMember, Post, PostBookmark, Reaction } from "../models";
+import {
+  ChatMessage,
+  CommunityReply,
+  Group,
+  GroupMember,
+  Post,
+  PostBookmark,
+  Reaction,
+} from "../models";
 import { addXp, requireUser } from "../user";
 
 /**
@@ -226,4 +234,20 @@ export async function toggleGroupMembership(groupId: string) {
   await Group.updateOne({ _id: groupId }, { $inc: { memberCount: 1 } });
   revalidatePath("/community");
   return { ok: true as const, joined: true };
+}
+
+/** Post one line into a room. Membership is the gate — you chat where you joined. */
+export async function sendMessage(groupId: string, body: string) {
+  await connectDB();
+  const user = await requireUser();
+
+  const text = body.trim().slice(0, 4000);
+  if (!text) return { ok: false as const, error: "Nothing to send." };
+
+  const member = await GroupMember.exists({ user: user._id, group: groupId });
+  if (!member) return { ok: false as const, error: "Join the group to chat in it." };
+
+  await ChatMessage.create({ author: user._id, group: groupId, body: text });
+  revalidatePath("/community/chat");
+  return { ok: true as const };
 }

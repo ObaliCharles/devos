@@ -20,7 +20,7 @@ export default async function PostPage({ params }: { params: Promise<{ postId: s
     <div className="page-body">
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px]">
         <Link
-          href="/community"
+          href="/community/discussions"
           className="transition-colors hover:text-[var(--text)]"
           style={{ color: "var(--text-faint)" }}
         >
@@ -61,7 +61,7 @@ export default async function PostPage({ params }: { params: Promise<{ postId: s
         {post.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {post.tags.map((t) => (
-              <Link key={t} href={`/community?tag=${t}`} className="chip chip-sm">
+              <Link key={t} href={`/community/discussions?tag=${t}`} className="chip chip-sm">
                 #{t}
               </Link>
             ))}

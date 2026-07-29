@@ -164,7 +164,7 @@ export function Thread({
           style={{ color: "var(--danger)" }}
           onClick={async () => {
             await deletePost(postId);
-            router.push("/community");
+            router.push("/community/discussions");
           }}
         >
           Delete post

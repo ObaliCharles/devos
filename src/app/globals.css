@@ -29,8 +29,8 @@
   --radius-xs: 8px;
   --radius-control: 10px;
   --radius-tile: 10px;
-  --radius-card: 12px;
-  --radius-panel: 12px;
+  --radius-card: 10px;
+  --radius-panel: 10px;
   --radius-dialog: 14px;
   --radius-pill: 999px;
 
@@ -388,16 +388,18 @@ samp {
   /* A card is a physical surface: one flat fill, one hairline, no shadow of
      its own. It separates from the page because it is lighter than it, which
      is a cleaner signal than a blur ever is. */
+  /* A surface, not a floating card.
+     The border separates it from the page; the shadow used to, and that is what
+     made every list read as a stack of tiles rather than one workspace. The
+     background sits ~3% off --bg, which is enough contrast to group content and
+     not enough to draw the eye on its own. */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-sm);
     transition:
-      transform var(--dur) var(--ease-out),
-      box-shadow var(--dur) var(--ease-out),
-      border-color var(--dur) var(--ease-out),
-      background var(--dur) var(--ease-out);
+      border-color var(--dur-fast) var(--ease-out),
+      background var(--dur-fast) var(--ease-out);
   }
 
   /* Larger container for a whole region of the page */
@@ -405,7 +407,6 @@ samp {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-panel);
-    box-shadow: var(--shadow-sm);
   }
 
   /* A quieter surface for nested blocks that must not compete with .card */
@@ -421,14 +422,14 @@ samp {
   .card-link {
     cursor: pointer;
   }
+  /* Hover brightens, it does not lift. A card that rises off the page on hover
+     is a marketing card; a tool acknowledges the pointer and stays put. */
   .card-link:hover {
-    transform: translateY(-2px);
+    background: var(--surface-2);
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-md);
   }
   .card-link:active {
-    transform: translateY(0);
-    transition-duration: 80ms;
+    background: var(--surface-3);
   }
 
   /* Row-shaped interactive surface (lists, menus, nav) */

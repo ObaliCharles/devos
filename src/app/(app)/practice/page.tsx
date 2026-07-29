@@ -1,6 +1,7 @@
 import { Check, Dumbbell, Target, Zap } from "lucide-react";
 import { requireUser } from "@/lib/user";
-import { getChallenges, getPracticeStats } from "@/lib/queries";
+import { getChallengePage, getPracticeStats } from "@/lib/queries";
+import { parseLibraryParams, toChallengeQuery, type RawParams } from "@/lib/library-params";
 import { PageHeader, StatTile } from "@/components/ui";
 import { ChallengeLibrary } from "@/components/practice/challenge-library";
 
@@ -12,13 +13,17 @@ export const dynamic = "force-dynamic";
  * Same library as `/learning/challenges`, one component, two doors: Learning
  * reaches it as part of a path, Practice reaches it as a place to grind. The
  * difference is what sits around it — here the four summary tiles and the
- * progress ring, because this is the page you open to answer "how am I doing",
- * not "what should I learn next".
+ * progress ring, because this is the page you open to answer "how am I doing".
  */
-export default async function PracticePage() {
+export default async function PracticePage({
+  searchParams,
+}: {
+  searchParams: Promise<RawParams>;
+}) {
+  const params = parseLibraryParams(await searchParams);
   const user = await requireUser();
-  const [challenges, stats] = await Promise.all([
-    getChallenges(user._id),
+  const [data, stats] = await Promise.all([
+    getChallengePage(user._id, toChallengeQuery(params)),
     getPracticeStats(user._id),
   ]);
 
@@ -30,10 +35,7 @@ export default async function PracticePage() {
         description="Sharpen your skills by solving real coding challenges. Every one runs your code against real tests."
       />
 
-      <section
-        className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        aria-label="Practice summary"
-      >
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Practice summary">
         <StatTile
           label="Solved"
           value={stats.solved}
@@ -57,7 +59,9 @@ export default async function PracticePage() {
       </section>
 
       <ChallengeLibrary
-        challenges={challenges}
+        data={data}
+        params={params}
+        basePath="/practice"
         streak={user.currentStreak ?? 0}
         progress={{ solved: stats.solved, total: stats.total, accuracy: stats.accuracy }}
       />

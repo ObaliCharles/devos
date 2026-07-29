@@ -125,3 +125,21 @@ export const CommunityReply =
   models.CommunityReply || model("CommunityReply", CommunityReplySchema);
 export const Reaction = models.Reaction || model("Reaction", ReactionSchema);
 export const PostBookmark = models.PostBookmark || model("PostBookmark", PostBookmarkSchema);
+
+/**
+ * Room chat. Messages hang off a Group, so a group is one thing with two
+ * surfaces — a discussion board for questions worth keeping, and a chat room
+ * for the conversation that is not. Separating them into two entities would
+ * have meant joining a group twice.
+ */
+const ChatMessageSchema = new Schema(
+  {
+    author: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    group: { type: Schema.Types.ObjectId, ref: "Group", required: true, index: true },
+    body: { type: String, required: true },
+  },
+  { timestamps: true },
+);
+ChatMessageSchema.index({ group: 1, createdAt: -1 });
+
+export const ChatMessage = models.ChatMessage || model("ChatMessage", ChatMessageSchema);

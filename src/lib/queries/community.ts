@@ -1,5 +1,13 @@
 import { connectDB } from "../db";
-import { CommunityReply, Group, GroupMember, Post, PostBookmark, Reaction } from "../models";
+import {
+  ChatMessage,
+  CommunityReply,
+  Group,
+  GroupMember,
+  Post,
+  PostBookmark,
+  Reaction,
+} from "../models";
 
 /**
  * Reads for the Community module.
@@ -281,4 +289,40 @@ export async function listPostTags(limit = 16): Promise<string[]> {
     { $limit: limit },
   ]).catch(() => []);
   return rows.map((r) => r._id).filter(Boolean);
+}
+
+/* ----------------------------------------------------------------- chat -- */
+
+export type ChatLine = {
+  id: string;
+  body: string;
+  author: Author;
+  mine: boolean;
+  createdAt: string;
+};
+
+/**
+ * The last N messages in a room, oldest last.
+ *
+ * Read newest-first with a limit and then reversed, rather than sorted
+ * ascending — an ascending sort with a limit returns the *oldest* N, which is
+ * the wrong end of a chat log.
+ */
+export async function listMessages(userId: unknown, groupId: string, limit = 60): Promise<ChatLine[]> {
+  await connectDB();
+  const rows = await ChatMessage.find({ group: groupId })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .populate({ path: "author", select: "name avatarUrl" })
+    .lean<
+      { _id: unknown; body?: string; author?: PopulatedUser; createdAt?: Date }[]
+    >();
+
+  return rows.reverse().map((m) => ({
+    id: String(m._id),
+    body: String(m.body ?? ""),
+    author: toAuthor(m.author),
+    mine: String((m.author as PopulatedUser)?._id ?? "") === String(userId),
+    createdAt: new Date(m.createdAt ?? Date.now()).toISOString(),
+  }));
 }

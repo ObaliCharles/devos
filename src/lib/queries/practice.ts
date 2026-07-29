@@ -16,6 +16,8 @@ export type ChallengeCard = {
   category: string;
   difficulty: string;
   technology: string[];
+  /** The language the runner executes for this challenge. */
+  language: string;
   xp: number;
   estimatedMinutes: number;
   solved: boolean;
@@ -50,13 +52,152 @@ function summarise(prompt: string): string {
   return plain.length > 160 ? `${plain.slice(0, 157).trimEnd()}…` : plain;
 }
 
-export async function getChallenges(userId: unknown) {
+export type ChallengeQuery = {
+  q?: string;
+  difficulty?: string[];
+  category?: string;
+  tag?: string;
+  status?: "all" | "solved" | "unsolved" | "saved";
+  sort?: "newest" | "difficulty" | "xp" | "title";
+  page?: number;
+  perPage?: number;
+};
+
+export type ChallengePage = {
+  items: ChallengeCard[];
+  total: number;
+  page: number;
+  perPage: number;
+  /** Every technology present across the whole library, for the filter rail. */
+  tags: string[];
+};
+
+/**
+ * One page of the challenge library.
+ *
+ * This used to load every challenge — full markdown `prompt` and all — summarise
+ * them in Node, and hand the entire catalogue to the browser to filter. That is
+ * fine for twelve challenges and unusable for a real library: the prompt is the
+ * largest field on the document, and it was being fetched for rows nobody was
+ * going to look at.
+ *
+ * Now the database does the work. Filtering, sorting and paging happen in the
+ * query; `$substrCP` truncates the prompt server-side so the blurb costs 200
+ * bytes instead of 8KB; and only one page crosses the wire. The user's own
+ * progress is still a second read joined in memory, because that part is small
+ * and indexed.
+ */
+export async function getChallengePage(
+  userId: unknown,
+  opts: ChallengeQuery = {},
+): Promise<ChallengePage> {
   await connectDB();
-  const [challenges, progress, cohort] = await Promise.all([
-    Challenge.find().sort({ difficulty: 1, createdAt: 1 }).select("-tests -starterCode").lean(),
-    ChallengeProgress.find({ user: userId }).lean(),
-    // One grouped read for everyone's numbers, rather than two counts per row.
+  const {
+    q,
+    difficulty = [],
+    category,
+    tag,
+    status = "all",
+    sort = "newest",
+    page = 1,
+    perPage = 25,
+  } = opts;
+
+  const filter: Record<string, unknown> = {};
+  if (difficulty.length > 0) filter.difficulty = { $in: difficulty };
+  if (category) filter.category = category;
+  if (tag) filter.technology = tag;
+  if (q?.trim()) {
+    // A prefix-anchored regex rather than $text: it matches mid-word the way a
+    // filter box is expected to, and $text cannot do "rev" → "reverse".
+    const safe = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    filter.$or = [
+      { title: { $regex: safe, $options: "i" } },
+      { technology: { $regex: safe, $options: "i" } },
+      { category: { $regex: safe, $options: "i" } },
+    ];
+  }
+
+  // Solved / unsolved / saved need the user's own rows, and they are the only
+  // filters that do — so they are resolved to an id set first and folded in.
+  if (status !== "all") {
+    const own = await ChallengeProgress.find(
+      status === "saved" ? { user: userId, bookmarked: true } : { user: userId, solved: true },
+    )
+      .select("challenge")
+      .lean();
+    const ids = own.map((p) => p.challenge);
+    filter._id = status === "unsolved" ? { $nin: ids } : { $in: ids };
+  }
+
+  const order: Record<string, 1 | -1> =
+    sort === "difficulty"
+      ? { difficultyRank: 1, createdAt: -1 }
+      : sort === "xp"
+        ? { xp: -1 }
+        : sort === "title"
+          ? { title: 1 }
+          : { createdAt: -1 };
+
+  const skip = Math.max(0, (page - 1) * perPage);
+
+  const [rows, total, tags] = await Promise.all([
+    Challenge.aggregate<{
+      _id: unknown;
+      slug: string;
+      title: string;
+      blurb: string;
+      category: string;
+      difficulty: string;
+      technology: string[];
+      language: string;
+      xp: number;
+      estimatedMinutes: number;
+      createdAt: Date;
+    }>([
+      { $match: filter },
+      {
+        $addFields: {
+          difficultyRank: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$difficulty", "easy"] }, then: 0 },
+                { case: { $eq: ["$difficulty", "medium"] }, then: 1 },
+              ],
+              default: 2,
+            },
+          },
+        },
+      },
+      { $sort: order },
+      { $skip: skip },
+      { $limit: perPage },
+      {
+        $project: {
+          slug: 1,
+          title: 1,
+          category: 1,
+          difficulty: 1,
+          technology: 1,
+          language: 1,
+          xp: 1,
+          estimatedMinutes: 1,
+          createdAt: 1,
+          // 400 characters is comfortably more than the blurb needs and still a
+          // twentieth of a real prompt.
+          blurb: { $substrCP: [{ $ifNull: ["$prompt", ""] }, 0, 400] },
+        },
+      },
+    ]),
+    Challenge.countDocuments(filter),
+    Challenge.distinct("technology").catch((): string[] => []),
+  ]);
+
+  const ids = rows.map((r) => r._id);
+  const [mine, cohort] = await Promise.all([
+    ChallengeProgress.find({ user: userId, challenge: { $in: ids } }).lean(),
     ChallengeProgress.aggregate<{ _id: unknown; attempted: number; solved: number }>([
+      { $match: { challenge: { $in: ids } } },
       {
         $group: {
           _id: "$challenge",
@@ -67,21 +208,22 @@ export async function getChallenges(userId: unknown) {
     ]).catch(() => []),
   ]);
 
-  const byChallenge = new Map(progress.map((p) => [String(p.challenge), p]));
+  const byChallenge = new Map(mine.map((p) => [String(p.challenge), p]));
   const byCohort = new Map(cohort.map((c) => [String(c._id), c]));
 
-  const cards: ChallengeCard[] = challenges.map((c) => {
+  const items: ChallengeCard[] = rows.map((c) => {
     const p = byChallenge.get(String(c._id));
     const co = byCohort.get(String(c._id));
     const attempted = co?.attempted ?? 0;
     return {
       id: String(c._id),
-      slug: String(c.slug),
-      title: String(c.title),
-      description: summarise(String(c.prompt ?? "")),
+      slug: String(c.slug ?? ""),
+      title: String(c.title ?? ""),
+      description: summarise(String(c.blurb ?? "")),
       category: String(c.category ?? "algorithms"),
       difficulty: String(c.difficulty ?? "easy"),
       technology: (c.technology ?? []) as string[],
+      language: String(c.language ?? "javascript"),
       xp: Number(c.xp ?? 30),
       estimatedMinutes: Number(c.estimatedMinutes ?? 20),
       solved: Boolean(p?.solved),
@@ -93,8 +235,21 @@ export async function getChallenges(userId: unknown) {
     };
   });
 
-  return cards;
+  return {
+    items,
+    total,
+    page,
+    perPage,
+    tags: (tags as string[]).filter(Boolean).sort(),
+  };
 }
+
+/** The unpaged list, for the small rails on Learn and the dashboard. */
+export async function getChallenges(userId: unknown, limit = 24) {
+  const { items } = await getChallengePage(userId, { perPage: limit, sort: "difficulty" });
+  return items;
+}
+
 
 export async function getPracticeStats(userId: unknown) {
   await connectDB();

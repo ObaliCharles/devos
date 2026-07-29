@@ -12,7 +12,7 @@ export default async function GroupsPage() {
   return (
     <div className="page-body">
       <PageHeader
-        back={{ href: "/community", label: "Community" }}
+        back={{ href: "/community/discussions", label: "Discussions" }}
         eyebrow="Community"
         title="Groups"
         description="Each group is the home for one topic — its own feed, its own members."

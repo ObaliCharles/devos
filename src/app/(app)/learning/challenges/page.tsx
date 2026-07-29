@@ -1,13 +1,19 @@
 import { requireUser } from "@/lib/user";
-import { getChallenges } from "@/lib/queries";
+import { getChallengePage } from "@/lib/queries";
+import { parseLibraryParams, toChallengeQuery, type RawParams } from "@/lib/library-params";
 import { PageHeader } from "@/components/ui";
 import { ChallengeLibrary } from "@/components/practice/challenge-library";
 
 export const dynamic = "force-dynamic";
 
-export default async function ChallengesPage() {
+export default async function ChallengesPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawParams>;
+}) {
+  const params = parseLibraryParams(await searchParams);
   const user = await requireUser();
-  const challenges = await getChallenges(user._id);
+  const data = await getChallengePage(user._id, toChallengeQuery(params));
 
   return (
     <div className="page-body">
@@ -15,9 +21,14 @@ export default async function ChallengesPage() {
         back={{ href: "/learning", label: "Learning" }}
         eyebrow="Learning"
         title="Challenges"
-        description="Sharpen your skills by solving real coding challenges."
+        description="Short problems graded against real tests. Run them in the browser, submit when the hidden cases pass."
       />
-      <ChallengeLibrary challenges={challenges} streak={user.currentStreak ?? 0} />
+      <ChallengeLibrary
+        data={data}
+        params={params}
+        basePath="/learning/challenges"
+        streak={user.currentStreak ?? 0}
+      />
     </div>
   );
 }

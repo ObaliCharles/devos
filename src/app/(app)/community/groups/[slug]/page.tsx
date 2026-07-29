@@ -34,7 +34,7 @@ export default async function GroupPage({
     <div className="page-body">
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px]">
         <Link
-          href="/community"
+          href="/community/discussions"
           className="transition-colors hover:text-[var(--text)]"
           style={{ color: "var(--text-faint)" }}
         >

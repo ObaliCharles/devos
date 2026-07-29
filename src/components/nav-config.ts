@@ -5,6 +5,7 @@ import {
   Calendar,
   Dumbbell,
   FolderKanban,
+  Hash,
   LayoutDashboard,
   MessagesSquare,
   NotebookPen,
@@ -42,9 +43,15 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/projects", label: "Projects", icon: FolderKanban },
       { href: "/ai", label: "AI Workspace", icon: Sparkles },
-      // Community sits in Build, not in its own group: you come here because
-      // you are stuck on something you are building, which is the same trip.
-      { href: "/community", label: "Community", icon: MessagesSquare },
+    ],
+  },
+  {
+    // Community is a section, not a destination. There is no landing page above
+    // these two — one would just be a menu of the same links the sidebar is.
+    heading: "Community",
+    items: [
+      { href: "/community/discussions", label: "Discussions", icon: MessagesSquare },
+      { href: "/community/chat", label: "Chat", icon: Hash },
     ],
   },
   {
