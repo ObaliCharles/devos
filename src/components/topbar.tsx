@@ -2,29 +2,24 @@
 
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { Bell, Flame, Moon, Search, Sun, Zap } from "lucide-react";
+import { Bell, Moon, Search, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { CommandPalette } from "./command-palette";
 import { MobileDrawer } from "./mobile-drawer";
 import type { SidebarUser } from "./nav-config";
 
 /**
- * The top bar is deliberately thin: 56px, one row, no page title. The page
- * owns its own header, so repeating it here would only cost vertical space.
- * What lives here is everything that is true on every route, search, the two
- * streak signals, notifications, theme, account, and on phones the menu
- * trigger for the navigation drawer.
+ * The top bar is deliberately thin: one row, no page title. The page owns its
+ * own header, so repeating it here would only cost vertical space. What lives
+ * here is everything that is true on every route — search, notifications,
+ * theme, account, and on phones the menu trigger for the navigation drawer.
  */
 export function Topbar({
-  streak,
-  xp,
   unread = 0,
   dueCount = 0,
   isAdmin = false,
   navUser,
 }: {
-  streak: number;
-  xp: number;
   unread?: number;
   dueCount?: number;
   isAdmin?: boolean;
@@ -74,34 +69,13 @@ export function Topbar({
 
       {/* -------------------------------------------------- Right cluster */}
       <div className="ml-auto flex items-center gap-1">
-        {/* Streak and XP read as one status group, separated from the controls.
-            Both are neutral. They are readouts, not alerts, and a lit-up flame
-            in the corner of every screen is the fastest way to make a tool feel
-            like a game. */}
-        <div className="mr-1.5 hidden items-center gap-0.5 sm:flex">
-          <span
-            className="tooltip flex h-8 items-center gap-1.5 rounded-[var(--radius-control)] px-2.5 text-[12px] font-medium"
-            data-tip={streak > 0 ? `${streak} day streak` : "No streak yet"}
-            style={{ color: streak > 0 ? "var(--text-muted)" : "var(--text-faint)" }}
-          >
-            <Flame size={14} />
-            <span className="num">{streak}</span>
-          </span>
-
-          <Link
-            href="/analytics"
-            className="tooltip row-link flex h-8 items-center gap-1.5 px-2.5 text-[12px] font-medium"
-            data-tip="Experience earned"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <Zap size={14} />
-            <span className="num">{xp.toLocaleString()}</span>
-            <span className="hidden lg:inline" style={{ color: "var(--text-faint)" }}>
-              XP
-            </span>
-          </Link>
-        </div>
-
+        {/* The streak flame and the XP counter used to live here. They are gone
+            from the chrome on purpose: a number that follows you onto every
+            route is claiming to be the thing you should be watching, and
+            neither of them is. Both still exist — XP drives levels and
+            achievements, the streak is on the dashboard next to the work that
+            produced it — but they are readouts you go and look at, not a score
+            pinned to the corner of the product. */}
         <Link href="/notifications" className="btn-icon relative" aria-label="Notifications">
           <Bell size={16} />
           {/* Accent, not red. Unread mail is not an error. */}

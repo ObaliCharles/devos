@@ -27,6 +27,101 @@ export type PracticeTeaser = {
   estimatedMinutes: number;
 } | null;
 
+/** Easiest first. The order a recommendation has to respect to be one. */
+const DIFFICULTY_RANK = { easy: 0, medium: 1, hard: 2 } as const;
+
+function teaser(c: Record<string, unknown>): PracticeTeaser {
+  return {
+    id: String(c._id),
+    title: String(c.title ?? ""),
+    difficulty: String(c.difficulty ?? "easy"),
+    category: String(c.category ?? "algorithms"),
+    xp: Number(c.xp ?? 30),
+    estimatedMinutes: Number(c.estimatedMinutes ?? 20),
+  };
+}
+
+/**
+ * Which challenge to recommend next, and why.
+ *
+ * The pick used to be `$sample: 1` over everything unsolved, which is to say it
+ * was a lottery. A lottery is not a recommendation: it will hand a first-day
+ * user Merge Intervals as readily as FizzBuzz, and once it has done that the
+ * card has taught them to ignore it.
+ *
+ * So the pick is ordered rather than drawn: the easiest unsolved challenge,
+ * preferring a category you have already started over a cold start in a new
+ * one, ties broken by title so the same state always yields the same pick.
+ * That is a claim the data can actually support — difficulty and solved-state
+ * are both real.
+ *
+ * What it deliberately does *not* claim is topical relevance to whatever you
+ * are currently learning. Every challenge in the catalogue is an algorithms
+ * challenge, so a "matched to your current skill" line would be decoration
+ * over a join that does not exist. `Challenge` already carries `technology`
+ * and `skills` refs for the day the catalogue earns that claim; this is the
+ * function that should learn about them, and not before.
+ *
+ * Exported because the read path and the write path must agree. They did not:
+ * this ranked one way and `pickDailyChallenge` pinned the oldest by
+ * `createdAt`, so the card could name one challenge and open another. A stated
+ * reason makes that mismatch a lie rather than a quirk, so both now call here.
+ */
+export async function selectRecommendedChallenge(userId: unknown) {
+  await connectDB();
+
+  const solvedRows = await ChallengeProgress.find({ user: userId, solved: true })
+    .select("challenge")
+    .populate({ path: "challenge", select: "category" })
+    .lean();
+
+  const startedCategories = new Set(
+    solvedRows
+      .map((r) => String((r.challenge as { category?: string } | null)?.category ?? ""))
+      .filter(Boolean),
+  );
+
+  const unsolved = await Challenge.find({
+    _id: { $nin: solvedRows.map((s) => s.challenge) },
+  })
+    .select("title difficulty category xp estimatedMinutes")
+    .lean()
+    .catch(() => [] as Record<string, unknown>[]);
+
+  // Everything solved: fall back to the whole catalogue so the card still has
+  // something to offer rather than emptying out as a reward for finishing.
+  const pool = unsolved.length
+    ? unsolved
+    : await Challenge.find()
+        .select("title difficulty category xp estimatedMinutes")
+        .lean()
+        .catch(() => [] as Record<string, unknown>[]);
+
+  const pick = [...pool].sort((a, b) => {
+    const da = DIFFICULTY_RANK[String(a.difficulty) as keyof typeof DIFFICULTY_RANK] ?? 1;
+    const db = DIFFICULTY_RANK[String(b.difficulty) as keyof typeof DIFFICULTY_RANK] ?? 1;
+    if (da !== db) return da - db;
+    const ca = startedCategories.has(String(a.category)) ? 0 : 1;
+    const cb = startedCategories.has(String(b.category)) ? 0 : 1;
+    if (ca !== cb) return ca - cb;
+    return String(a.title).localeCompare(String(b.title));
+  })[0];
+
+  if (!pick) return null;
+
+  const difficulty = String(pick.difficulty ?? "easy");
+  const category = String(pick.category ?? "algorithms");
+
+  return {
+    doc: pick,
+    reason: !unsolved.length
+      ? "You have solved everything. This one is worth a second pass."
+      : startedCategories.has(category)
+        ? `Your easiest unsolved ${category} challenge.`
+        : `The easiest ${difficulty} challenge you have not solved.`,
+  };
+}
+
 /** Today's pick, recalled if it exists so it does not reshuffle on reload. */
 export async function getDailyChallenge(userId: unknown) {
   await connectDB();
@@ -37,43 +132,22 @@ export async function getDailyChallenge(userId: unknown) {
     .lean<{ completed?: boolean; challenge?: Record<string, unknown> } | null>();
 
   if (existing?.challenge) {
-    const c = existing.challenge as Record<string, unknown>;
     return {
       completed: Boolean(existing.completed),
-      challenge: {
-        id: String(c._id),
-        title: String(c.title ?? ""),
-        difficulty: String(c.difficulty ?? "easy"),
-        category: String(c.category ?? "algorithms"),
-        xp: Number(c.xp ?? 30),
-        estimatedMinutes: Number(c.estimatedMinutes ?? 20),
-      } as PracticeTeaser,
+      challenge: teaser(existing.challenge),
+      reason: null as string | null,
     };
   }
 
   // No pick yet. Read-only here on purpose: a GET should not write, so the row
   // is created by `pickDailyChallenge` when the card is actually engaged with.
-  const solved = await ChallengeProgress.find({ user: userId, solved: true })
-    .select("challenge")
-    .lean();
-  const [candidate] = await Challenge.aggregate([
-    { $match: { _id: { $nin: solved.map((s) => s.challenge) } } },
-    { $sample: { size: 1 } },
-    { $project: { title: 1, difficulty: 1, category: 1, xp: 1, estimatedMinutes: 1 } },
-  ]).catch(() => []);
+  const recommended = await selectRecommendedChallenge(userId);
+  if (!recommended) return { completed: false, challenge: null, reason: null as string | null };
 
   return {
     completed: false,
-    challenge: candidate
-      ? ({
-          id: String(candidate._id),
-          title: String(candidate.title ?? ""),
-          difficulty: String(candidate.difficulty ?? "easy"),
-          category: String(candidate.category ?? "algorithms"),
-          xp: Number(candidate.xp ?? 30),
-          estimatedMinutes: Number(candidate.estimatedMinutes ?? 20),
-        } as PracticeTeaser)
-      : null,
+    challenge: teaser(recommended.doc),
+    reason: recommended.reason,
   };
 }
 

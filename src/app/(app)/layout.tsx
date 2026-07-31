@@ -52,8 +52,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {/* The topbar owns the mobile menu trigger, so navigation on a phone is
             always one tap from the top of the screen. */}
         <Topbar
-          streak={user.currentStreak ?? 0}
-          xp={user.xp ?? 0}
           unread={unread}
           dueCount={dueCount}
           isAdmin={user.role === "admin"}

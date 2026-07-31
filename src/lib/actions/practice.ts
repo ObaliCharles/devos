@@ -6,6 +6,7 @@ import { dayKey } from "../day";
 import { runChallenge, type RunOutcome } from "../runner";
 import { Challenge, ChallengeAttempt, ChallengeProgress, DailyChallenge, TimeEntry } from "../models";
 import { addXp, recordActivity, requireUser } from "../user";
+import { selectRecommendedChallenge } from "../queries/practice-home";
 import { recordMatchSubmission } from "./compete";
 
 /**
@@ -128,8 +129,14 @@ export async function toggleChallengeBookmark(challengeId: string) {
 }
 
 /**
- * Pick (or recall) today's challenge for this user. Fixed per day so it does
+ * Pin (or recall) today's challenge for this user. Fixed per day so it does
  * not reshuffle on reload, the same reasoning as the daily note.
+ *
+ * The selection itself lives in `selectRecommendedChallenge` because the
+ * practice card reads it to decide what to show *and* states why. This used to
+ * pin the oldest challenge by `createdAt` while the card previewed a different
+ * one, so the card could name FizzBuzz and open Two Sum. One selector, one
+ * answer.
  */
 export async function pickDailyChallenge() {
   await connectDB();
@@ -139,15 +146,10 @@ export async function pickDailyChallenge() {
   const existing = await DailyChallenge.findOne({ user: user._id, day }).lean<{ challenge: unknown } | null>();
   if (existing) return { id: String(existing.challenge) };
 
-  // Prefer something not yet solved; fall back to anything.
-  const solved = await ChallengeProgress.find({ user: user._id, solved: true }).select("challenge").lean();
-  const solvedIds = solved.map((s) => s.challenge);
+  const recommended = await selectRecommendedChallenge(user._id);
+  if (!recommended) return null;
 
-  const pool =
-    (await Challenge.findOne({ _id: { $nin: solvedIds } }).sort({ createdAt: 1 }).select("_id").lean<{ _id: unknown } | null>()) ??
-    (await Challenge.findOne().sort({ createdAt: 1 }).select("_id").lean<{ _id: unknown } | null>());
-
-  if (!pool) return null;
-  await DailyChallenge.create({ user: user._id, day, challenge: pool._id });
-  return { id: String(pool._id) };
+  const id = recommended.doc._id;
+  await DailyChallenge.create({ user: user._id, day, challenge: id });
+  return { id: String(id) };
 }

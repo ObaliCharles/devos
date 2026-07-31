@@ -136,28 +136,21 @@ export default async function CourseLessonPage({
         </section>
       )}
 
-      {/* Complete this lesson — credits XP, streak and course progress once */}
-      <div
-        className="card flex flex-wrap items-center justify-between gap-4 p-5"
-        style={{ background: "var(--surface-2)" }}
-      >
-        <div>
-          <p className="title-card">Done with this lesson?</p>
-          <p className="text-body mt-0.5 text-[14px]">
-            Mark it complete to earn XP, keep your streak alive, and track course progress.
-          </p>
-        </div>
-        <CompleteLesson
-          course={course.slug}
-          lessonIndex={idx}
-          nextHref={
-            next
-              ? `/learning/course/${course.slug}/${next.index + 1}`
-              : `/learning/course/${course.slug}`
-          }
-          alreadyDone={doneSet.has(idx)}
-        />
-      </div>
+      {/* Completing the lesson, and the handoff to the next step in the loop.
+          The component owns both states: the prompt before, the next actions
+          after. */}
+      <CompleteLesson
+        course={course.slug}
+        lessonIndex={idx}
+        nextHref={
+          next
+            ? `/learning/course/${course.slug}/${next.index + 1}`
+            : `/learning/course/${course.slug}`
+        }
+        nextTitle={next?.title ?? null}
+        practiceCount={current.challenges?.length ?? 0}
+        alreadyDone={doneSet.has(idx)}
+      />
 
       {/* Prev / Next through the course */}
       <nav className="grid gap-3 sm:grid-cols-2" aria-label="Lesson navigation">

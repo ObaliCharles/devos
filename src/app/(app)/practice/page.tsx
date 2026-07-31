@@ -39,7 +39,11 @@ export default async function PracticePage({
 
   const [data, daily, continueWith, week, collections, attempts, activity] = await Promise.all([
     getChallengePage(user._id, toChallengeQuery(params)),
-    getDailyChallenge(user._id).catch(() => ({ completed: false, challenge: null })),
+    getDailyChallenge(user._id).catch(() => ({
+      completed: false,
+      challenge: null,
+      reason: null as string | null,
+    })),
     getContinuePractice(user._id).catch(() => null),
     getWeekProgress(user._id, weeklyGoal).catch(() => ({ solved: 0, goal: weeklyGoal, days: [] })),
     getCollections(user._id).catch(() => []),
@@ -58,6 +62,7 @@ export default async function PracticePage({
       <PracticeHome
         daily={daily.challenge}
         dailyDone={daily.completed}
+        dailyReason={daily.reason}
         continueWith={continueWith}
         week={week}
         collections={collections}

@@ -29,6 +29,7 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 export function PracticeHome({
   daily,
   dailyDone,
+  dailyReason,
   continueWith,
   week,
   collections,
@@ -38,6 +39,8 @@ export function PracticeHome({
 }: {
   daily: PracticeTeaser;
   dailyDone: boolean;
+  /** Why this challenge and not another. Null once the day's pick is pinned. */
+  dailyReason: string | null;
   continueWith: PracticeTeaser;
   week: WeekProgress;
   collections: Collection[];
@@ -61,8 +64,14 @@ export function PracticeHome({
         )}
         {daily && (
           <Teaser
-            eyebrow="Today's challenge"
-            note={dailyDone ? "Done for today." : "Fresh pick, changes at midnight."}
+            eyebrow="Recommended next"
+            // Say why this one. "Fresh pick, changes at midnight" described the
+            // mechanism; what a recommendation owes you is its reasoning.
+            note={
+              dailyDone
+                ? "Done for today."
+                : (dailyReason ?? "Today's pick, held until midnight.")
+            }
             challenge={daily}
             cta={dailyDone ? "Review it" : "Solve it"}
             done={dailyDone}
