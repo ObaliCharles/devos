@@ -45,7 +45,7 @@ function Block({
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="title-card">{title}</h2>
         {href && (
-          <Link href={href} className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+          <Link href={href} className="text-micro font-medium" style={{ color: "var(--primary)" }}>
             {hrefLabel}
           </Link>
         )}
@@ -75,8 +75,8 @@ function Row({
       <Link href={href} className="row-link -mx-2 flex items-center gap-2.5 px-2 py-2">
         <span className="shrink-0">{mark}</span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[14px] font-medium">{title}</span>
-          <span className="text-meta block truncate text-[12px]">{meta}</span>
+          <span className="block truncate text-ui font-medium">{title}</span>
+          <span className="text-meta block truncate text-micro">{meta}</span>
           {pct !== undefined && (
             <span className="progress mt-1.5 block">
               <span className="progress-bar block" style={{ width: `${pct}%` }} />
@@ -139,7 +139,7 @@ export function LearnBands({
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {/* Roadmap — the phases as a vertical stepper */}
         <Block title="Roadmap" href="/learning/roadmap">
-          <p className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+          <p className="text-micro font-medium" style={{ color: "var(--primary)" }}>
             {pathTitle}{" "}
             <span className="num" style={{ color: "var(--text-faint)" }}>
               {pathPct}% completed
@@ -156,7 +156,7 @@ export function LearnBands({
             {phases.slice(0, 5).map((p, i) => (
               <li key={p.id} className="relative flex items-start gap-2.5">
                 <span
-                  className="relative z-[1] grid h-[21px] w-[21px] shrink-0 place-items-center rounded-full text-[12px] font-medium"
+                  className="relative z-[1] grid h-[21px] w-[21px] shrink-0 place-items-center rounded-full text-micro font-medium"
                   style={{
                     background: p.pct === 100 ? "var(--primary)" : "var(--surface-3)",
                     border: `1px solid ${p.current ? "var(--primary)" : "var(--border)"}`,
@@ -166,9 +166,9 @@ export function LearnBands({
                   {p.pct === 100 ? <Check size={10} strokeWidth={3} /> : p.locked ? <Lock size={9} /> : i + 1}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[12px] font-medium">{p.title}</span>
+                  <span className="block truncate text-micro font-medium">{p.title}</span>
                   <span
-                    className="block text-[12px]"
+                    className="block text-micro"
                     style={{ color: p.current ? "var(--primary)" : "var(--text-faint)" }}
                   >
                     {p.pct === 100
@@ -183,7 +183,7 @@ export function LearnBands({
               </li>
             ))}
             {phases.length === 0 && (
-              <li className="text-meta text-[12px]">No path active yet.</li>
+              <li className="text-meta text-micro">No path active yet.</li>
             )}
           </ol>
         </Block>
@@ -206,7 +206,7 @@ export function LearnBands({
                   meta={p.status === "complete" ? "Completed" : titleCase(p.status)}
                   pct={pct}
                   trailing={
-                    <span className="num shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="num shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
                       {pct}%
                     </span>
                   }
@@ -214,7 +214,7 @@ export function LearnBands({
               );
             })}
             {projects.length === 0 && (
-              <li className="text-meta py-1 text-[12px]">
+              <li className="text-meta py-1 text-micro">
                 No projects yet. Start one from a brief.
               </li>
             )}
@@ -284,10 +284,10 @@ export function LearnBands({
         {/* Gamification */}
         <Block title="Progress" href="/analytics">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-[14px] font-medium">
+            <p className="text-ui font-medium">
               Level {level} · {levelTitle}
             </p>
-            <p className="num text-[12px]" style={{ color: "var(--text-muted)" }}>
+            <p className="num text-micro" style={{ color: "var(--text-muted)" }}>
               {xp.toLocaleString()} XP
             </p>
           </div>
@@ -295,7 +295,7 @@ export function LearnBands({
             <div className="progress flex-1">
               <div className="progress-bar" style={{ width: `${Math.round((into / need) * 100)}%` }} />
             </div>
-            <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
               {Math.round((into / need) * 100)}%
             </span>
           </div>
@@ -306,8 +306,8 @@ export function LearnBands({
                 <Flame size={14} />
               </span>
               <span className="min-w-0">
-                <span className="num block text-[14px] font-semibold leading-none">{streak}</span>
-                <span className="text-meta block text-[12px]">
+                <span className="num block text-ui font-semibold leading-none">{streak}</span>
+                <span className="text-meta block text-micro">
                   day{streak === 1 ? "" : "s"} streak
                 </span>
               </span>
@@ -317,11 +317,11 @@ export function LearnBands({
                 <Trophy size={14} />
               </span>
               <span className="min-w-0">
-                <span className="num block text-[14px] font-semibold leading-none">
+                <span className="num block text-ui font-semibold leading-none">
                   {badgesEarned}
                   <span style={{ color: "var(--text-faint)" }}>/{badgesTotal}</span>
                 </span>
-                <span className="text-meta block text-[12px]">badges</span>
+                <span className="text-meta block text-micro">badges</span>
               </span>
             </div>
           </div>
@@ -329,7 +329,7 @@ export function LearnBands({
 
         {/* AI Mentor — the chips are real prefilled prompts */}
         <Block title="AI mentor" href="/ai/chat" hrefLabel="Open">
-          <p className="text-meta text-[12px]">Ask anything about what you are learning.</p>
+          <p className="text-meta text-micro">Ask anything about what you are learning.</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {[
               "Explain this topic",
@@ -350,7 +350,7 @@ export function LearnBands({
           >
             <span className="search flex-1">
               <Sparkles size={14} style={{ color: "var(--text-faint)" }} />
-              <span className="flex-1 truncate text-[14px]">Ask anything…</span>
+              <span className="flex-1 truncate text-ui">Ask anything…</span>
             </span>
             <span className="btn btn-primary btn-sm shrink-0" aria-hidden>
               <ChevronRight size={14} />
@@ -373,13 +373,13 @@ export function LearnBands({
               <li key={href}>
                 <Link href={href} className="row-link -mx-2 flex items-center gap-2.5 px-2 py-[7px]">
                   <span
-                    className="num grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[12px]"
+                    className="num grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-micro"
                     style={{ background: "var(--neutral-faint)", color: "var(--text-faint)" }}
                   >
                     {i + 1}
                   </span>
                   <Icon size={13} style={{ color: "var(--text-faint)" }} className="shrink-0" />
-                  <span className="min-w-0 flex-1 truncate text-[12px]">{label}</span>
+                  <span className="min-w-0 flex-1 truncate text-micro">{label}</span>
                   <ChevronRight size={13} style={{ color: "var(--text-faint)" }} className="shrink-0" />
                 </Link>
               </li>

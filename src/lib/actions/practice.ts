@@ -8,6 +8,7 @@ import { Challenge, ChallengeAttempt, ChallengeProgress, DailyChallenge, TimeEnt
 import { addXp, recordActivity, requireUser } from "../user";
 import { selectRecommendedChallenge } from "../queries/practice-home";
 import { recordMatchSubmission } from "./compete";
+import { evidenceFromChallenge } from "../evidence";
 
 /**
  * Run the visible tests without recording anything. This is the "Run" button, 
@@ -86,6 +87,12 @@ export async function submitCode(challengeId: string, code: string, minutes = 0)
       { $set: { completed: true } }
     );
   }
+
+  // The strongest evidence the product routinely collects: the tests decided,
+  // not the learner. Written on every submission rather than only on the first
+  // solve, because partial progress on a hard problem is real evidence and
+  // throwing it away would leave the record showing only successes.
+  await evidenceFromChallenge(user._id, challengeId, outcome);
 
   // A duel is scored off the same submission, so competing never means using a
   // second, parallel runner. If you are not in one this is a single indexed miss.

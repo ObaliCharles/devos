@@ -88,16 +88,16 @@ export function PathRail({ steps }: { steps: PathStep[] }) {
             ) : s.state === "done" ? (
               <Check size={16} style={{ color: "var(--primary)" }} />
             ) : (
-              <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+              <span className="num text-micro font-medium" style={{ color: "var(--text-muted)" }}>
                 {i + 1}
               </span>
             )}
           </span>
 
           <span className="w-full">
-            <span className="block truncate text-[12px] font-medium">{s.title}</span>
+            <span className="block truncate text-micro font-medium">{s.title}</span>
             <span
-              className="block truncate text-[12px]"
+              className="block truncate text-micro"
               style={{ color: s.state === "current" ? "var(--primary)" : "var(--text-faint)" }}
             >
               {s.state === "done"

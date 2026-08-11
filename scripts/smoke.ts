@@ -44,6 +44,25 @@ import {
   GATE_STEPS,
 } from "../src/lib/models";
 import { grade, nextDue, INTERVALS_DAYS } from "../src/lib/srs";
+import {
+  DIMENSIONS,
+  assistMultiplier,
+  competencyFrom,
+  evidenceWeight,
+  independenceFrom,
+} from "../src/lib/competency";
+import {
+  ACTIVITY_META,
+  ACTIVITY_TYPES,
+  Activity,
+  EXECUTING_ACTIVITY_TYPES,
+  LessonDocument,
+  auditLesson,
+  checkObjective,
+  dimensionsCovered,
+  readSections,
+  respondableActivities,
+} from "../src/lib/lesson-schema";
 import { dayKey, dayKeyOffset } from "../src/lib/day";
 import { levelFromXp } from "../src/lib/user";
 
@@ -123,6 +142,480 @@ function checkPureLogic() {
   );
   check("yesterday is one day back", dayKeyOffset(-1) !== dayKey());
   check("day keys sort lexicographically", dayKeyOffset(-1) < dayKey());
+
+  console.log("\nmeasurable objectives");
+  check("\"understand X\" is rejected", !checkObjective("Understand APIs").measurable);
+  check("so is any other vague verb", !checkObjective("Know how HTTP works").measurable);
+  check(
+    "an observable verb with substance passes",
+    checkObjective("Explain the difference between GET, POST, PUT and DELETE").measurable
+  );
+  check(
+    "a real verb with nothing after it still fails",
+    !checkObjective("Implement it").measurable
+  );
+  check("the rejection says why", checkObjective("Understand APIs").problems.length > 0);
+
+  console.log("\nevidence weighting");
+  const solid = { dimension: "implementation", source: "challenge", strength: 1, verified: true } as const;
+  check("a verified artefact outweighs the same claim self-reported", evidenceWeight(solid) > evidenceWeight({ ...solid, verified: false }));
+  check("a self-report is worth very little", evidenceWeight({ ...solid, source: "self_report" }) < 0.2);
+  check("unaided work keeps its full value", assistMultiplier(0) === 1);
+  check("being handed the answer costs most of it", assistMultiplier(6) < 0.25);
+  check("the ladder is monotonic", assistMultiplier(2) > assistMultiplier(5));
+  check("assist levels cannot be gamed past the ends", assistMultiplier(-3) === assistMultiplier(0) && assistMultiplier(99) === assistMultiplier(6));
+  check(
+    "solving it yourself beats being shown how",
+    evidenceWeight({ ...solid, assistLevel: 0 }) > evidenceWeight({ ...solid, assistLevel: 6 })
+  );
+
+  console.log("\ncompetency");
+  const oneDim = ["implementation"] as const;
+  check("no evidence is untouched", competencyFrom([], oneDim).level === "untouched");
+  check(
+    "self-reports alone never reach mastery",
+    competencyFrom(
+      Array.from({ length: 40 }, () => ({ dimension: "implementation", source: "self_report", strength: 1, verified: false }) as const),
+      oneDim
+    ).level !== "mastered"
+  );
+  check(
+    "verified work across the relevant dimension does",
+    competencyFrom(
+      Array.from({ length: 4 }, () => ({ dimension: "implementation", source: "challenge", strength: 1, verified: true }) as const),
+      oneDim
+    ).level === "mastered"
+  );
+  check(
+    "a dimension with no evidence is reported as missing",
+    competencyFrom(
+      [{ dimension: "implementation", source: "challenge", strength: 1, verified: true }],
+      ["implementation", "explanation"]
+    ).missing.includes("explanation")
+  );
+  check(
+    "one skill cannot be mastered by grinding a single dimension",
+    competencyFrom(
+      Array.from({ length: 30 }, () => ({ dimension: "knowledge", source: "quiz", strength: 1, verified: true }) as const),
+      ["knowledge", "implementation"]
+    ).level !== "mastered"
+  );
+  check(
+    "repeating the same activity has diminishing returns",
+    (() => {
+      const one = competencyFrom([{ dimension: "knowledge", source: "quiz", strength: 1, verified: true }], ["knowledge"]).overall;
+      const ten = competencyFrom(
+        Array.from({ length: 10 }, () => ({ dimension: "knowledge", source: "quiz", strength: 1, verified: true }) as const),
+        ["knowledge"]
+      ).overall;
+      return ten > one && ten - one < one * 10;
+    })()
+  );
+
+  console.log("\nindependence");
+  const mixed = [
+    { dimension: "implementation", source: "challenge", strength: 1, verified: true, assistLevel: 0 },
+    { dimension: "implementation", source: "challenge", strength: 1, verified: true, assistLevel: 2 },
+    { dimension: "implementation", source: "challenge", strength: 1, verified: true, assistLevel: 6 },
+  ] as const;
+  const ind = independenceFrom([...mixed]);
+  check("the three shares account for everything", Math.abs(ind.independent + ind.hinted + ind.solved - 1) < 1e-9);
+  check("a hint is not counted as a solution", ind.hinted > 0 && ind.solved > 0 && ind.hinted === ind.solved);
+  check("the sample size is reported so a small one can be discounted", ind.sample === 3);
+  check("no evidence reports a zero sample rather than 100% independent", independenceFrom([]).sample === 0);
+
+  console.log("\nlesson documents");
+  const goodActivity = Activity.safeParse({
+    type: "multiple_choice",
+    prompt: "Which method is idempotent?",
+    choices: [{ text: "POST" }, { text: "PUT" }],
+    answerIndex: 1,
+  });
+  check("a well-formed activity parses", goodActivity.success);
+  check(
+    "an activity missing its payload is rejected",
+    !Activity.safeParse({ type: "multiple_choice", prompt: "No choices" }).success
+  );
+  check("an unknown activity type is rejected", !Activity.safeParse({ type: "interpretive_dance", markdown: "x" }).success);
+  check(
+    "every activity type has a meaning attached",
+    ACTIVITY_TYPES.every((t) => typeof ACTIVITY_META[t]?.label === "string")
+  );
+  check(
+    "reading a paragraph is not evidence of anything",
+    ACTIVITY_META.text.dimension === null && ACTIVITY_META.reflection.dimension === null
+  );
+  check("a debugging exercise is evidence of debugging", ACTIVITY_META.debugging_exercise.dimension === "debugging");
+  check(
+    "only machine-checked activities claim to be verifiable",
+    !ACTIVITY_META.teach_back.verifiable && ACTIVITY_META.coding_exercise.verifiable
+  );
+  check(
+    "the activities needing a sandbox are named, so they can be gated",
+    EXECUTING_ACTIVITY_TYPES.includes("coding_exercise") && !EXECUTING_ACTIVITY_TYPES.includes("multiple_choice")
+  );
+
+  const passiveDoc = {
+    objectives: [
+      { statement: "Implement a REST endpoint with validation and status codes", dimensions: ["implementation"] },
+    ],
+    sections: [{ kind: "concept", activities: [{ type: "text", markdown: "Some prose about REST." }] }],
+  };
+  const passive = auditLesson(LessonDocument.parse(passiveDoc));
+  check("a lesson that asks nothing of the learner is caught", passive.passive);
+  check(
+    "a lesson claiming a dimension it cannot demonstrate is caught",
+    passive.unevidenced.includes("implementation")
+  );
+  check("the audit explains itself", passive.problems.length > 0 && !passive.ok);
+
+  const soundDoc = LessonDocument.parse({
+    objectives: [
+      { statement: "Implement a REST endpoint with validation and status codes", dimensions: ["implementation"] },
+    ],
+    sections: [
+      { kind: "concept", activities: [{ type: "text", markdown: "Some prose about REST." }] },
+      {
+        kind: "independent_practice",
+        activities: [
+          {
+            type: "coding_exercise",
+            brief: "Write the handler.",
+            tests: [{ call: "handler()", expected: 200 }],
+          },
+        ],
+      },
+    ],
+  });
+  check("a lesson that can deliver its objectives passes", auditLesson(soundDoc).ok);
+  check("a vague objective is caught by the audit too", auditLesson(LessonDocument.parse({ ...soundDoc, objectives: [{ statement: "Understand REST", dimensions: ["implementation"] }] })).vagueObjectives.length === 1);
+  check("the audit reports which dimensions are actually covered", dimensionsCovered(soundDoc.sections).includes("implementation"));
+  check("only the activities that need answering count toward progress", respondableActivities(soundDoc.sections).length === 1);
+
+  console.log("\nreading stored lessons");
+  check("a lesson with no sections reads as empty, not as a crash", readSections(undefined).length === 0);
+  check("a non-array body does not throw", readSections("just markdown").length === 0);
+  const salvaged = readSections([
+    {
+      kind: "concept",
+      activities: [
+        { type: "text", markdown: "This one is fine." },
+        { type: "multiple_choice", prompt: "broken, no choices" },
+      ],
+    },
+  ]);
+  check("one unparseable activity costs that activity, not the section", salvaged.length === 1);
+  check("and the good activity survives", salvaged[0]?.activities.length === 1);
+  check(
+    "a section whose activities are all broken is dropped",
+    readSections([{ kind: "concept", activities: [{ type: "nonsense" }] }]).length === 0
+  );
+}
+
+/* --------------------------------------------- the structured lesson, stored */
+
+async function checkLearningSchema() {
+  console.log("\nstructured lessons in the database");
+
+  const { Evidence, Lesson, Skill } = await import("../src/lib/models");
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  const user = await requireUser();
+
+  const skill = await Skill.findOne();
+  if (!skill) {
+    failures.push("no skills in the database — run `npm run seed` first");
+    return;
+  }
+
+  // The whole point of the two-field seam: the lessons that already exist keep
+  // working untouched. If this ever fails, the change stopped being additive.
+  //
+  // Note the `$exists: false` half. A lesson written before this schema has no
+  // `sections` key at all, not an empty one — Mongoose only writes the default
+  // for documents it saves itself. Anything reading `sections` therefore has to
+  // survive `undefined`, which is why `readSections` takes `unknown` and why
+  // this query asks the question the database can actually answer.
+  const legacy = await Lesson.findOne({
+    $or: [{ sections: { $exists: false } }, { sections: { $size: 0 } }],
+  }).lean<{ body: string; sections?: unknown[] }>();
+  check("lessons written before this model still load", !!legacy && typeof legacy.body === "string");
+  check("and they carry no sections rather than a broken one", (legacy?.sections ?? []).length === 0);
+  check("an absent sections field reads as no sections", readSections(legacy?.sections).length === 0);
+
+  const doc = LessonDocument.parse({
+    objectives: [
+      {
+        statement: "Explain when a database index helps and when it costs",
+        cognitiveLevel: "understand",
+        dimensions: ["knowledge", "explanation"],
+      },
+    ],
+    sections: [
+      { kind: "orientation", activities: [{ type: "text", markdown: "Indexes are why the dashboard is fast." }] },
+      {
+        kind: "interactive_understanding",
+        objectiveIndexes: [0],
+        activities: [
+          {
+            type: "multiple_choice",
+            prompt: "What does an index cost?",
+            choices: [{ text: "Nothing" }, { text: "Write throughput and space" }],
+            answerIndex: 1,
+          },
+        ],
+      },
+      { kind: "teach_back", activities: [{ type: "teach_back", prompt: "Explain indexes without notes.", rubric: ["Mentions the write cost"] }] },
+    ],
+  });
+
+  const structured = await Lesson.create({
+    skill: skill._id,
+    order: 9001,
+    title: "Smoke structured lesson",
+    body: "Fallback body, kept because `body` is still required.",
+    learningObjectives: doc.objectives,
+    sections: doc.sections,
+  });
+
+  const reread = await Lesson.findById(structured._id).lean<{
+    learningObjectives: { statement: string; dimensions: string[] }[];
+    sections: unknown[];
+  }>();
+  check("a structured lesson round-trips through Mongo", !!reread && reread.sections.length === 3);
+  check("its objectives keep their dimensions", reread?.learningObjectives[0]?.dimensions.includes("explanation") === true);
+  check(
+    "and the activities survive the Mixed column intact",
+    readSections(reread?.sections).length === 3
+  );
+  check(
+    "a stored activity still narrows to its own shape",
+    (() => {
+      const parsed = readSections(reread?.sections);
+      const mc = parsed[1]?.activities[0];
+      return mc?.type === "multiple_choice" && mc.choices.length === 2;
+    })()
+  );
+
+  console.log("\nevidence");
+
+  // checkTheLoop ran a quiz and a review through this user against this same
+  // skill, and those now write evidence of their own. Clear it, or this section
+  // is asserting against the other section's side effects.
+  await Evidence.deleteMany({ user: user._id });
+
+  await Evidence.create([
+    { user: user._id, skill: skill._id, lesson: structured._id, dimension: "knowledge", source: "quiz", strength: 1, verified: true, assistLevel: 0, detail: "5/5 unaided" },
+    { user: user._id, skill: skill._id, lesson: structured._id, dimension: "explanation", source: "teach_back", strength: 0.9, verified: false, assistLevel: 2 },
+  ]);
+
+  const rows = await Evidence.find({ user: user._id, skill: skill._id }).lean<
+    { dimension: string; source: string; strength: number; verified: boolean; assistLevel: number }[]
+  >();
+  check("evidence is stored against the user and the skill", rows.length === 2);
+  check("a machine-graded row is marked verified", rows.some((r) => r.source === "quiz" && r.verified));
+  check("a judged row is not", rows.some((r) => r.source === "teach_back" && !r.verified));
+
+  const derived = competencyFrom(
+    rows.map((r) => ({
+      dimension: r.dimension as (typeof DIMENSIONS)[number],
+      source: r.source as Parameters<typeof evidenceWeight>[0]["source"],
+      strength: r.strength,
+      verified: r.verified,
+      assistLevel: r.assistLevel,
+    })),
+    ["knowledge", "explanation"]
+  );
+  check("competence is derived from the stored rows, not from a flag", derived.overall > 0);
+  check("two artefacts are not yet mastery", derived.level !== "mastered");
+  check("and the derivation says which dimension is short", derived.dimensions.length === 2);
+
+  const rejected = await Evidence.create({
+    user: user._id,
+    skill: skill._id,
+    dimension: "recall",
+    source: "review",
+    strength: 5,
+  }).then(
+    () => false,
+    () => true
+  );
+  check("strength outside 0–1 is refused by the schema", rejected);
+
+  await Lesson.deleteOne({ _id: structured._id });
+  await Evidence.deleteMany({ user: user._id });
+  delete process.env.SMOKE_CLERK_ID;
+}
+
+/* -------------------------------------------- evidence, written by real work */
+
+async function checkEvidenceWritePath() {
+  console.log("\nevidence is written by the graded actions, not by the client");
+
+  const { Evidence, Lesson, Challenge, Review } = await import("../src/lib/models");
+  const { submitQuiz, setGateStep, gradeReview, submitCode } = await import("../src/lib/actions");
+  const { getSkillCompetency, getIndependence, listEvidence } = await import("../src/lib/queries");
+
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  const user = await requireUser();
+
+  const lesson = await Lesson.findOne().sort({ order: 1 }).lean<{ _id: unknown; skill: unknown }>();
+  if (!lesson) {
+    failures.push("no lessons in the database — run `npm run seed` first");
+    return;
+  }
+  const lessonId = String(lesson._id);
+
+  // The write path is only observable against a clean slate, and checkTheLoop
+  // has already run a quiz and a review through this user.
+  await Evidence.deleteMany({ user: user._id });
+
+  // ---- the exported surface is the security property
+  const actions = await import("../src/lib/actions");
+  check(
+    "there is no action a client can call to write evidence directly",
+    !Object.keys(actions).some((k) => /^recordEvidence$|^evidenceFrom/.test(k))
+  );
+
+  // ---- a graded quiz
+  await submitQuiz(lessonId, 4, 5);
+  const quizRows = await Evidence.find({ user: user._id, source: "quiz" }).lean<
+    { dimension: string; strength: number; verified: boolean; assistLevel?: number }[]
+  >();
+  check("passing a quiz records evidence", quizRows.length === 1);
+  check("a quiz is evidence of knowledge", quizRows[0]?.dimension === "knowledge");
+  check("machine-graded, so it is verified", quizRows[0]?.verified === true);
+  check("and it carries the real score, not a pass flag", Math.abs((quizRows[0]?.strength ?? 0) - 0.8) < 1e-9);
+  check(
+    "no assist level is recorded, because none was measured",
+    quizRows[0]?.assistLevel === undefined
+  );
+
+  await submitQuiz(lessonId, 2, 5);
+  check(
+    "a failed attempt is recorded too, rather than only successes",
+    (await Evidence.countDocuments({ user: user._id, source: "quiz" })) === 2
+  );
+
+  // ---- a self-reported exercise
+  //
+  // checkTheLoop already ticked this box, and the recorder only fires on the
+  // false -> true transition, so the box has to be cleared first to observe it.
+  // That the naive version of this test failed is the guard working.
+  await setGateStep(lessonId, "exercised", false);
+  await setGateStep(lessonId, "exercised", true);
+  const claims = await Evidence.find({ user: user._id, source: "self_report" }).lean<{ verified: boolean }[]>();
+  check("ticking the exercise records a self-report", claims.length === 1);
+  check("which is never marked verified", claims[0]?.verified === false);
+  await setGateStep(lessonId, "exercised", true);
+  check(
+    "re-ticking an already-ticked box records nothing further",
+    (await Evidence.countDocuments({ user: user._id, source: "self_report" })) === 1
+  );
+
+  await setGateStep(lessonId, "read", true);
+  await setGateStep(lessonId, "reviewed", true);
+  check(
+    "reading and reviewing demonstrate nothing, so they record nothing",
+    (await Evidence.countDocuments({ user: user._id, source: "self_report" })) === 1
+  );
+
+  // ---- a review grade
+  const review = await Review.findOne({ user: user._id });
+  if (review) {
+    await gradeReview(String(review._id), true);
+    const recall = await Evidence.find({ user: user._id, dimension: "recall" }).lean<{ verified: boolean; source: string }[]>();
+    check("grading a review records recall evidence", recall.length === 1);
+    check(
+      "self-assessed recall is not verified, however honest it was",
+      recall[0]?.verified === false && recall[0]?.source === "review"
+    );
+  }
+
+  // ---- a graded challenge, which is the strong case
+  const skillId = lesson.skill;
+  const challenge = await Challenge.create({
+    slug: `smoke-evidence-${Date.now()}`,
+    title: "Smoke evidence challenge",
+    prompt: "Return the answer.",
+    category: "algorithms",
+    entryPoint: "solution",
+    skills: [skillId],
+    tests: [
+      { call: "solution()", expected: "42" },
+      { call: "solution()", expected: "42", hidden: true },
+    ],
+  });
+  const cid = String(challenge._id);
+
+  await submitCode(cid, "function solution() { return 42; }", 3);
+  const solved = await Evidence.find({ user: user._id, source: "challenge" }).lean<
+    { dimension: string; strength: number; verified: boolean; skill: unknown }[]
+  >();
+  check("solving a challenge records evidence", solved.length === 1);
+  check("a challenge is evidence of implementation", solved[0]?.dimension === "implementation");
+  check("decided by the tests, so it is verified", solved[0]?.verified === true);
+  check("all tests passed is full strength", solved[0]?.strength === 1);
+  check("and it is attached to the skill the challenge declares", String(solved[0]?.skill) === String(skillId));
+
+  await submitCode(cid, "function solution() { return 0; }", 1);
+  const failed = await Evidence.find({ user: user._id, source: "challenge" }).sort({ createdAt: -1 }).lean<{ strength: number }[]>();
+  check("a failing submission is recorded as well", failed.length === 2);
+  check("at the strength it earned, which is none", failed[0]?.strength === 0);
+
+  const debugChallenge = await Challenge.create({
+    slug: `smoke-debug-${Date.now()}`,
+    title: "Smoke debugging challenge",
+    prompt: "Fix it.",
+    category: "debugging",
+    entryPoint: "solution",
+    skills: [skillId],
+    tests: [{ call: "solution()", expected: "1" }],
+  });
+  await submitCode(String(debugChallenge._id), "function solution() { return 1; }", 1);
+  check(
+    "a debugging challenge is evidence of debugging, not implementation",
+    (await Evidence.countDocuments({ user: user._id, dimension: "debugging" })) === 1
+  );
+
+  const orphan = await Challenge.create({
+    slug: `smoke-orphan-${Date.now()}`,
+    title: "Smoke unmapped challenge",
+    prompt: "Return it.",
+    category: "algorithms",
+    entryPoint: "solution",
+    tests: [{ call: "solution()", expected: "1" }],
+  });
+  const before = await Evidence.countDocuments({ user: user._id });
+  await submitCode(String(orphan._id), "function solution() { return 1; }", 1);
+  check(
+    "a challenge mapped to no skill records nothing rather than guessing",
+    (await Evidence.countDocuments({ user: user._id })) === before
+  );
+
+  // ---- reading it back
+  const competency = await getSkillCompetency(user._id, skillId);
+  check("the skill now derives a competency from real work", competency.overall > 0);
+  check("implementation is among the dimensions scored", competency.dimensions.some((d) => d.dimension === "implementation"));
+  check(
+    "and the dimensions with nothing behind them are still reported missing",
+    competency.missing.length > 0
+  );
+
+  const independence = await getIndependence(user._id);
+  check(
+    "independence reports a zero sample rather than a flattering 100%",
+    independence.sample === 0 && independence.independent === 0
+  );
+
+  const items = await listEvidence(user._id, skillId);
+  check("the artefacts can be listed, so a score can show its working", items.length > 0);
+  check("each one says what it was", items.every((i) => typeof i.detail === "string"));
+
+  await Challenge.deleteMany({ _id: { $in: [challenge._id, debugChallenge._id, orphan._id] } });
+  await Evidence.deleteMany({ user: user._id });
+  delete process.env.SMOKE_CLERK_ID;
 }
 
 /* ---------------------------------------------------------- the actual loop */
@@ -912,6 +1405,7 @@ async function cleanup() {
     AiMemory.deleteMany({ user: { $in: ids } }),
     AiConversation.deleteMany({ user: { $in: ids } }),
     AiMessage.deleteMany({ user: { $in: ids } }),
+    (await import("../src/lib/models")).Evidence.deleteMany({ user: { $in: ids } }),
     (await import("../src/lib/models")).Resume.deleteMany({ user: { $in: ids } }),
     (await import("../src/lib/models")).JobApplication.deleteMany({ user: { $in: ids } }),
     (await import("../src/lib/models")).Certificate.deleteMany({ user: { $in: ids } }),
@@ -940,7 +1434,12 @@ async function main() {
   await cleanup();
   await ensureContent();
   checkPureLogic();
+  // After checkTheLoop, not before: that section asserts a *first-time* Clerk
+  // id creates the user, and resolving the user here first would quietly turn
+  // that into a second-time check that passes for the wrong reason.
   await checkTheLoop();
+  await checkLearningSchema();
+  await checkEvidenceWritePath();
   await checkProjects();
   await checkKnowledge();
   await checkPractice();

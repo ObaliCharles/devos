@@ -111,6 +111,48 @@ const TaskSchema = new Schema(
   { _id: false }
 );
 
+/**
+ * A measurable learning objective. The shape is defined and validated in
+ * `lib/lesson-schema.ts` — this is only the storage. Kept as a real subdocument
+ * rather than Mixed because these are queried (find the lessons that carry an
+ * implementation objective) where activities never are.
+ */
+const ObjectiveSchema = new Schema(
+  {
+    statement: { type: String, required: true },
+    cognitiveLevel: {
+      type: String,
+      enum: ["remember", "understand", "apply", "analyze", "evaluate", "create"],
+      default: "understand",
+    },
+    difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"], default: "beginner" },
+    estimatedMinutes: { type: Number, default: 10 },
+    prerequisites: { type: [String], default: [] },
+    /** Which competency dimensions satisfying this objective demonstrates. */
+    dimensions: { type: [String], default: ["knowledge"] },
+    masteryThreshold: { type: Number, default: 0.8 },
+  },
+  { _id: false }
+);
+
+/**
+ * One section of a structured lesson. `activities` is `Mixed` on purpose:
+ * it is a discriminated union of twenty-odd payload shapes, which Mongoose
+ * models badly and Zod models exactly, so `lib/lesson-schema.ts` is the
+ * contract and every writer parses through it before saving. Validating the
+ * same union twice, in two languages, is how the two definitions drift.
+ */
+const SectionSchema = new Schema(
+  {
+    kind: { type: String, required: true },
+    title: String,
+    /** Indexes into `learningObjectives`. */
+    objectiveIndexes: { type: [Number], default: [] },
+    activities: { type: [Schema.Types.Mixed], default: [] },
+  },
+  { _id: false }
+);
+
 const LessonSchema = new Schema(
   {
     skill: { type: Schema.Types.ObjectId, ref: "Skill", required: true, index: true },
@@ -118,10 +160,25 @@ const LessonSchema = new Schema(
     topic: { type: Schema.Types.ObjectId, ref: "Topic", index: true },
     order: { type: Number, required: true },
     title: { type: String, required: true },
+    /**
+     * Legacy free-text objectives. Still written, still read, still displayed
+     * by the review session and the AI context builder. Superseded by
+     * `learningObjectives` below, which is additive precisely so that the 92
+     * catalog lessons and every roadmap generated before today keep working
+     * without a migration.
+     */
     objectives: [String],
+    /** Measurable objectives. Empty on every lesson authored before this model. */
+    learningObjectives: { type: [ObjectiveSchema], default: [] },
     estimatedMinutes: { type: Number, default: 30 },
-    /** Markdown. */
+    /**
+     * Markdown. Still required, and still the whole lesson for anything
+     * authored before `sections` existed — the renderer falls back to it when
+     * `sections` is empty, which is the seam that makes this change additive.
+     */
     body: { type: String, required: true },
+    /** The structured lesson. Empty means "render `body` as markdown". */
+    sections: { type: [SectionSchema], default: [] },
     exercise: {
       brief: String,
       acceptance: [String],

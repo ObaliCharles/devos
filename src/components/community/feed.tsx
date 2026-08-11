@@ -84,7 +84,7 @@ export function Feed({
             <span className="icon-tile icon-tile-lg icon-tile-primary">
               <Plus size={18} />
             </span>
-            <span className="text-[14px]" style={{ color: "var(--text-muted)" }}>
+            <span className="text-ui" style={{ color: "var(--text-muted)" }}>
               Ask a question, share what you built, start a discussion…
             </span>
           </button>
@@ -108,7 +108,7 @@ export function Feed({
               #{tag} <X size={11} />
             </Link>
           )}
-          <span className="num ml-auto text-[12px]" style={{ color: "var(--text-faint)" }}>
+          <span className="num ml-auto text-micro" style={{ color: "var(--text-faint)" }}>
             {posts.length} {posts.length === 1 ? "post" : "posts"}
           </span>
         </div>
@@ -118,8 +118,8 @@ export function Feed({
             <span className="icon-tile icon-tile-lg">
               <MessageSquare size={18} />
             </span>
-            <p className="text-[14px] font-medium">Nothing here yet</p>
-            <p className="text-body max-w-sm text-[13px]">
+            <p className="text-ui font-medium">Nothing here yet</p>
+            <p className="text-body max-w-sm text-dense">
               {tag
                 ? "No posts carry that tag. Clear it to see everything."
                 : "Be the first to post. A question counts — most good threads start as one."}
@@ -223,7 +223,7 @@ function Composer({ groupId, onClose }: { groupId?: string; onClose: () => void 
       />
 
       {error && (
-        <p className="text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+        <p className="text-dense" style={{ color: "var(--danger)" }} role="alert">
           {error}
         </p>
       )}
@@ -257,7 +257,7 @@ function PostRow({ post }: { post: PostCard }) {
         <Avatar author={post.author} />
 
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <div className="flex flex-wrap items-center gap-2 text-micro">
             <Link
               href={`/u/${post.author.id}`}
               className="relative font-medium hover:underline"
@@ -286,7 +286,7 @@ function PostRow({ post }: { post: PostCard }) {
             <span className="min-w-0">{post.title}</span>
             {post.answered && (
               <span
-                className="flex shrink-0 items-center gap-1 text-[12px]"
+                className="flex shrink-0 items-center gap-1 text-micro"
                 style={{ color: "var(--success)" }}
               >
                 <CheckCircle2 size={12} /> Answered
@@ -294,7 +294,7 @@ function PostRow({ post }: { post: PostCard }) {
             )}
           </h3>
 
-          {post.excerpt && <p className="text-body mt-1.5 line-clamp-2 text-[13px]">{post.excerpt}</p>}
+          {post.excerpt && <p className="text-body mt-1.5 line-clamp-2 text-dense">{post.excerpt}</p>}
 
           {post.tags.length > 0 && (
             <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -308,7 +308,7 @@ function PostRow({ post }: { post: PostCard }) {
 
           <div className="mt-3 flex items-center gap-1">
             <button
-              className="relative flex items-center gap-1.5 rounded-[var(--radius-pill)] px-2 py-1 text-[12px]"
+              className="relative flex items-center gap-1.5 rounded-[var(--radius-pill)] px-2 py-1 text-micro"
               aria-pressed={reacted}
               aria-label={reacted ? "Remove reaction" : "React to this post"}
               style={{ color: reacted ? "var(--danger)" : "var(--text-faint)" }}
@@ -323,7 +323,7 @@ function PostRow({ post }: { post: PostCard }) {
             </button>
 
             <span
-              className="flex items-center gap-1.5 px-2 py-1 text-[12px]"
+              className="flex items-center gap-1.5 px-2 py-1 text-micro"
               style={{ color: "var(--text-faint)" }}
             >
               <MessageSquare size={13} />
@@ -360,13 +360,13 @@ function GroupsRail({ groups }: { groups: GroupCard[] }) {
     <section className="card p-4">
       <div className="flex items-center justify-between gap-2">
         <h2 className="eyebrow">Groups</h2>
-        <Link href="/community/groups" className="text-[12px]" style={{ color: "var(--primary)" }}>
+        <Link href="/community/groups" className="text-micro" style={{ color: "var(--primary)" }}>
           All
         </Link>
       </div>
 
       {groups.length === 0 ? (
-        <p className="text-body mt-3 text-[13px]">
+        <p className="text-body mt-3 text-dense">
           No groups yet. Create one and it becomes the home for a topic.
         </p>
       ) : (
@@ -381,8 +381,8 @@ function GroupsRail({ groups }: { groups: GroupCard[] }) {
                   <Users size={13} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium">{g.name}</span>
-                  <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="block truncate text-dense font-medium">{g.name}</span>
+                  <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                     {g.memberCount} {g.memberCount === 1 ? "member" : "members"}
                   </span>
                 </span>
@@ -434,7 +434,7 @@ export function Avatar({ author, size = 36 }: { author: { name: string; avatarUr
   }
   return (
     <span
-      className="num grid shrink-0 place-items-center rounded-full text-[13px] font-semibold"
+      className="num grid shrink-0 place-items-center rounded-full text-dense font-semibold"
       style={{
         width: size,
         height: size,

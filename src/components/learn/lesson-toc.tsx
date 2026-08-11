@@ -69,7 +69,7 @@ export function LessonToc({ headings }: { headings: Heading[] }) {
           <li key={h.id}>
             <a
               href={`#${h.id}`}
-              className="row-link block truncate py-1 text-[12px]"
+              className="row-link block truncate py-1 text-micro"
               style={{
                 paddingLeft: h.depth === 3 ? 18 : 8,
                 paddingRight: 8,

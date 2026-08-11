@@ -50,7 +50,7 @@ export function StatusScreen({
 
         <p className="eyebrow eyebrow-accent">{eyebrow}</p>
         <h1 className="mt-2 text-[22px] font-bold tracking-[-0.03em]">{title}</h1>
-        <p className="text-body mx-auto mt-2 max-w-[44ch] text-[14px]">{body}</p>
+        <p className="text-body mx-auto mt-2 max-w-[44ch] text-ui">{body}</p>
 
         {actions && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">{actions}</div>
@@ -221,6 +221,45 @@ export function PageSkeleton() {
               <div className="skeleton mt-2 h-3 w-3/4" />
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The split coding workspace: brief on the left, editor and test results on the
+ * right. The sixth shape, added because the challenge routes were falling back
+ * to `ListSkeleton` — a run of list rows in front of a code editor predicts the
+ * wrong layout, which is the one thing a skeleton must never do.
+ *
+ * The editor block is deliberately a single tall mass rather than fake lines of
+ * code: a skeleton should promise the shape of what is coming, and pretending
+ * to know the length of someone's solution is a promise it cannot keep.
+ */
+export function WorkspaceSkeleton() {
+  return (
+    <div className="page-body" aria-busy aria-label="Loading">
+      <header>
+        <div className="skeleton h-2.5 w-24" />
+        <div className="skeleton mt-3 h-6 w-[280px] max-w-full" />
+      </header>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+        <div className="card flex flex-col gap-3 p-4">
+          {["100%", "92%", "97%", "64%"].map((w, i) => (
+            <div key={i} className="skeleton h-2.5" style={{ width: w }} />
+          ))}
+          <div className="skeleton mt-2 h-[88px] w-full rounded-[var(--radius-tile)]" />
+          {["100%", "78%"].map((w, i) => (
+            <div key={i} className="skeleton h-2.5" style={{ width: w }} />
+          ))}
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="skeleton h-[320px] w-full rounded-[var(--radius-card)]" />
+          <div className="flex gap-2">
+            <div className="skeleton h-8 w-24 rounded-[var(--radius-control)]" />
+            <div className="skeleton h-8 w-24 rounded-[var(--radius-control)]" />
+          </div>
         </div>
       </div>
     </div>

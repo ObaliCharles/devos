@@ -88,7 +88,7 @@ export default async function ProjectsPage({
           >
             Archived
             {stats.archived > 0 && (
-              <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                 {stats.archived}
               </span>
             )}
@@ -140,7 +140,7 @@ export default async function ProjectsPage({
                 </div>
 
                 {p.description && (
-                  <p className="text-body mt-2 line-clamp-2 text-[14px]">{p.description}</p>
+                  <p className="text-body mt-2 line-clamp-2 text-ui">{p.description}</p>
                 )}
 
                 {p.skills.length > 0 && (
@@ -162,7 +162,7 @@ export default async function ProjectsPage({
                       label={`${p.title}: ${p.tasksDone} of ${p.tasks} tasks done`}
                     />
                     <span
-                      className="num shrink-0 text-[12px] font-medium"
+                      className="num shrink-0 text-micro font-medium"
                       style={{ color: "var(--text-faint)" }}
                     >
                       {p.tasksDone}/{p.tasks}
@@ -170,7 +170,7 @@ export default async function ProjectsPage({
                   </div>
 
                   <div
-                    className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px]"
+                    className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-micro"
                     style={{ color: "var(--text-faint)" }}
                   >
                     {p.bugsOpen > 0 && (

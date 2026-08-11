@@ -80,7 +80,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
                 tone={mastered === lessons.length && lessons.length > 0 ? "success" : "primary"}
                 label={`${mastered} of ${lessons.length} lessons mastered`}
               />
-              <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                 {mastered}/{lessons.length}
               </span>
             </div>
@@ -104,7 +104,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
                 className="card card-link flex items-center gap-3.5 p-3.5"
               >
                 <span
-                  className={`icon-tile num h-8 w-8 text-[12px] font-semibold ${
+                  className={`icon-tile num h-8 w-8 text-micro font-semibold ${
                     isMastered ? "" : ""
                   }`}
                 >
@@ -112,7 +112,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
                 </span>
 
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-medium">{lesson.title}</span>
+                  <span className="block truncate text-ui font-medium">{lesson.title}</span>
                   <span className="text-meta mt-0.5 flex items-center gap-2">
                     {lesson.estimatedMinutes ?? 30} min
                     <Badge tone={state.tone}>{state.text}</Badge>
@@ -144,7 +144,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
 
         {projects.length === 0 ? (
           <div className="well p-4">
-            <p className="text-body text-[14px]">
+            <p className="text-body text-ui">
               Nothing yet. Mastering the lessons proves you can follow along, building a project
               proves you can do it without one. Start a project and link it to this skill.
             </p>
@@ -160,7 +160,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skillId:
                   href={`/projects/${String(p._id)}`}
                   className="card card-link flex items-center justify-between gap-3 p-3.5"
                 >
-                  <span className="truncate text-[14px] font-medium">{String(p.title)}</span>
+                  <span className="truncate text-ui font-medium">{String(p.title)}</span>
                   <Badge tone={PROJECT_TONE[String(p.status)] ?? "neutral"}>
                     {String(p.status)}
                   </Badge>

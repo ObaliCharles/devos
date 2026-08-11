@@ -90,11 +90,11 @@ export function ExplainLesson({
           </div>
 
           {loading ? (
-            <p className="flex items-center gap-2 py-2 text-[14px]" style={{ color: "var(--text-muted)" }}>
+            <p className="flex items-center gap-2 py-2 text-ui" style={{ color: "var(--text-muted)" }}>
               <Loader2 size={14} className="animate-spin" /> Thinking…
             </p>
           ) : (
-            <div className="prose-doc text-[14px]">
+            <div className="prose-doc text-ui">
               <Markdown remarkPlugins={[remarkGfm]}>{text ?? ""}</Markdown>
             </div>
           )}

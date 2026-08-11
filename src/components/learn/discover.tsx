@@ -157,7 +157,7 @@ export function Discover() {
             <Search size={16} style={{ color: "var(--text-faint)" }} />
           )}
           <input
-            className="search-input text-[14px]"
+            className="search-input text-ui"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search courses, projects, roadmaps, certifications…"
@@ -166,7 +166,7 @@ export function Discover() {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="text-[12px] font-medium"
+              className="text-micro font-medium"
               style={{ color: "var(--text-faint)" }}
             >
               Clear
@@ -193,8 +193,8 @@ export function Discover() {
           <span className="icon-tile icon-tile-lg mx-auto">
             <Search size={20} />
           </span>
-          <p className="mt-3 text-[14px] font-semibold">Nothing matches “{query}”</p>
-          <p className="text-body mt-1 text-[14px]">
+          <p className="mt-3 text-ui font-semibold">Nothing matches “{query}”</p>
+          <p className="text-body mt-1 text-ui">
             Try a broader term like “Python”, “AI”, “Docker” or “Security”.
           </p>
         </div>
@@ -209,7 +209,7 @@ export function Discover() {
                 <span className="group-heading flex items-center gap-1.5">
                   {g.icon} {g.plural}
                 </span>
-                <span className="text-meta num text-[12px]">{g.items.length}</span>
+                <span className="text-meta num text-micro">{g.items.length}</span>
               </div>
               <ul className="flex flex-col gap-1">
                 {g.items.map((item) => {
@@ -228,10 +228,10 @@ export function Discover() {
                           <span className="icon-tile">{g.icon}</span>
                         )}
                         <span className="min-w-0">
-                          <span className="block truncate text-[14px] font-medium">
+                          <span className="block truncate text-ui font-medium">
                             {item.title}
                           </span>
-                          <span className="text-meta block truncate text-[12px]">
+                          <span className="text-meta block truncate text-micro">
                             {item.level}
                           </span>
                         </span>

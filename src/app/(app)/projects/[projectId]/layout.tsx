@@ -58,7 +58,7 @@ export default async function ProjectLayout({
                 tone={counts.tasks && counts.tasksDone === counts.tasks ? "success" : "primary"}
                 label={`${counts.tasksDone ?? 0} of ${counts.tasks ?? 0} tasks done`}
               />
-              <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                 {counts.tasksDone ?? 0}/{counts.tasks ?? 0} tasks
               </span>
             </div>

@@ -301,7 +301,7 @@ export function KnowledgeWorkspace({
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="select h-7 w-auto border-transparent bg-transparent pl-1.5 pr-7 text-[12px]"
+            className="select h-7 w-auto border-transparent bg-transparent pl-1.5 pr-7 text-micro"
             aria-label="Sort notes"
           >
             <option value="edited">Last edited</option>
@@ -311,7 +311,7 @@ export function KnowledgeWorkspace({
 
         {visible.length === 0 ? (
           <div className="well px-3 py-6 text-center">
-            <p className="text-[14px] font-medium">
+            <p className="text-ui font-medium">
               {filtering ? "Nothing matches" : "No notes yet"}
             </p>
             <p className="text-meta mt-1">
@@ -358,7 +358,7 @@ export function KnowledgeWorkspace({
                         />
                       )}
                       <span
-                        className="min-w-0 flex-1 truncate text-[14px] font-medium"
+                        className="min-w-0 flex-1 truncate text-ui font-medium"
                         style={{ color: isActive ? "var(--primary)" : "var(--text)" }}
                       >
                         {n.title}
@@ -368,7 +368,7 @@ export function KnowledgeWorkspace({
                       <span className="text-meta min-w-0 flex-1 truncate">
                         {n.lessonTitle ? `From ${n.lessonTitle}` : n.body.slice(0, 48) || "Empty"}
                       </span>
-                      <span className="text-meta shrink-0 text-[12px]">
+                      <span className="text-meta shrink-0 text-micro">
                         {relativeDate(n.updatedAt)}
                       </span>
                     </span>
@@ -435,7 +435,7 @@ function FilterButton({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className="flex w-full items-center gap-2 rounded-[var(--radius-control)] px-2.5 py-1.5 text-left text-[14px] lg:w-auto xl:w-full"
+      className="flex w-full items-center gap-2 rounded-[var(--radius-control)] px-2.5 py-1.5 text-left text-ui lg:w-auto xl:w-full"
       style={{
         background: active ? "var(--primary-faint)" : "transparent",
         color: active ? "var(--primary)" : "var(--text-muted)",
@@ -448,7 +448,7 @@ function FilterButton({
       )}
       <span className="min-w-0 flex-1 truncate">{children}</span>
       {count !== undefined && (
-        <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+        <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
           {count}
         </span>
       )}
@@ -493,7 +493,7 @@ function Editor({
           placeholder="Untitled note"
         />
         <span
-          className="shrink-0 text-[12px]"
+          className="shrink-0 text-micro"
           style={{ color: saving ? "var(--warning)" : "var(--text-faint)" }}
           aria-live="polite"
         >
@@ -538,7 +538,7 @@ function Editor({
           </span>
         ))}
         <input
-          className="w-24 bg-transparent text-[12px] outline-none"
+          className="w-24 bg-transparent text-micro outline-none"
           value={tagDraft}
           onChange={(e) => setTagDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -560,7 +560,7 @@ function Editor({
           <WikiMarkdown body={note.body || "_Nothing written yet._"} titleToId={titleToId} />
         ) : (
           <textarea
-            className="h-full min-h-[380px] w-full resize-none bg-transparent font-[family-name:var(--font-mono)] text-[14px] leading-[1.75] outline-none"
+            className="h-full min-h-[380px] w-full resize-none bg-transparent font-[family-name:var(--font-mono)] text-ui leading-[1.75] outline-none"
             value={note.body}
             onChange={(e) => onPatch({ body: e.target.value })}
             placeholder="Markdown supported. Link another note with [[its title]]. Autosaves as you type."

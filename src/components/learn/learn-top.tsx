@@ -65,7 +65,7 @@ export function LearnTop({
       {/* ------------------------------------------------------------ Greeting */}
       <header className="rise">
         <Greeting name={name} className="title-page" />
-        <p className="text-body mt-1 text-[14px]">Ready to build your future?</p>
+        <p className="text-body mt-1 text-ui">Ready to build your future?</p>
       </header>
 
       {/* ------------------------------- Continue Learning | Today's Goal ---- */}
@@ -85,21 +85,21 @@ export function LearnTop({
               )}
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[14px] font-semibold tracking-[-0.014em]">
+                <p className="truncate text-ui font-semibold tracking-[-0.014em]">
                   {next.skillTitle}
                 </p>
-                <p className="text-meta mt-1 truncate text-[12px]">{next.title}</p>
+                <p className="text-meta mt-1 truncate text-micro">{next.title}</p>
 
                 <div className="mt-3 flex items-center gap-2.5">
                   <div className="progress flex-1">
                     <div className="progress-bar" style={{ width: `${next.skillPct}%` }} />
                   </div>
-                  <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  <span className="num text-micro font-medium" style={{ color: "var(--text-muted)" }}>
                     {next.skillPct}%
                   </span>
                 </div>
 
-                <p className="text-meta mt-2 flex items-center gap-1.5 text-[12px]">
+                <p className="text-meta mt-2 flex items-center gap-1.5 text-micro">
                   <Clock size={12} /> {next.minutes} min left
                 </p>
               </div>
@@ -112,7 +112,7 @@ export function LearnTop({
               </Link>
             </div>
           ) : (
-            <p className="text-body mt-4 text-[14px]">
+            <p className="text-body mt-4 text-ui">
               Nothing in progress. Pick a path below to start one.
             </p>
           )}
@@ -122,11 +122,11 @@ export function LearnTop({
         <div className="card p-5 sm:p-5">
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="title-card">Today&apos;s goal</h2>
-            <Link href="/dashboard" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+            <Link href="/dashboard" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
               View all
             </Link>
           </div>
-          <p className="text-meta mt-1 text-[12px]">Keep the momentum going.</p>
+          <p className="text-meta mt-1 text-micro">Keep the momentum going.</p>
 
           <ul className="mt-4 flex flex-col gap-1">
             <GoalRow
@@ -160,14 +160,14 @@ export function LearnTop({
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <div className="flex flex-wrap items-baseline gap-2.5">
               <h2 className="title-card">Your learning path</h2>
-              <span className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+              <span className="text-micro font-medium" style={{ color: "var(--primary)" }}>
                 {pathTitle}
               </span>
-              <span className="text-meta num text-[12px]">{pathPct}% completed</span>
+              <span className="text-meta num text-micro">{pathPct}% completed</span>
             </div>
             <Link
               href="/learning/roadmap"
-              className="inline-flex items-center gap-1 text-[12px] font-medium"
+              className="inline-flex items-center gap-1 text-micro font-medium"
               style={{ color: "var(--primary)" }}
             >
               View full path <ArrowRight size={12} />
@@ -218,16 +218,16 @@ export function LearnTop({
                   ) : s.state === "done" ? (
                     <Check size={18} style={{ color: "var(--primary)" }} />
                   ) : (
-                    <span className="num text-[14px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    <span className="num text-ui font-medium" style={{ color: "var(--text-muted)" }}>
                       {i + 1}
                     </span>
                   )}
                 </span>
 
                 <span className="w-full">
-                  <span className="block truncate text-[12px] font-medium">{s.title}</span>
+                  <span className="block truncate text-micro font-medium">{s.title}</span>
                   <span
-                    className="block truncate text-[12px]"
+                    className="block truncate text-micro"
                     style={{
                       color: s.state === "current" ? "var(--primary)" : "var(--text-faint)",
                     }}
@@ -262,15 +262,15 @@ export function LearnTop({
             <Target size={20} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold" style={{ color: "var(--primary)" }}>
+            <p className="text-micro font-semibold" style={{ color: "var(--primary)" }}>
               Your next step
             </p>
-            <p className="mt-1 text-[14px] leading-snug">
+            <p className="mt-1 text-ui leading-snug">
               You&apos;re <strong className="font-semibold">{remainingInSkill}</strong>{" "}
               {remainingInSkill === 1 ? "lesson" : "lessons"} from finishing{" "}
               <strong className="font-semibold">{next.skillTitle}</strong>.
             </p>
-            <p className="text-meta mt-1 text-[12px]">
+            <p className="text-meta mt-1 text-micro">
               Estimated time: {estimate < 60 ? `${estimate} minutes` : `${Math.round(estimate / 6) / 10} hours`}.
             </p>
           </div>
@@ -303,9 +303,9 @@ function GoalRow({
         <span className="min-w-0 flex-1">
           <span className="flex items-baseline gap-1.5">
             <span className="num text-[16px] font-semibold leading-none">{value}</span>
-            <span className="truncate text-[14px]">{label}</span>
+            <span className="truncate text-ui">{label}</span>
           </span>
-          <span className="text-meta mt-0.5 block truncate text-[12px]">{meta}</span>
+          <span className="text-meta mt-0.5 block truncate text-micro">{meta}</span>
         </span>
       </Link>
     </li>

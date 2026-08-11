@@ -1,9 +1,8 @@
-import { BookOpen, Clock, Target, TrendingUp } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getAnalytics, levelInfo } from "@/lib/queries";
 import { syncAchievements } from "@/lib/actions";
 import { Heatmap } from "@/components/heatmap";
-import { StatTile } from "@/components/ui";
+import { Section, Stat, StatRow } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -29,58 +28,46 @@ export default async function AnalyticsOverviewPage() {
   const totalKindMinutes = data.timeByKind.reduce((sum, k) => sum + k.minutes, 0);
 
   return (
-    <div className="section-stack">
-      <section className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile
-          label="Level"
-          value={level.level}
-          sub={`${level.title} · ${level.need - level.into} XP to next`}
-          icon={<TrendingUp size={17} />}
-        />
-        <StatTile
-          label="Total time"
-          value={`${data.totalHours}h`}
-          sub="tracked across everything"
-          icon={<Clock size={17} />}
-        />
-        <StatTile
-          label="Lessons mastered"
-          value={data.lessonsMastered}
-          sub="past the gate"
-          icon={<BookOpen size={17} />}
-        />
-        <StatTile
-          label="Challenges solved"
-          value={data.challengesSolved}
-          sub="tests passing"
-          icon={<Target size={17} />}
-        />
-      </section>
+    /* Reference implementation for the section primitives. Nothing on this page
+       is an object — four readings and two regions — so nothing on it is a
+       card. The four numbers were four tiles with four different icons, which
+       said "these are separate things"; one divided row says "these belong
+       together", which is what a stat row always means. The icons are gone
+       because they were decoration: a clock beside "Total time" adds nothing a
+       reader did not already have from the word. */
+    <div className="page-body">
+      <Section major={false}>
+        <StatRow className="stagger">
+          <Stat
+            label="Level"
+            value={level.level}
+            sub={`${level.title} · ${level.need - level.into} XP to next`}
+          />
+          <Stat label="Total time" value={`${data.totalHours}h`} sub="tracked across everything" />
+          <Stat label="Lessons mastered" value={data.lessonsMastered} sub="past the gate" />
+          <Stat label="Challenges solved" value={data.challengesSolved} sub="tests passing" />
+        </StatRow>
+      </Section>
 
       {/* -------------------------------------------------------- Heatmap */}
-      <section className="card p-4 sm:p-5">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="title-section">Activity</h2>
-          <span className="text-meta">Last 12 weeks</span>
-        </div>
-        <div className="mt-5">
-          <Heatmap days={data.heatmap} />
-        </div>
-      </section>
+      <Section
+        title="Activity"
+        action={<span className="text-meta">Last 12 weeks</span>}
+      >
+        <Heatmap days={data.heatmap} />
+      </Section>
 
       {/* --------------------------------------------------- Time by kind */}
-      <section className="card p-4 sm:p-5">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="title-section">Where your time goes</h2>
-          {totalKindMinutes > 0 && (
-            <span className="text-meta num">
-              {Math.round(totalKindMinutes / 6) / 10}h total
-            </span>
-          )}
-        </div>
-
+      <Section
+        title="Where your time goes"
+        action={
+          totalKindMinutes > 0 ? (
+            <span className="text-meta num">{Math.round(totalKindMinutes / 6) / 10}h total</span>
+          ) : undefined
+        }
+      >
         {data.timeByKind.length === 0 ? (
-          <p className="text-body mt-4 text-[14px]">
+          <p className="text-body mt-4 text-ui">
             No time tracked yet. Master a lesson, run a focus session, or log time on a project and
             the breakdown appears here.
           </p>
@@ -88,7 +75,7 @@ export default async function AnalyticsOverviewPage() {
           <ul className="mt-5 flex flex-col gap-3">
             {data.timeByKind.map((k) => (
               <li key={k.kind} className="flex items-center gap-4">
-                <span className="w-[76px] shrink-0 text-[14px] capitalize" style={{ color: "var(--text-muted)" }}>
+                <span className="w-[76px] shrink-0 text-ui capitalize" style={{ color: "var(--text-muted)" }}>
                   {k.kind}
                 </span>
                 <span className="progress h-[18px] flex-1 rounded-[var(--radius-xs)]" style={{ background: "var(--surface-2)" }}>
@@ -102,7 +89,7 @@ export default async function AnalyticsOverviewPage() {
                   />
                 </span>
                 <span
-                  className="num w-[52px] shrink-0 text-right text-[12px]"
+                  className="num w-[52px] shrink-0 text-right text-micro"
                   style={{ color: "var(--text-faint)" }}
                 >
                   {Math.round((k.minutes / 60) * 10) / 10}h
@@ -111,7 +98,7 @@ export default async function AnalyticsOverviewPage() {
             ))}
           </ul>
         )}
-      </section>
+      </Section>
     </div>
   );
 }

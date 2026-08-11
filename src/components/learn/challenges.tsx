@@ -119,7 +119,7 @@ function ChallengeRow({
 
         <div className="min-w-0 flex-1">
           <p
-            className="text-[14px] leading-relaxed"
+            className="text-ui leading-relaxed"
             style={{
               color: done ? "var(--text-faint)" : "var(--text)",
               textDecoration: done ? "line-through" : undefined,
@@ -132,7 +132,7 @@ function ChallengeRow({
             <button
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
-              className="mt-2 inline-flex items-center gap-1 text-[12px] font-medium"
+              className="mt-2 inline-flex items-center gap-1 text-micro font-medium"
               style={{ color: "var(--text-muted)" }}
             >
               <ChevronDown
@@ -150,7 +150,7 @@ function ChallengeRow({
             <div className="mt-3 flex flex-col gap-3">
               {challenge.hint && (
                 <p
-                  className="flex items-start gap-2 text-[14px] leading-relaxed"
+                  className="flex items-start gap-2 text-ui leading-relaxed"
                   style={{ color: "var(--text-muted)" }}
                 >
                   <Lightbulb size={14} className="mt-[3px] shrink-0" />
@@ -172,7 +172,7 @@ function Code({ label, source }: { label: string; source: string }) {
     <div>
       <p className="group-heading mb-1.5">{label}</p>
       <pre
-        className="overflow-x-auto rounded-[var(--radius-tile)] p-3 text-[12px] leading-relaxed"
+        className="overflow-x-auto rounded-[var(--radius-tile)] p-3 text-micro leading-relaxed"
         style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
       >
         <code>{source}</code>

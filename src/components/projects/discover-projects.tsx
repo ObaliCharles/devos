@@ -28,7 +28,7 @@ export function DiscoverProjects({
   return (
     <div className="flex flex-col gap-5">
       {error && (
-        <p className="card p-3 text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+        <p className="card p-3 text-dense" style={{ color: "var(--danger)" }} role="alert">
           {error}
         </p>
       )}
@@ -46,8 +46,8 @@ export function DiscoverProjects({
                 style={i > 0 ? { borderColor: "var(--border-faint)" } : undefined}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-[14px] font-medium">{inv.projectTitle}</p>
-                  <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <p className="text-ui font-medium">{inv.projectTitle}</p>
+                  <p className="text-micro" style={{ color: "var(--text-faint)" }}>
                     as {inv.role}
                     {inv.message && ` — ${inv.message}`}
                   </p>
@@ -85,8 +85,8 @@ export function DiscoverProjects({
           <span className="icon-tile icon-tile-lg">
             <Users size={18} />
           </span>
-          <p className="text-[14px] font-medium">No projects are open yet</p>
-          <p className="text-body max-w-sm text-[13px]">
+          <p className="text-ui font-medium">No projects are open yet</p>
+          <p className="text-body max-w-sm text-dense">
             Flip &ldquo;Open to contributors&rdquo; on your own project&rsquo;s Team tab and it
             appears here for everyone else.
           </p>
@@ -96,10 +96,10 @@ export function DiscoverProjects({
           {projects.map((p) => (
             <li key={p.id} className="card flex flex-col gap-3 p-4">
               <div className="min-w-0">
-                <Link href={`/projects/${p.id}`} className="text-[14px] font-semibold hover:underline">
+                <Link href={`/projects/${p.id}`} className="text-ui font-semibold hover:underline">
                   {p.title}
                 </Link>
-                <p className="text-body mt-1 line-clamp-2 text-[13px]">
+                <p className="text-body mt-1 line-clamp-2 text-dense">
                   {p.description || "No description yet."}
                 </p>
               </div>
@@ -115,7 +115,7 @@ export function DiscoverProjects({
               </div>
 
               <div className="mt-auto flex items-center gap-2 pt-1">
-                <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                   {p.members} {p.members === 1 ? "member" : "members"} · {p.owner}
                 </span>
                 <span className="ml-auto">

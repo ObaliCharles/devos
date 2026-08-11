@@ -117,7 +117,7 @@ export function MobileDrawer({
                       <NavLink
                         href={href}
                         aria-current={active ? "page" : undefined}
-                        className={`nav-row gap-3 px-2.5 text-[14px] ${
+                        className={`nav-row gap-3 px-2.5 text-ui ${
                           active ? "nav-row-on icon-strong" : ""
                         }`}
                         style={{ height: 42 }}
@@ -161,7 +161,7 @@ export function MobileDrawer({
             >
               <span className="relative shrink-0">
                 <span
-                  className="grid h-[34px] w-[34px] place-items-center rounded-full text-[14px] font-medium"
+                  className="grid h-[34px] w-[34px] place-items-center rounded-full text-ui font-medium"
                   style={{
                     background: "var(--surface-3)",
                     border: "1px solid var(--border)",
@@ -172,8 +172,8 @@ export function MobileDrawer({
                 </span>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-medium">{user.name}</span>
-                <span className="block truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
+                <span className="block truncate text-ui font-medium">{user.name}</span>
+                <span className="block truncate text-micro" style={{ color: "var(--text-faint)" }}>
                   Level {user.level} · {user.title}
                 </span>
               </span>

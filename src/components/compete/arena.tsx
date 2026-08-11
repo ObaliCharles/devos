@@ -45,7 +45,7 @@ export function Arena({
   return (
     <div className="flex flex-col gap-4">
       {error && (
-        <p className="card p-3 text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+        <p className="card p-3 text-dense" style={{ color: "var(--danger)" }} role="alert">
           {error}
         </p>
       )}
@@ -55,17 +55,17 @@ export function Arena({
         <div className="flex items-center gap-2.5">
           <Trophy size={18} style={{ color: standing.league.colour }} />
           <div>
-            <p className="text-[14px] font-semibold" style={{ color: standing.league.colour }}>
+            <p className="text-ui font-semibold" style={{ color: standing.league.colour }}>
               {standing.league.name}
             </p>
-            <p className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <p className="num text-micro" style={{ color: "var(--text-faint)" }}>
               {standing.rating} rating
               {standing.rank ? ` · #${standing.rank}` : " · unranked"}
             </p>
           </div>
         </div>
 
-        <div className="num flex flex-wrap gap-x-4 text-[13px]" style={{ color: "var(--text-muted)" }}>
+        <div className="num flex flex-wrap gap-x-4 text-dense" style={{ color: "var(--text-muted)" }}>
           <span>
             <b style={{ color: "var(--success)" }}>{standing.wins}</b> W
           </span>
@@ -79,7 +79,7 @@ export function Arena({
         </div>
 
         {standing.next && (
-          <p className="num ml-auto text-[12px]" style={{ color: "var(--text-faint)" }}>
+          <p className="num ml-auto text-micro" style={{ color: "var(--text-faint)" }}>
             {standing.next.needed} to {standing.next.name}
           </p>
         )}
@@ -89,7 +89,7 @@ export function Arena({
       <section className="card flex flex-wrap items-end gap-3 p-4">
         <div className="min-w-0 flex-1">
           <h2 className="eyebrow">Start a duel</h2>
-          <p className="text-meta mt-1 text-[12px]">
+          <p className="text-meta mt-1 text-micro">
             You both get the same challenge and 30 minutes. First to pass wins; if
             neither does, most passing tests takes it.
           </p>
@@ -151,7 +151,7 @@ export function Arena({
               Open duels
             </h2>
             {open.length === 0 ? (
-              <p className="text-body p-4 text-[13px]">
+              <p className="text-body p-4 text-dense">
                 Nobody is waiting. Open one and it appears here for everyone else.
               </p>
             ) : (
@@ -164,8 +164,8 @@ export function Arena({
                   >
                     {m.opponent && <Avatar author={m.opponent} size={28} />}
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-medium">{m.opponent?.name ?? "Someone"}</p>
-                      <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+                      <p className="text-dense font-medium">{m.opponent?.name ?? "Someone"}</p>
+                      <p className="text-micro" style={{ color: "var(--text-faint)" }}>
                         {m.difficulty} · {m.mode} · {ago(m.createdAt)}
                       </p>
                     </div>
@@ -192,7 +192,7 @@ export function Arena({
               matches={history}
               render={(m) => (
                 <span
-                  className="num text-[13px] font-medium"
+                  className="num text-dense font-medium"
                   style={{ color: resultColour(m.result) }}
                 >
                   {m.result === "win" ? "Won" : m.result === "loss" ? "Lost" : "Draw"}
@@ -214,7 +214,7 @@ export function Arena({
             Season ladder · {standing.season}
           </h2>
           {leaders.length === 0 ? (
-            <p className="text-body p-4 text-[13px]">
+            <p className="text-body p-4 text-dense">
               Nobody has played a ranked duel yet. First one on the board.
             </p>
           ) : (
@@ -228,17 +228,17 @@ export function Arena({
                     background: l.isMe ? "var(--primary-faint)" : undefined,
                   }}
                 >
-                  <span className="num w-5 shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="num w-5 shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
                     {i + 1}
                   </span>
                   {i === 0 && <Crown size={13} style={{ color: "var(--warning)" }} />}
                   <Link
                     href={`/u/${l.username}`}
-                    className="min-w-0 flex-1 truncate text-[13px] hover:underline"
+                    className="min-w-0 flex-1 truncate text-dense hover:underline"
                   >
                     {l.name}
                   </Link>
-                  <span className="num shrink-0 text-[13px] font-medium" style={{ color: l.colour }}>
+                  <span className="num shrink-0 text-dense font-medium" style={{ color: l.colour }}>
                     {l.rating}
                   </span>
                 </li>
@@ -279,8 +279,8 @@ function MatchList({
             style={i > 0 ? { borderColor: "var(--border-faint)" } : undefined}
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium">{m.challengeTitle}</p>
-              <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <p className="truncate text-dense font-medium">{m.challengeTitle}</p>
+              <p className="text-micro" style={{ color: "var(--text-faint)" }}>
                 vs {m.opponent?.name ?? "—"} · {m.difficulty} · {m.mode}
                 {m.status === "active" && m.expiresAt && (
                   <span className="ml-1.5" style={{ color: "var(--warning)" }}>

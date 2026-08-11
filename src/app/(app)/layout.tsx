@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
+import { BottomNav } from "@/components/bottom-nav";
 import { RouteProgress } from "@/components/route-progress";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCurrentUser, levelFromXp } from "@/lib/user";
@@ -58,7 +59,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           navUser={navUser}
         />
 
-        <main id="main" className="flex-1 overflow-y-auto">
+        <main id="main" className="has-bottom-nav flex-1 overflow-y-auto">
           <div
             className="page-container"
             style={{ paddingTop: "var(--page-top)", paddingBottom: "var(--page-top)" }}
@@ -71,6 +72,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
+
+      {/* Mobile only. The five daily destinations stay one tap away instead of
+          living behind the drawer with everything else — see the note in
+          bottom-nav.tsx. The drawer in the topbar keeps the full index. */}
+      <BottomNav dueCount={dueCount} />
     </div>
   );
 }

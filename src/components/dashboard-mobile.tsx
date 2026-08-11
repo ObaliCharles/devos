@@ -112,7 +112,7 @@ export function DashboardMobile({
               this on a 390px screen, and a title that wraps to two lines pushes
               everything below the fold before you have read a single number. */}
           <Greeting name={name} className="text-[24px] font-bold leading-tight tracking-[-0.03em]" />
-          <p className="text-body mt-1 text-[14px]">
+          <p className="text-body mt-1 text-ui">
             {next
               ? `Pick up where you left off in ${next.skillTitle}.`
               : "Nothing queued. Pick a path to get started."}
@@ -128,8 +128,8 @@ export function DashboardMobile({
         >
           <Flame size={15} />
           <span className="leading-tight">
-            <span className="num block text-[14px] font-semibold">{streak}</span>
-            <span className="block text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <span className="num block text-ui font-semibold">{streak}</span>
+            <span className="block text-micro" style={{ color: "var(--text-faint)" }}>
               Day streak
             </span>
           </span>
@@ -177,8 +177,8 @@ export function DashboardMobile({
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-semibold">{next.skillTitle}</span>
-                  <span className="text-meta mt-0.5 block truncate text-[12px]">
+                  <span className="block truncate text-ui font-semibold">{next.skillTitle}</span>
+                  <span className="text-meta mt-0.5 block truncate text-micro">
                     {next.lessonTitle}
                   </span>
                 </span>
@@ -188,14 +188,14 @@ export function DashboardMobile({
                 <span className="progress flex-1">
                   <span className="progress-bar" style={{ width: `${next.skillPct}%` }} />
                 </span>
-                <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+                <span className="num text-micro font-medium" style={{ color: "var(--text-muted)" }}>
                   {next.skillPct}%
                 </span>
               </span>
 
               <span className="mt-3 flex items-center justify-between gap-3">
                 <span
-                  className="flex items-center gap-1.5 text-[12px]"
+                  className="flex items-center gap-1.5 text-micro"
                   style={{ color: "var(--text-faint)" }}
                 >
                   <Clock size={12} /> {fmtDuration(next.minutesLeft)} left
@@ -209,8 +209,8 @@ export function DashboardMobile({
             </Link>
           ) : (
             <div className="card p-4">
-              <p className="text-[14px] font-medium">No lesson queued</p>
-              <p className="text-body mt-1 text-[14px]">
+              <p className="text-ui font-medium">No lesson queued</p>
+              <p className="text-body mt-1 text-ui">
                 Follow a path and the next lesson lands here.
               </p>
               <Link href="/learning" className="btn btn-primary btn-sm mt-3">
@@ -236,10 +236,10 @@ export function DashboardMobile({
                   <Brain size={18} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-semibold">
+                  <span className="block truncate text-ui font-semibold">
                     {path.origin === "ai" ? "AI generated path for you" : "Your active path"}
                   </span>
-                  <span className="text-meta mt-0.5 block truncate text-[12px]">{path.title}</span>
+                  <span className="text-meta mt-0.5 block truncate text-micro">{path.title}</span>
                 </span>
                 <ChevronRight size={16} className="shrink-0" style={{ color: "var(--text-faint)" }} />
               </Link>
@@ -267,7 +267,7 @@ export function DashboardMobile({
                       )}
 
                       <span
-                        className="num relative z-[1] grid h-[27px] w-[27px] place-items-center rounded-full text-[12px] font-medium"
+                        className="num relative z-[1] grid h-[27px] w-[27px] place-items-center rounded-full text-micro font-medium"
                         style={{
                           background:
                             s.state === "done"
@@ -296,9 +296,9 @@ export function DashboardMobile({
                       </span>
 
                       <span className="w-full">
-                        <span className="block truncate text-[12px] font-medium">{s.title}</span>
+                        <span className="block truncate text-micro font-medium">{s.title}</span>
                         <span
-                          className="block truncate text-[12px]"
+                          className="block truncate text-micro"
                           style={{
                             color: s.state === "current" ? "var(--primary)" : "var(--text-faint)",
                           }}
@@ -319,8 +319,8 @@ export function DashboardMobile({
             </div>
           ) : (
             <div className="card p-4">
-              <p className="text-[14px] font-medium">No path yet</p>
-              <p className="text-body mt-1 text-[14px]">
+              <p className="text-ui font-medium">No path yet</p>
+              <p className="text-body mt-1 text-ui">
                 Tell the AI who you want to become and it writes a real curriculum.
               </p>
               <Link href="/learning" className="btn btn-primary btn-sm mt-3">
@@ -338,8 +338,8 @@ export function DashboardMobile({
         <Reveal className="min-w-0">
           <div className="card flex h-full flex-col p-3.5">
             <div className="flex items-baseline justify-between gap-2">
-              <h2 className="text-[14px] font-semibold tracking-[-0.01em]">Today</h2>
-              <Link href="/calendar" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+              <h2 className="text-ui font-semibold tracking-[-0.01em]">Today</h2>
+              <Link href="/calendar" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
                 All
               </Link>
             </div>
@@ -355,10 +355,10 @@ export function DashboardMobile({
                         aria-hidden
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="line-clamp-2 text-[12px] font-medium leading-snug">
+                        <span className="line-clamp-2 text-micro font-medium leading-snug">
                           {t.label}
                         </span>
-                        <span className="num mt-0.5 block text-[12px]" style={{ color: "var(--text-faint)" }}>
+                        <span className="num mt-0.5 block text-micro" style={{ color: "var(--text-faint)" }}>
                           {t.meta}
                         </span>
                       </span>
@@ -367,14 +367,14 @@ export function DashboardMobile({
                 ))}
               </ul>
             ) : (
-              <p className="text-body mt-2 text-[14px]">All clear.</p>
+              <p className="text-body mt-2 text-ui">All clear.</p>
             )}
           </div>
         </Reveal>
 
         <Reveal className="min-w-0">
           <div className="card flex h-full flex-col p-3.5">
-            <h2 className="text-[14px] font-semibold tracking-[-0.01em]">Your progress</h2>
+            <h2 className="text-ui font-semibold tracking-[-0.01em]">Your progress</h2>
 
             <div className="mt-3 flex justify-center">
               {/* Accent, not the traffic-light default: path progress is not a
@@ -383,10 +383,10 @@ export function DashboardMobile({
             </div>
 
             <div className="mt-3.5">
-              <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <p className="text-micro" style={{ color: "var(--text-faint)" }}>
                 Level {level.level}
               </p>
-              <p className="text-[14px] font-semibold">{level.title}</p>
+              <p className="text-ui font-semibold">{level.title}</p>
               <div className="progress progress-sm mt-2">
                 <div
                   className="progress-bar"
@@ -396,10 +396,10 @@ export function DashboardMobile({
             </div>
 
             <div className="mt-3">
-              <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <p className="text-micro" style={{ color: "var(--text-faint)" }}>
                 Next milestone
               </p>
-              <p className="num text-[14px] font-semibold">{toNextLevel.toLocaleString()} XP</p>
+              <p className="num text-ui font-semibold">{toNextLevel.toLocaleString()} XP</p>
             </div>
           </div>
         </Reveal>
@@ -425,10 +425,10 @@ export function DashboardMobile({
                     <BookOpen size={16} />
                   </span>
                 )}
-                <p className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug">
+                <p className="mt-2.5 line-clamp-2 text-ui font-semibold leading-snug">
                   {c.title}
                 </p>
-                <p className="text-meta mt-1 text-[12px]">{c.hours}h</p>
+                <p className="text-meta mt-1 text-micro">{c.hours}h</p>
                 <span className="chip chip-sm mt-2.5 self-start">{c.level}</span>
               </Link>
             </Reveal>
@@ -441,7 +441,7 @@ export function DashboardMobile({
           latest certificate. Rather than stack three more cards on a phone,
           they stay one tap away — present, but not in the way. */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-[14px] font-semibold tracking-[-0.01em]">More</h2>
+        <h2 className="text-ui font-semibold tracking-[-0.01em]">More</h2>
         <div className="card divide-y" style={{ borderColor: "var(--border)" }}>
           <MoreRow
             href="/analytics"
@@ -475,7 +475,7 @@ function Header({ title, href }: { title: string; href: string }) {
       <h2 className="text-[18px] font-bold tracking-[-0.02em]">{title}</h2>
       <Link
         href={href}
-        className="inline-flex items-center gap-0.5 text-[12px] font-medium"
+        className="inline-flex items-center gap-0.5 text-micro font-medium"
         style={{ color: "var(--primary)" }}
       >
         View all <ChevronRight size={13} />
@@ -504,9 +504,9 @@ function Signal({
         <span className="num truncate text-[16px] font-semibold" style={{ color: "var(--text)" }}>
           {value}
         </span>
-        {unit && <span className="text-[12px]">{unit}</span>}
+        {unit && <span className="text-micro">{unit}</span>}
       </span>
-      <span className="mt-1 block truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
+      <span className="mt-1 block truncate text-micro" style={{ color: "var(--text-faint)" }}>
         {label}
       </span>
     </div>
@@ -528,8 +528,8 @@ function MoreRow({
     <Link href={href} className="row-link flex items-center gap-3 p-3.5">
       <span className="icon-tile">{icon}</span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14px] font-medium">{label}</span>
-        <span className="text-meta block truncate text-[12px]">{meta}</span>
+        <span className="block truncate text-ui font-medium">{label}</span>
+        <span className="text-meta block truncate text-micro">{meta}</span>
       </span>
       <ChevronRight size={16} style={{ color: "var(--text-faint)" }} />
     </Link>

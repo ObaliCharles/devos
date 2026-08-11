@@ -178,7 +178,7 @@ export function ChallengeWorkspace({ challenge }: { challenge: ChallengeData }) 
               placeholder here rather than letting the layout jump. */}
           {expanded ? (
             <div
-              className="card grid place-items-center p-8 text-[13px]"
+              className="card grid place-items-center p-8 text-dense"
               style={{ color: "var(--text-faint)" }}
             >
               Editor is full screen — press Escape to bring it back.
@@ -298,7 +298,7 @@ function ProblemCard({ challenge }: { challenge: ChallengeData }) {
 
       {/* Meta row — the four numbers worth knowing before you start. */}
       <div
-        className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t pt-4 text-[12px]"
+        className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t pt-4 text-micro"
         style={{ borderColor: "var(--border-faint)", color: "var(--text-faint)" }}
       >
         <Meta icon={<Zap size={12} style={{ color: "var(--warning)" }} />} label={`${challenge.xp} XP`} />
@@ -367,7 +367,7 @@ function Editor({
           {/* Only JavaScript executes today (see runner.ts), so this reports
               the language rather than pretending to switch it. */}
           <span
-            className="flex items-center gap-1 rounded-[var(--radius-pill)] px-2 py-1 text-[12px] capitalize"
+            className="flex items-center gap-1 rounded-[var(--radius-pill)] px-2 py-1 text-micro capitalize"
             style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
           >
             {language}
@@ -393,7 +393,7 @@ function Editor({
         <div
           ref={gutter}
           aria-hidden
-          className="scrollbar-none shrink-0 select-none overflow-hidden py-4 pl-4 pr-3 text-right font-[family-name:var(--font-mono)] text-[13px] leading-relaxed"
+          className="scrollbar-none shrink-0 select-none overflow-hidden py-4 pl-4 pr-3 text-right font-[family-name:var(--font-mono)] text-dense leading-relaxed"
           style={{ color: "var(--text-faint)", background: "var(--surface-2)" }}
         >
           {Array.from({ length: lineCount }, (_, i) => (
@@ -404,7 +404,7 @@ function Editor({
         {/* whitespace-pre + overflow-auto: the code scrolls inside its own box
             rather than stretching the page. */}
         <textarea
-          className="block min-w-0 flex-1 resize-none overflow-auto whitespace-pre bg-transparent p-4 font-[family-name:var(--font-mono)] text-[13px] leading-relaxed outline-none"
+          className="block min-w-0 flex-1 resize-none overflow-auto whitespace-pre bg-transparent p-4 font-[family-name:var(--font-mono)] text-dense leading-relaxed outline-none"
           style={{ minHeight: expanded ? 0 : 340, height: expanded ? "100%" : undefined, color: "var(--text)" }}
           value={code}
           onChange={(e) => onChange(e.target.value)}
@@ -507,11 +507,11 @@ function TestcasePanel({
         {showConsole ? (
           <Console outcome={outcome} />
         ) : !test ? (
-          <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>
+          <p className="text-dense" style={{ color: "var(--text-faint)" }}>
             This challenge grades on hidden tests only. Submit when you are ready.
           </p>
         ) : (
-          <dl className="flex flex-col gap-3 text-[13px]">
+          <dl className="flex flex-col gap-3 text-dense">
             <Field label="Input" value={test.call} />
             <Field label="Expected" value={test.expected} tone="var(--success)" />
             {result && !result.passed && <Field label="Got" value={result.got} tone="var(--danger)" />}
@@ -535,7 +535,7 @@ function Field({ label, value, tone }: { label: string; value: string; tone?: st
     <div className="min-w-0">
       <dt className="eyebrow">{label}</dt>
       <dd
-        className="well mt-1.5 min-w-0 overflow-x-auto whitespace-pre p-2.5 font-[family-name:var(--font-mono)] text-[12px]"
+        className="well mt-1.5 min-w-0 overflow-x-auto whitespace-pre p-2.5 font-[family-name:var(--font-mono)] text-micro"
         style={tone ? { color: tone } : undefined}
       >
         {value}
@@ -554,7 +554,7 @@ function Console({ outcome }: { outcome: RunOutcome | null }) {
             Error
           </p>
           <pre
-            className="mt-1.5 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-[12px]"
+            className="mt-1.5 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-micro"
             style={{ color: "var(--danger)" }}
           >
             <code>{outcome.error}</code>
@@ -565,7 +565,7 @@ function Console({ outcome }: { outcome: RunOutcome | null }) {
         <div className="min-w-0">
           <p className="eyebrow">Output</p>
           <pre
-            className="well mt-1.5 max-w-full overflow-x-auto p-2.5 text-[12px]"
+            className="well mt-1.5 max-w-full overflow-x-auto p-2.5 text-micro"
             style={{ color: "var(--text-muted)" }}
           >
             <code>{outcome.logs.join("\n")}</code>
@@ -586,11 +586,11 @@ function Examples({ tests }: { tests: ChallengeData["visibleTests"] }) {
       <ol className="mt-3 flex flex-col gap-3">
         {tests.slice(0, 3).map((t, i) => (
           <li key={i} className="min-w-0">
-            <p className="text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+            <p className="text-micro font-medium" style={{ color: "var(--text-muted)" }}>
               {t.label ?? `Example ${i + 1}`}
             </p>
             <div
-              className="well mt-1.5 min-w-0 overflow-x-auto p-2.5 font-[family-name:var(--font-mono)] text-[12px] leading-relaxed"
+              className="well mt-1.5 min-w-0 overflow-x-auto p-2.5 font-[family-name:var(--font-mono)] text-micro leading-relaxed"
             >
               <div className="whitespace-pre">{t.call}</div>
               <div className="mt-1 whitespace-pre" style={{ color: "var(--success)" }}>
@@ -613,14 +613,14 @@ function Hints({ hints }: { hints: string[] }) {
       <div className="flex items-center gap-2">
         <Lightbulb size={14} style={{ color: "var(--warning)" }} />
         <h2 className="eyebrow flex-1">Hints</h2>
-        <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+        <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
           {shown}/{hints.length}
         </span>
       </div>
 
       <ol className="mt-3 flex flex-col gap-2">
         {hints.map((h, i) => (
-          <li key={i} className="flex gap-2 text-[13px]">
+          <li key={i} className="flex gap-2 text-dense">
             <span className="num shrink-0" style={{ color: "var(--text-faint)" }}>
               {i + 1}.
             </span>
@@ -660,15 +660,15 @@ function Stats({ challenge }: { challenge: ChallengeData }) {
       <dl className="mt-3 flex flex-col gap-2.5">
         {rows.map((r) => (
           <div key={r.label} className="flex items-baseline justify-between gap-3">
-            <dt className="text-[13px]" style={{ color: "var(--text-muted)" }}>
+            <dt className="text-dense" style={{ color: "var(--text-muted)" }}>
               {r.label}
             </dt>
-            <dd className="num text-[13px] font-medium">{r.value}</dd>
+            <dd className="num text-dense font-medium">{r.value}</dd>
           </div>
         ))}
       </dl>
       {stats.attemptedBy === 0 && (
-        <p className="mt-3 text-[12px]" style={{ color: "var(--text-faint)" }}>
+        <p className="mt-3 text-micro" style={{ color: "var(--text-faint)" }}>
           Nobody has attempted this one yet.
         </p>
       )}
@@ -682,7 +682,7 @@ function SubmitBanner({ passed, firstSolve, xp }: { passed: boolean; firstSolve:
   const colour = passed ? "var(--success)" : "var(--danger)";
   return (
     <div
-      className="card scale-in flex items-center gap-2.5 p-4 text-[14px] font-medium"
+      className="card scale-in flex items-center gap-2.5 p-4 text-ui font-medium"
       style={{
         borderColor: `color-mix(in srgb, ${colour} 45%, transparent)`,
         background: `color-mix(in srgb, ${colour} 8%, transparent)`,
@@ -726,7 +726,7 @@ function ActionBar({
       <ActionButton className="btn btn-primary" icon={<Send size={15} />} loading={pending} onClick={onSubmit}>
         {solved ? "Submit again" : "Submit solution"}
       </ActionButton>
-      <span className="num ml-auto text-[12px]" style={{ color: "var(--text-faint)" }}>
+      <span className="num ml-auto text-micro" style={{ color: "var(--text-faint)" }}>
         {pending ? "Running…" : summary}
       </span>
     </div>

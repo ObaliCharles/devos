@@ -32,7 +32,7 @@ export default async function GroupPage({
 
   return (
     <div className="page-body">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px]">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-dense">
         <Link
           href="/community/discussions"
           className="transition-colors hover:text-[var(--text)]"
@@ -50,9 +50,9 @@ export default async function GroupPage({
         </span>
         <div className="min-w-0 flex-1">
           <h1 className="title-page">{group.name}</h1>
-          {group.description && <p className="text-body mt-1 text-[14px]">{group.description}</p>}
+          {group.description && <p className="text-body mt-1 text-ui">{group.description}</p>}
           <div
-            className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px]"
+            className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-micro"
             style={{ color: "var(--text-faint)" }}
           >
             <span className="num">

@@ -34,7 +34,7 @@ export function UsersTable({ users, meId }: { users: Record<string, unknown>[]; 
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)" }}>
               {["User", "Email", "Role", "XP", "Streak", ""].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-[12px] font-medium uppercase tracking-wide" style={{ color: "var(--text-faint)" }}>{h}</th>
+                <th key={h} className="px-4 py-3 text-left text-micro font-medium uppercase tracking-wide" style={{ color: "var(--text-faint)" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -44,7 +44,7 @@ export function UsersTable({ users, meId }: { users: Record<string, unknown>[]; 
                 <td className="px-4 py-3 font-medium">{String(u.name)}{String(u.id) === meId ? " (you)" : ""}</td>
                 <td className="px-4 py-3" style={{ color: "var(--text-muted)" }}>{String(u.email)}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded-full px-2 py-0.5 text-[12px]" style={{ background: u.role === "admin" ? "var(--primary-faint)" : "var(--surface-2)", color: u.role === "admin" ? "var(--primary)" : "var(--text-muted)" }}>
+                  <span className="rounded-full px-2 py-0.5 text-micro" style={{ background: u.role === "admin" ? "var(--primary-faint)" : "var(--surface-2)", color: u.role === "admin" ? "var(--primary)" : "var(--text-muted)" }}>
                     {String(u.role)}
                   </span>
                 </td>
@@ -52,7 +52,7 @@ export function UsersTable({ users, meId }: { users: Record<string, unknown>[]; 
                 <td className="px-4 py-3 tabular-nums">{String(u.streak)}</td>
                 <td className="px-4 py-3 text-right">
                   <button
-                    className="btn btn-ghost h-7 px-2.5 text-[12px]"
+                    className="btn btn-ghost h-7 px-2.5 text-micro"
                     disabled={pending}
                     onClick={() => run(async () => {
                       const res = await setUserRole(String(u.id), u.role === "admin" ? "user" : "admin");
@@ -163,7 +163,7 @@ export function ContentBuilder({ content }: { content: { roadmapTitle: string; p
                       <p className="text-sm font-medium">{String(skill.title)}</p>
                       <ul className="mt-1.5 flex flex-col gap-1 pl-3">
                         {lessons.map((l) => (
-                          <li key={String(l.id)} className="flex items-center justify-between text-[14px]" style={{ color: "var(--text-muted)" }}>
+                          <li key={String(l.id)} className="flex items-center justify-between text-ui" style={{ color: "var(--text-muted)" }}>
                             <span>{String(l.order)}. {String(l.title)}</span>
                             <button onClick={() => run(() => deleteLesson(String(l.id)))} style={{ color: "var(--danger)" }} aria-label="Delete lesson"><Trash2 size={12} /></button>
                           </li>
@@ -171,13 +171,13 @@ export function ContentBuilder({ content }: { content: { roadmapTitle: string; p
                       </ul>
                       <div className="mt-1.5 flex gap-1.5 pl-3">
                         <input
-                          className="input h-8 text-[12px]"
+                          className="input h-8 text-micro"
                           value={lessonDraft[sid] ?? ""}
                           onChange={(e) => setLessonDraft((d) => ({ ...d, [sid]: e.target.value }))}
                           placeholder="New lesson title"
                           aria-label="New lesson"
                         />
-                        <button className="btn btn-ghost h-8 shrink-0 px-2 text-[12px]" disabled={!lessonDraft[sid]?.trim() || pending} onClick={() => { run(() => createLesson({ skillId: sid, title: lessonDraft[sid] })); setLessonDraft((d) => ({ ...d, [sid]: "" })); }}>
+                        <button className="btn btn-ghost h-8 shrink-0 px-2 text-micro" disabled={!lessonDraft[sid]?.trim() || pending} onClick={() => { run(() => createLesson({ skillId: sid, title: lessonDraft[sid] })); setLessonDraft((d) => ({ ...d, [sid]: "" })); }}>
                           <Plus size={13} />
                         </button>
                       </div>
@@ -187,13 +187,13 @@ export function ContentBuilder({ content }: { content: { roadmapTitle: string; p
 
                 <div className="flex gap-1.5">
                   <input
-                    className="input h-8 text-[12px]"
+                    className="input h-8 text-micro"
                     value={skillDraft[pid] ?? ""}
                     onChange={(e) => setSkillDraft((d) => ({ ...d, [pid]: e.target.value }))}
                     placeholder="New skill title"
                     aria-label="New skill"
                   />
-                  <button className="btn btn-ghost h-8 shrink-0 px-2 text-[12px]" disabled={!skillDraft[pid]?.trim() || pending} onClick={() => { run(() => createSkill({ phaseId: pid, title: skillDraft[pid] })); setSkillDraft((d) => ({ ...d, [pid]: "" })); }}>
+                  <button className="btn btn-ghost h-8 shrink-0 px-2 text-micro" disabled={!skillDraft[pid]?.trim() || pending} onClick={() => { run(() => createSkill({ phaseId: pid, title: skillDraft[pid] })); setSkillDraft((d) => ({ ...d, [pid]: "" })); }}>
                     <Plus size={13} /> Skill
                   </button>
                 </div>

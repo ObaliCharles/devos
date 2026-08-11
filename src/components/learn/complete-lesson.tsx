@@ -59,7 +59,7 @@ export function CompleteLesson({
     return (
       <section className="card p-5" style={{ background: "var(--surface-2)" }}>
         <p
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium"
+          className="inline-flex items-center gap-1.5 text-ui font-medium"
           style={{ color: "var(--success)" }}
         >
           <Check size={15} /> Lesson complete
@@ -76,8 +76,8 @@ export function CompleteLesson({
                 <Code2 size={16} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-medium">Put it into code</span>
-                <span className="text-meta block text-[12px]">
+                <span className="block text-ui font-medium">Put it into code</span>
+                <span className="text-meta block text-micro">
                   {practiceCount} practice {practiceCount === 1 ? "task" : "tasks"} on this page
                 </span>
               </span>
@@ -90,10 +90,10 @@ export function CompleteLesson({
               <ArrowRight size={16} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[14px] font-medium">
+              <span className="block truncate text-ui font-medium">
                 {nextTitle ?? "Back to the course overview"}
               </span>
-              <span className="text-meta block text-[12px]">
+              <span className="text-meta block text-micro">
                 {nextTitle ? "Next lesson" : "You have reached the end of this course"}
               </span>
             </span>
@@ -110,7 +110,7 @@ export function CompleteLesson({
     >
       <div>
         <p className="title-card">Done with this lesson?</p>
-        <p className="text-body mt-0.5 text-[14px]">
+        <p className="text-body mt-0.5 text-ui">
           Marking it complete records your progress through the course and unlocks what comes next.
         </p>
       </div>

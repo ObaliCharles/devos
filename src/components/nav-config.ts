@@ -3,20 +3,22 @@ import { COMMUNITY_LINKS } from "@/lib/community-links";
 import { DiscordMark } from "@/components/brand-icons";
 import {
   BarChart3,
-  BookOpen,
-  Briefcase,
   Calendar,
-  Dumbbell,
-  FolderKanban,
   LayoutDashboard,
   MessagesSquare,
-  NotebookPen,
-  RotateCcw,
   Settings,
   Shield,
-  Sparkles,
   Swords,
 } from "lucide-react";
+import {
+  IconCareer,
+  IconKnowledge,
+  IconLearn,
+  IconPractice,
+  IconProjects,
+  IconReview,
+  IconTutor,
+} from "@/components/icons";
 
 /**
  * The one navigation model, shared by the desktop sidebar and the mobile
@@ -35,18 +37,22 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Learn",
     // Ordered the way the loop actually runs: you learn it, you drill it, you
     // are re-tested on it, and what survives ends up in your knowledge base.
+    // The concept marks come from components/icons.tsx, not lucide: these five
+    // are DeveloperOS ideas rather than generic actions. Dashboard, Calendar,
+    // Analytics, Settings and Admin stay on lucide, because a calendar is a
+    // calendar everywhere and inventing one would be identity for its own sake.
     items: [
-      { href: "/learning", label: "Learning", icon: BookOpen },
-      { href: "/practice", label: "Practice", icon: Dumbbell },
-      { href: "/review", label: "Review", icon: RotateCcw },
-      { href: "/notes", label: "Knowledge", icon: NotebookPen },
+      { href: "/learning", label: "Learning", icon: IconLearn },
+      { href: "/practice", label: "Practice", icon: IconPractice },
+      { href: "/review", label: "Review", icon: IconReview },
+      { href: "/notes", label: "Knowledge", icon: IconKnowledge },
     ],
   },
   {
     heading: "Build",
     items: [
-      { href: "/projects", label: "Projects", icon: FolderKanban },
-      { href: "/ai", label: "AI Workspace", icon: Sparkles },
+      { href: "/projects", label: "Projects", icon: IconProjects },
+      { href: "/ai", label: "AI Workspace", icon: IconTutor },
     ],
   },
   {
@@ -63,7 +69,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     heading: "Grow",
     items: [
-      { href: "/career", label: "Career", icon: Briefcase },
+      { href: "/career", label: "Career", icon: IconCareer },
       { href: "/analytics", label: "Analytics", icon: BarChart3 },
       { href: "/calendar", label: "Calendar", icon: Calendar },
     ],
@@ -86,6 +92,35 @@ export function navGroups(isAdmin: boolean): NavGroup[] {
 
 export function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
+}
+
+/* ---------------------------------------------------------------- hierarchy
+
+   Sixteen destinations presented as sixteen equal choices is not navigation,
+   it is an index. These five are the ones a learner opens on a normal day; the
+   rest are real features that are visited occasionally and reached from the
+   drawer, the command palette or a contextual link.
+
+   Nothing is removed by this — the drawer still lists every group. The claim is
+   only about *emphasis*, which is the thing a phone has no room to get wrong.
+   ------------------------------------------------------------------------ */
+export const PRIMARY_HREFS = ["/dashboard", "/learning", "/practice", "/review", "/projects"] as const;
+
+/**
+ * The daily five, in loop order, for the mobile bottom bar.
+ *
+ * Five is the ceiling: a sixth target drops each one below the ~44px that a
+ * thumb can hit reliably on a narrow phone, and a nav you miss is worse than a
+ * nav you have to open.
+ *
+ * When the Today engine lands, `/dashboard` becomes `/today` here and in
+ * NAV_GROUPS — one edit, because both surfaces read this file.
+ */
+export function primaryNav(): NavItem[] {
+  const all = NAV_GROUPS.flatMap((g) => g.items);
+  return PRIMARY_HREFS.map((href) => all.find((i) => i.href === href)).filter(
+    (i): i is NavItem => Boolean(i)
+  );
 }
 
 export type SidebarUser = {

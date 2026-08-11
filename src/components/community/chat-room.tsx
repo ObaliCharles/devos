@@ -77,7 +77,7 @@ export function ChatRoom({
         aria-label="Rooms"
       >
         {rooms.length === 0 ? (
-          <p className="text-body p-2 text-[13px]">
+          <p className="text-body p-2 text-dense">
             No rooms yet.{" "}
             <Link href="/community/groups" style={{ color: "var(--primary)" }}>
               Create a group
@@ -90,7 +90,7 @@ export function ChatRoom({
               key={g.id}
               href={`/community/chat?room=${g.slug}`}
               aria-current={room?.id === g.id ? "page" : undefined}
-              className={`row-link flex shrink-0 items-center gap-2 px-2.5 py-2 text-[13px] ${
+              className={`row-link flex shrink-0 items-center gap-2 px-2.5 py-2 text-dense ${
                 room?.id === g.id ? "nav-row-on" : ""
               }`}
             >
@@ -106,8 +106,8 @@ export function ChatRoom({
           <span className="icon-tile icon-tile-lg">
             <Hash size={18} />
           </span>
-          <p className="text-[14px] font-medium">Pick a room</p>
-          <p className="text-body max-w-sm text-[13px]">
+          <p className="text-ui font-medium">Pick a room</p>
+          <p className="text-body max-w-sm text-dense">
             Every group has a room. Chat is for the conversation that is not worth
             keeping — anything that is belongs in Discussions.
           </p>
@@ -120,8 +120,8 @@ export function ChatRoom({
           >
             <Hash size={15} style={{ color: "var(--text-faint)" }} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[14px] font-medium">{room.name}</span>
-              <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <span className="block truncate text-ui font-medium">{room.name}</span>
+              <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                 {room.memberCount} {room.memberCount === 1 ? "member" : "members"}
               </span>
             </span>
@@ -132,7 +132,7 @@ export function ChatRoom({
 
           <div ref={log} className="flex min-h-[420px] flex-col gap-0.5 overflow-y-auto p-4">
             {messages.length === 0 ? (
-              <p className="text-body m-auto text-[13px]">
+              <p className="text-body m-auto text-dense">
                 Nothing said yet. Say the first thing.
               </p>
             ) : (
@@ -152,7 +152,7 @@ export function ChatRoom({
             style={{ borderColor: "var(--border)" }}
           >
             {error && (
-              <p className="mb-2 text-[12px]" style={{ color: "var(--danger)" }} role="alert">
+              <p className="mb-2 text-micro" style={{ color: "var(--danger)" }} role="alert">
                 {error}
               </p>
             )}
@@ -184,7 +184,7 @@ export function ChatRoom({
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <p className="text-body flex-1 text-[13px]">Join the group to chat in it.</p>
+                <p className="text-body flex-1 text-dense">Join the group to chat in it.</p>
                 <JoinButton group={room} />
               </div>
             )}
@@ -204,13 +204,13 @@ function Line({ line, grouped }: { line: ChatLine; grouped: boolean }) {
       <div className="min-w-0 flex-1">
         {!grouped && (
           <div className="flex items-baseline gap-2">
-            <span className="text-[13px] font-medium">{line.author.name}</span>
-            <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
+            <span className="text-dense font-medium">{line.author.name}</span>
+            <span className="text-micro" style={{ color: "var(--text-faint)" }}>
               {ago(line.createdAt)}
             </span>
           </div>
         )}
-        <p className="whitespace-pre-wrap break-words text-[13px]" style={{ color: "var(--text-muted)" }}>
+        <p className="whitespace-pre-wrap break-words text-dense" style={{ color: "var(--text-muted)" }}>
           {line.body}
         </p>
       </div>

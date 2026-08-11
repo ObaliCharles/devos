@@ -61,7 +61,7 @@ export function ProjectChat({
     <section className="card flex min-w-0 flex-col overflow-hidden">
       <div ref={log} className="flex min-h-[440px] flex-col gap-0.5 overflow-y-auto p-4">
         {messages.length === 0 ? (
-          <p className="text-body m-auto max-w-sm text-center text-[13px]">
+          <p className="text-body m-auto max-w-sm text-center text-dense">
             Nothing said yet. This is the place for the decisions that do not
             belong in a task description.
           </p>
@@ -80,14 +80,14 @@ export function ProjectChat({
                 <div className="min-w-0 flex-1">
                   {!grouped && (
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[13px] font-medium">{m.author.name}</span>
-                      <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
+                      <span className="text-dense font-medium">{m.author.name}</span>
+                      <span className="text-micro" style={{ color: "var(--text-faint)" }}>
                         {ago(m.createdAt)}
                       </span>
                     </div>
                   )}
                   <p
-                    className="whitespace-pre-wrap break-words text-[13px]"
+                    className="whitespace-pre-wrap break-words text-dense"
                     style={{ color: "var(--text-muted)" }}
                   >
                     {m.body}
@@ -101,7 +101,7 @@ export function ProjectChat({
 
       <div className="shrink-0 border-t p-3" style={{ borderColor: "var(--border)" }}>
         {error && (
-          <p className="mb-2 text-[12px]" style={{ color: "var(--danger)" }} role="alert">
+          <p className="mb-2 text-micro" style={{ color: "var(--danger)" }} role="alert">
             {error}
           </p>
         )}
@@ -130,7 +130,7 @@ export function ProjectChat({
             </ActionButton>
           </div>
         ) : (
-          <p className="text-body text-[13px]">
+          <p className="text-body text-dense">
             Viewers can read the channel but not post in it.
           </p>
         )}

@@ -24,7 +24,7 @@ export default async function CareerOverviewPage() {
             >
               {r.overall}%
             </p>
-            <p className="text-body mt-2 text-[14px]">
+            <p className="text-body mt-2 text-ui">
               {r.ready
                 ? "You are in good shape to apply."
                 : "A few things would strengthen your case."}
@@ -47,7 +47,7 @@ export default async function CareerOverviewPage() {
             <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {r.gaps.map((g) => (
                 <li key={g}>
-                  <span className="well flex items-center gap-2 px-3 py-2.5 text-[14px]">
+                  <span className="well flex items-center gap-2 px-3 py-2.5 text-ui">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ background: "var(--warning)" }}
@@ -103,7 +103,7 @@ export default async function CareerOverviewPage() {
         </IconTile>
         <div className="min-w-0">
           <p className="eyebrow">The path</p>
-          <p className="text-body mt-2 max-w-[70ch] text-[14px]">
+          <p className="text-body mt-2 max-w-[70ch] text-ui">
             Learn, build, showcase, apply, interview, hired. Your projects already live in this
             workspace, so your portfolio and resume can be built from them rather than from scratch.
             Deploy two projects, publish a portfolio, and get your resume past 70%. The rest is

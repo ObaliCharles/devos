@@ -33,7 +33,7 @@ export function LearningModePanel({
           <Layers size={16} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-medium">Switch path or generate a new one</span>
+          <span className="block text-ui font-medium">Switch path or generate a new one</span>
           <span className="text-meta block">
             {roadmaps.length} {roadmaps.length === 1 ? "path" : "paths"} available
             {other > 0 ? ` · ${other} other` : ""}

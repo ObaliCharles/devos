@@ -162,7 +162,7 @@ function CourseCard({ skill, locked }: { skill: Skill; locked: boolean }) {
         </div>
       </div>
 
-      {skill.why && <p className="text-body mt-2 line-clamp-2 text-[14px]">{skill.why}</p>}
+      {skill.why && <p className="text-body mt-2 line-clamp-2 text-ui">{skill.why}</p>}
 
       <div className="mt-auto flex items-center gap-3 pt-5">
         <ProgressBar
@@ -172,7 +172,7 @@ function CourseCard({ skill, locked }: { skill: Skill; locked: boolean }) {
           tone={complete ? "success" : "primary"}
           label={`${skill.title}: ${done} of ${total} lessons mastered`}
         />
-        <span className="num shrink-0 text-[12px] font-medium" style={{ color: "var(--text-faint)" }}>
+        <span className="num shrink-0 text-micro font-medium" style={{ color: "var(--text-faint)" }}>
           {done}/{total}
         </span>
       </div>

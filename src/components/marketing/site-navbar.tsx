@@ -112,7 +112,7 @@ export function SiteNavbar() {
                     }
                     aria-expanded={openDropdown === item.label}
                     aria-haspopup="menu"
-                    className="row-link flex items-center gap-1 px-3 py-2 text-[14px] font-medium"
+                    className="row-link flex items-center gap-1 px-3 py-2 text-ui font-medium"
                     style={{
                       color: openDropdown === item.label ? "var(--text)" : "var(--text-muted)",
                     }}
@@ -142,7 +142,7 @@ export function SiteNavbar() {
                             role="menuitem"
                             href={sub.href}
                             onClick={closeAll}
-                            className="row-link block px-3 py-2 text-[14px]"
+                            className="row-link block px-3 py-2 text-ui"
                             style={{ color: "var(--text-muted)" }}
                           >
                             {sub.label}
@@ -157,7 +157,7 @@ export function SiteNavbar() {
                   key={item.label}
                   href={item.href!}
                   onClick={closeAll}
-                  className="row-link px-3 py-2 text-[14px] font-medium"
+                  className="row-link px-3 py-2 text-ui font-medium"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {item.label}
@@ -207,7 +207,7 @@ export function SiteNavbar() {
                       setOpenDropdown(openDropdown === item.label ? null : item.label)
                     }
                     aria-expanded={openDropdown === item.label}
-                    className="row-link flex w-full items-center justify-between px-3 py-2.5 text-[14px] font-medium"
+                    className="row-link flex w-full items-center justify-between px-3 py-2.5 text-ui font-medium"
                   >
                     {item.label}
                     <ChevronDown
@@ -228,7 +228,7 @@ export function SiteNavbar() {
                           <Link
                             href={sub.href}
                             onClick={closeAll}
-                            className="row-link block px-3 py-2 text-[14px]"
+                            className="row-link block px-3 py-2 text-ui"
                             style={{ color: "var(--text-muted)" }}
                           >
                             {sub.label}
@@ -243,7 +243,7 @@ export function SiteNavbar() {
                   <Link
                     href={item.href!}
                     onClick={closeAll}
-                    className="row-link block px-3 py-2.5 text-[14px] font-medium"
+                    className="row-link block px-3 py-2.5 text-ui font-medium"
                   >
                     {item.label}
                   </Link>

@@ -74,7 +74,7 @@ export function Thread({
           }}
         />
         {error && (
-          <p className="text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+          <p className="text-dense" style={{ color: "var(--danger)" }} role="alert">
             {error}
           </p>
         )}
@@ -95,8 +95,8 @@ export function Thread({
 
         {replies.length === 0 ? (
           <div className="card p-6 text-center">
-            <p className="text-[14px] font-medium">No replies yet</p>
-            <p className="text-body mt-1 text-[13px]">
+            <p className="text-ui font-medium">No replies yet</p>
+            <p className="text-body mt-1 text-dense">
               {isQuestion ? "Know the answer? It is worth 3 XP." : "Start the conversation."}
             </p>
           </div>
@@ -206,7 +206,7 @@ function Reply({
       <div className="flex items-start gap-3">
         <Avatar author={reply.author} size={32} />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <div className="flex flex-wrap items-center gap-2 text-micro">
             <Link
               href={`/u/${reply.author.id}`}
               className="font-medium hover:underline"
@@ -222,13 +222,13 @@ function Reply({
             )}
           </div>
 
-          <div className="prose-doc mt-2 min-w-0 max-w-full overflow-x-auto text-[14px]">
+          <div className="prose-doc mt-2 min-w-0 max-w-full overflow-x-auto text-ui">
             <Markdown remarkPlugins={[remarkGfm]}>{reply.body}</Markdown>
           </div>
 
           <div className="mt-2.5 flex items-center gap-1">
             <button
-              className="flex items-center gap-1.5 rounded-[var(--radius-pill)] px-2 py-1 text-[12px]"
+              className="flex items-center gap-1.5 rounded-[var(--radius-pill)] px-2 py-1 text-micro"
               aria-pressed={reacted}
               aria-label={reacted ? "Remove reaction" : "React to this reply"}
               style={{ color: reacted ? "var(--danger)" : "var(--text-faint)" }}
@@ -244,7 +244,7 @@ function Reply({
 
             {onReply && (
               <button
-                className="rounded-[var(--radius-pill)] px-2 py-1 text-[12px]"
+                className="rounded-[var(--radius-pill)] px-2 py-1 text-micro"
                 style={{ color: "var(--text-faint)" }}
                 onClick={onReply}
               >

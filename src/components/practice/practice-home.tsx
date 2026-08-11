@@ -85,7 +85,7 @@ export function PracticeHome({
           <section className="card p-4">
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="eyebrow">This week</h2>
-              <span className="num text-[13px]">
+              <span className="num text-dense">
                 <b>{week.solved}</b>
                 <span style={{ color: "var(--text-faint)" }}> / {week.goal} solved</span>
               </span>
@@ -106,7 +106,7 @@ export function PracticeHome({
                     }}
                   />
                   <span
-                    className="text-[11px]"
+                    className="text-micro"
                     style={{ color: d.isToday ? "var(--text)" : "var(--text-faint)" }}
                   >
                     {d.label}
@@ -135,14 +135,14 @@ export function PracticeHome({
                         href={`/practice?tag=&status=all&q=${encodeURIComponent(c.key)}`}
                         className="row-link flex items-center gap-3 px-4 py-2.5"
                       >
-                        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+                        <span className="min-w-0 flex-1 truncate text-dense font-medium">
                           {c.label}
                         </span>
                         <span className="progress progress-sm w-24 shrink-0">
                           <span className="progress-bar" style={{ width: `${pct}%` }} />
                         </span>
                         <span
-                          className="num w-14 shrink-0 text-right text-[12px]"
+                          className="num w-14 shrink-0 text-right text-micro"
                           style={{ color: "var(--text-faint)" }}
                         >
                           {c.solved}/{c.total}
@@ -163,7 +163,7 @@ export function PracticeHome({
               <h2 className="eyebrow">Activity</h2>
               {streak > 0 && (
                 <span
-                  className="num flex items-center gap-1 text-[12px]"
+                  className="num flex items-center gap-1 text-micro"
                   style={{ color: "var(--warning)" }}
                 >
                   <Flame size={11} /> {streak}
@@ -181,7 +181,7 @@ export function PracticeHome({
               Recent submissions
             </h2>
             {attempts.length === 0 ? (
-              <p className="text-body p-4 text-[13px]">Nothing submitted yet.</p>
+              <p className="text-body p-4 text-dense">Nothing submitted yet.</p>
             ) : (
               <ul>
                 {attempts.map((a, i) => (
@@ -199,8 +199,8 @@ export function PracticeHome({
                       ) : (
                         <X size={13} className="shrink-0" style={{ color: "var(--danger)" }} />
                       )}
-                      <span className="min-w-0 flex-1 truncate text-[13px]">{a.title}</span>
-                      <span className="num shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                      <span className="min-w-0 flex-1 truncate text-dense">{a.title}</span>
+                      <span className="num shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
                         {a.testsPassed}/{a.testsTotal}
                       </span>
                     </Link>
@@ -233,7 +233,7 @@ function Teaser({
     <section className="card flex flex-col gap-3 p-4">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="eyebrow">{eyebrow}</h2>
-        <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+        <span className="text-micro" style={{ color: "var(--text-faint)" }}>
           {note}
         </span>
       </div>
@@ -247,7 +247,7 @@ function Teaser({
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-semibold">{challenge.title}</p>
           <p
-            className="mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[12px]"
+            className="mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-micro"
             style={{ color: "var(--text-faint)" }}
           >
             <span className="capitalize" style={{ color: colour }}>

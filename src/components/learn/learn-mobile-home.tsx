@@ -126,7 +126,7 @@ export function LearnMobileHome({
           get you back into the lesson, so it says what the page is and stops. */}
       <header className="rise">
         <h1 className="text-[24px] font-bold leading-tight tracking-[-0.03em]">Learn</h1>
-        <p className="text-body mt-1 text-[14px]">Pick up where you left off.</p>
+        <p className="text-body mt-1 text-ui">Pick up where you left off.</p>
       </header>
 
       {/* =================================================== Continue learning */}
@@ -145,13 +145,13 @@ export function LearnMobileHome({
                 </span>
               )}
               <span className="min-w-0 flex-1">
-                <span className="block text-[12px] font-semibold" style={{ color: "var(--primary)" }}>
+                <span className="block text-micro font-semibold" style={{ color: "var(--primary)" }}>
                   Continue learning
                 </span>
                 <span className="mt-0.5 block truncate text-[16px] font-bold tracking-[-0.02em]">
                   {next.skillTitle}
                 </span>
-                <span className="text-meta mt-0.5 block truncate text-[12px]">
+                <span className="text-meta mt-0.5 block truncate text-micro">
                   {next.lessonTitle}
                 </span>
               </span>
@@ -161,14 +161,14 @@ export function LearnMobileHome({
               <span className="progress flex-1">
                 <span className="progress-bar" style={{ width: `${next.skillPct}%` }} />
               </span>
-              <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+              <span className="num text-micro font-medium" style={{ color: "var(--text-muted)" }}>
                 {next.skillPct}%
               </span>
             </span>
 
             <span className="mt-3 flex items-center justify-between gap-3">
               <span
-                className="flex items-center gap-1.5 text-[12px]"
+                className="flex items-center gap-1.5 text-micro"
                 style={{ color: "var(--text-faint)" }}
               >
                 <Clock size={12} /> {fmtDuration(next.minutesLeft)} left
@@ -181,8 +181,8 @@ export function LearnMobileHome({
           </Link>
         ) : (
           <div className="card p-4">
-            <p className="text-[14px] font-medium">Nothing in progress</p>
-            <p className="text-body mt-1 text-[14px]">
+            <p className="text-ui font-medium">Nothing in progress</p>
+            <p className="text-body mt-1 text-ui">
               Follow a path and your next lesson opens from here.
             </p>
             <Link href="/learning/browse" className="btn btn-primary btn-sm mt-3">
@@ -202,13 +202,13 @@ export function LearnMobileHome({
             <h2 className="text-[16px] font-bold tracking-[-0.02em]">Today&apos;s goal</h2>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-0.5 text-[12px] font-medium"
+              className="inline-flex items-center gap-0.5 text-micro font-medium"
               style={{ color: "var(--primary)" }}
             >
               View all <ChevronRight size={13} />
             </Link>
           </div>
-          <p className="text-meta mt-0.5 text-[12px]">Keep the momentum going.</p>
+          <p className="text-meta mt-0.5 text-micro">Keep the momentum going.</p>
 
           <div className="mt-3.5 grid grid-cols-3">
             <Goal
@@ -243,7 +243,7 @@ export function LearnMobileHome({
               <h2 className="text-[16px] font-bold tracking-[-0.02em]">Your learning path</h2>
               <Link
                 href="/learning/roadmap"
-                className="inline-flex items-center gap-0.5 text-[12px] font-medium"
+                className="inline-flex items-center gap-0.5 text-micro font-medium"
                 style={{ color: "var(--primary)" }}
               >
                 Full path <ChevronRight size={13} />
@@ -251,10 +251,10 @@ export function LearnMobileHome({
             </div>
 
             <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-[14px] font-semibold" style={{ color: "var(--primary)" }}>
+              <span className="text-ui font-semibold" style={{ color: "var(--primary)" }}>
                 {path.title}
               </span>
-              <span className="text-meta num text-[12px]">{path.pct}% completed</span>
+              <span className="text-meta num text-micro">{path.pct}% completed</span>
             </p>
 
             {/* The rail scrolls rather than wraps: a sequence that breaks to a
@@ -283,15 +283,15 @@ export function LearnMobileHome({
                 <Target size={18} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold" style={{ color: "var(--primary)" }}>
+                <p className="text-micro font-semibold" style={{ color: "var(--primary)" }}>
                   Your next step
                 </p>
-                <p className="mt-1 text-[14px] leading-snug">
+                <p className="mt-1 text-ui leading-snug">
                   You&apos;re <strong className="font-semibold">{next.lessonsLeft}</strong>{" "}
                   {next.lessonsLeft === 1 ? "lesson" : "lessons"} from finishing{" "}
                   <strong className="font-semibold">{next.skillTitle}</strong>.
                 </p>
-                <p className="text-meta mt-1 text-[12px]">
+                <p className="text-meta mt-1 text-micro">
                   Estimated time: {fmtDuration(next.minutesLeft)}.
                 </p>
               </div>
@@ -320,15 +320,15 @@ export function LearnMobileHome({
                     </span>
                     <span className="badge">{r.active ? "Active" : "Roadmap"}</span>
                   </span>
-                  <span className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug">
+                  <span className="mt-2.5 line-clamp-2 text-ui font-semibold leading-snug">
                     {r.title}
                   </span>
-                  <span className="text-meta num mt-1 text-[12px]">{r.lessons} lessons</span>
+                  <span className="text-meta num mt-1 text-micro">{r.lessons} lessons</span>
                   <span className="mt-auto flex items-center gap-2 pt-3">
                     <span className="progress progress-sm flex-1">
                       <span className="progress-bar" style={{ width: `${r.pct}%` }} />
                     </span>
-                    <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                       {r.pct}%
                     </span>
                   </span>
@@ -354,11 +354,11 @@ export function LearnMobileHome({
                       <ContentIcon name={p.icon} size={16} />
                     </span>
                   )}
-                  <span className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug">
+                  <span className="mt-2.5 line-clamp-2 text-ui font-semibold leading-snug">
                     {p.title}
                   </span>
                   <span
-                    className="mt-1 text-[12px]"
+                    className="mt-1 text-micro"
                     style={{
                       color: p.pct === null ? "var(--text-faint)" : "var(--primary)",
                     }}
@@ -370,7 +370,7 @@ export function LearnMobileHome({
                       <span className="progress progress-sm flex-1">
                         <span className="progress-bar" style={{ width: `${p.pct}%` }} />
                       </span>
-                      <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                      <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                         {p.pct}%
                       </span>
                     </span>
@@ -399,16 +399,16 @@ export function LearnMobileHome({
                     <ContentIcon name={c.icon} size={16} />
                   </span>
                 )}
-                <span className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug">
+                <span className="mt-2.5 line-clamp-2 text-ui font-semibold leading-snug">
                   {c.title}
                 </span>
-                <span className="text-meta mt-1 text-[12px]">{c.level}</span>
+                <span className="text-meta mt-1 text-micro">{c.level}</span>
                 {c.pct > 0 && (
                   <span className="mt-auto flex items-center gap-2 pt-3">
                     <span className="progress progress-sm flex-1">
                       <span className="progress-bar" style={{ width: `${c.pct}%` }} />
                     </span>
-                    <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                       {c.pct}%
                     </span>
                   </span>
@@ -436,10 +436,10 @@ export function LearnMobileHome({
                   <span className={`icon-tile ${c.earned ? "icon-tile-primary" : ""}`}>
                     <ContentIcon name={c.icon} size={16} />
                   </span>
-                  <span className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug">
+                  <span className="mt-2.5 line-clamp-2 text-ui font-semibold leading-snug">
                     {c.title}
                   </span>
-                  <span className="text-meta mt-1 text-[12px]">{c.provider}</span>
+                  <span className="text-meta mt-1 text-micro">{c.provider}</span>
                   <span className="mt-auto pt-3">
                     {c.earned ? (
                       <span className="badge badge-primary">
@@ -466,7 +466,7 @@ export function LearnMobileHome({
             <h2 className="text-[16px] font-bold tracking-[-0.02em]">Your progress</h2>
             <Link
               href="/analytics"
-              className="inline-flex items-center gap-0.5 text-[12px] font-medium"
+              className="inline-flex items-center gap-0.5 text-micro font-medium"
               style={{ color: "var(--primary)" }}
             >
               Details <ChevronRight size={13} />
@@ -477,7 +477,7 @@ export function LearnMobileHome({
             <div className="progress progress-lg flex-1">
               <div className="progress-bar" style={{ width: `${progress.completedPct}%` }} />
             </div>
-            <span className="num text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+            <span className="num text-micro font-medium" style={{ color: "var(--text-muted)" }}>
               {progress.completedPct}%
             </span>
           </div>
@@ -509,8 +509,8 @@ export function LearnMobileHome({
               <Trophy size={15} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[14px] font-medium">Achievements</span>
-              <span className="text-meta block text-[12px]">
+              <span className="block text-ui font-medium">Achievements</span>
+              <span className="text-meta block text-micro">
                 {progress.badgesEarned} of {progress.badgesTotal} earned
               </span>
             </span>
@@ -528,8 +528,8 @@ export function LearnMobileHome({
             <AiMark size={18} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[14px] font-semibold">Ask the AI mentor</span>
-            <span className="text-meta mt-0.5 block text-[12px]">
+            <span className="block text-ui font-semibold">Ask the AI mentor</span>
+            <span className="text-meta mt-0.5 block text-micro">
               It can see your lessons, notes and projects.
             </span>
           </span>
@@ -544,8 +544,8 @@ export function LearnMobileHome({
             <Dumbbell size={18} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[14px] font-semibold">Challenges</span>
-            <span className="text-meta mt-0.5 block text-[12px]">
+            <span className="block text-ui font-semibold">Challenges</span>
+            <span className="text-meta mt-0.5 block text-micro">
               Solve problems against real tests and earn XP.
             </span>
           </span>
@@ -560,8 +560,8 @@ export function LearnMobileHome({
             <FolderGit2 size={18} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[14px] font-semibold">Browse everything</span>
-            <span className="text-meta mt-0.5 block text-[12px]">
+            <span className="block text-ui font-semibold">Browse everything</span>
+            <span className="text-meta mt-0.5 block text-micro">
               Roadmaps, courses, projects and certifications.
             </span>
           </span>
@@ -580,7 +580,7 @@ function RailHeader({ title, href }: { title: string; href: string }) {
       <h2 className="text-[18px] font-bold tracking-[-0.02em]">{title}</h2>
       <Link
         href={href}
-        className="inline-flex items-center gap-0.5 text-[12px] font-medium"
+        className="inline-flex items-center gap-0.5 text-micro font-medium"
         style={{ color: "var(--primary)" }}
       >
         See all <ChevronRight size={13} />
@@ -610,7 +610,7 @@ function Stat({
       <span className="icon-tile">{icon}</span>
       <span className="min-w-0">
         <span className="num block text-[15px] font-semibold leading-none">{value}</span>
-        <span className="text-meta mt-1 block truncate text-[12px]">{label}</span>
+        <span className="text-meta mt-1 block truncate text-micro">{label}</span>
       </span>
     </div>
   );
@@ -638,8 +638,8 @@ function Goal({
         {icon}
       </span>
       <p className="num mt-2 text-[18px] font-semibold leading-none">{value}</p>
-      <p className="mt-1 truncate text-[12px] font-medium">{label}</p>
-      <p className="truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
+      <p className="mt-1 truncate text-micro font-medium">{label}</p>
+      <p className="truncate text-micro" style={{ color: "var(--text-faint)" }}>
         {meta}
       </p>
     </div>

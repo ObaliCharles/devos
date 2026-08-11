@@ -231,7 +231,7 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
         <h3 className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: "var(--primary)" }}>
           AI Curriculum Builder
         </h3>
-        <p className="text-meta mt-1 text-[12px]">
+        <p className="text-meta mt-1 text-micro">
           Your personalised learning path, powered by AI.
         </p>
 
@@ -338,19 +338,39 @@ export function CurriculumBuilder({ configured }: { configured: boolean }) {
 
           {!configured && (
             <p
-              className="rounded-[var(--radius-tile)] p-2.5 text-[12px]"
+              className="rounded-[var(--radius-tile)] p-2.5 text-micro"
               style={{ background: "var(--warning-faint)", color: "var(--warning)" }}
             >
               Add ANTHROPIC_API_KEY or GROQ_API_KEY to .env.local to generate a real path.
             </p>
           )}
+          {/* A failure here used to render as the raw server string in red, which
+              tells a learner nothing they can act on and quietly implies they
+              have lost something. Three things instead: what happened, what it
+              cost them, and what to do — with the technical detail kept as
+              secondary text for whoever can actually use it.
+
+              The reassurance is load-bearing and it is true: generation writes
+              nothing until its final `saving` stage, and even then it creates a
+              *new* roadmap rather than editing the active one. A path that
+              already exists cannot be damaged by a generation that failed. */}
           {error && (
-            <p
-              className="rounded-[var(--radius-tile)] p-2.5 text-[12px]"
-              style={{ background: "var(--danger-faint)", color: "var(--danger)" }}
+            <div
+              className="flex flex-col gap-1.5 rounded-[var(--radius-tile)] p-3"
+              style={{ background: "var(--danger-faint)" }}
+              role="alert"
             >
-              {error}
-            </p>
+              <p className="text-dense font-medium" style={{ color: "var(--danger)" }}>
+                We couldn&apos;t finish building your curriculum
+              </p>
+              <p className="text-micro" style={{ color: "var(--text-muted)" }}>
+                Your existing path is untouched — nothing was saved or changed. Generating again
+                usually works, and takes about a minute.
+              </p>
+              <p className="text-micro" style={{ color: "var(--text-faint)" }}>
+                {error}
+              </p>
+            </div>
           )}
 
           {running ? (
@@ -420,7 +440,7 @@ function Preview({
       <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
         <p className="eyebrow eyebrow-accent">Your journey preview</p>
         <h3 className="mt-1.5 text-[22px] font-bold tracking-[-0.02em]">Become {role}</h3>
-        <p className="text-meta mt-1 text-[14px]">
+        <p className="text-meta mt-1 text-ui">
           About {shape.hours} hours of study. Estimated completion:{" "}
           <strong className="font-semibold" style={{ color: "var(--text)" }}>
             {completionLabel(months)}
@@ -435,7 +455,7 @@ function Preview({
             <span className="icon-tile">{s.icon}</span>
             <span className="min-w-0">
               <span className="num block text-[16px] font-semibold leading-none">{s.value}</span>
-              <span className="text-meta mt-1 block truncate text-[12px]">{s.label}</span>
+              <span className="text-meta mt-1 block truncate text-micro">{s.label}</span>
             </span>
           </div>
         ))}
@@ -447,7 +467,7 @@ function Preview({
           {Array.from({ length: shape.phases }).map((_, i) => (
             <li key={i} className="flex flex-1 items-center">
               <span
-                className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-[12px] font-medium"
+                className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full text-micro font-medium"
                 style={{
                   background: i === 0 ? "var(--primary)" : "var(--surface-3)",
                   color: i === 0 ? "var(--primary-ink)" : "var(--text-faint)",
@@ -467,7 +487,7 @@ function Preview({
             </span>
           </li>
         </ol>
-        <p className="text-meta mt-3 text-[12px]">
+        <p className="text-meta mt-3 text-micro">
           {shape.phases} phases, fundamentals through to a final build. Nothing is saved until the
           path is generated.
         </p>
@@ -545,23 +565,23 @@ function Progress({ run, shape }: { run: Run; shape: ReturnType<typeof planShape
                 ) : active ? (
                   <Loader2 size={12} className="animate-spin" />
                 ) : (
-                  <span className="num text-[12px]">{i + 1}</span>
+                  <span className="num text-micro">{i + 1}</span>
                 )}
               </span>
               <span className="min-w-0 flex-1">
                 <span
-                  className="block text-[14px] font-medium"
+                  className="block text-ui font-medium"
                   style={{ color: active || done ? "var(--text)" : "var(--text-faint)" }}
                 >
                   {s.label}
                 </span>
                 {active && s.key === "writing" && run.total > 0 && (
-                  <span className="text-meta block truncate text-[12px]">
+                  <span className="text-meta block truncate text-micro">
                     {run.done} of {run.total} skills · {run.skill}
                   </span>
                 )}
                 {active && s.key === "outlining" && run.outlineLessons > 0 && (
-                  <span className="text-meta block text-[12px]">
+                  <span className="text-meta block text-micro">
                     {run.outlineLessons} lessons planned
                   </span>
                 )}
@@ -574,7 +594,7 @@ function Progress({ run, shape }: { run: Run; shape: ReturnType<typeof planShape
             is grounded — a claim the UI would otherwise just be making. */}
         {run.sources.length > 0 && (
           <div className="well mt-1 p-3.5">
-            <p className="flex items-center gap-1.5 text-[12px] font-semibold">
+            <p className="flex items-center gap-1.5 text-micro font-semibold">
               <Globe size={12} style={{ color: "var(--primary)" }} />
               Grounded in {run.sources.length} real sources
             </p>
@@ -585,7 +605,7 @@ function Progress({ run, shape }: { run: Run; shape: ReturnType<typeof planShape
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-start gap-1.5 text-[12px]"
+                    className="flex items-start gap-1.5 text-micro"
                     style={{ color: "var(--text-muted)" }}
                   >
                     <ExternalLink size={11} className="mt-[3px] shrink-0" />
@@ -602,11 +622,11 @@ function Progress({ run, shape }: { run: Run; shape: ReturnType<typeof planShape
           </div>
         )}
 
-        <p className="text-meta mt-1 text-[12px]">
+        <p className="text-meta mt-1 text-micro">
           This takes a minute or two — it writes every lesson, not just the titles. Keep this tab
           open; you can leave the page once it lands on your roadmap.
         </p>
-        <p className="text-meta text-[12px]">
+        <p className="text-meta text-micro">
           Target: {shape.lessons} lessons across {shape.phases} phases.
         </p>
       </div>
@@ -629,7 +649,7 @@ function YesNo({
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-[14px] font-medium">{label}</span>
+      <span className="text-ui font-medium">{label}</span>
       <div className="flex gap-1">
         {[true, false].map((v) => (
           <button

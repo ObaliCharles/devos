@@ -54,7 +54,7 @@ export function TeamPanel({
   return (
     <div className="flex flex-col gap-5">
       {error && (
-        <p className="card p-3 text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+        <p className="card p-3 text-dense" style={{ color: "var(--danger)" }} role="alert">
           {error}
         </p>
       )}
@@ -74,10 +74,10 @@ export function TeamPanel({
               >
                 <Avatar author={p} size={32} />
                 <div className="min-w-0 flex-1">
-                  <Link href={`/u/${p.username}`} className="text-[14px] font-medium hover:underline">
+                  <Link href={`/u/${p.username}`} className="text-ui font-medium hover:underline">
                     {p.name}
                   </Link>
-                  <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <p className="text-micro" style={{ color: "var(--text-faint)" }}>
                     {p.direction === "request" ? "asked to join" : "invited"} as {p.role}
                     {p.message && ` — ${p.message}`}
                   </p>
@@ -130,10 +130,10 @@ export function TeamPanel({
             >
               <Avatar author={m} size={32} />
               <div className="min-w-0 flex-1">
-                <Link href={`/u/${m.username}`} className="text-[14px] font-medium hover:underline">
+                <Link href={`/u/${m.username}`} className="text-ui font-medium hover:underline">
                   {m.name}
                 </Link>
-                <p className="text-[12px] capitalize" style={{ color: "var(--text-faint)" }}>
+                <p className="text-micro capitalize" style={{ color: "var(--text-faint)" }}>
                   {m.role}
                 </p>
               </div>
@@ -141,7 +141,7 @@ export function TeamPanel({
               {canManage && m.role !== "owner" ? (
                 <div className="flex items-center gap-2">
                   <select
-                    className="select h-8 text-[13px]"
+                    className="select h-8 text-dense"
                     value={m.role}
                     aria-label={`Role for ${m.name}`}
                     onChange={async (e) => {
@@ -183,8 +183,8 @@ export function TeamPanel({
         <section className="card flex flex-wrap items-center gap-3 p-4">
           <Globe size={16} style={{ color: "var(--text-faint)" }} />
           <div className="min-w-0 flex-1">
-            <p className="text-[14px] font-medium">Open to contributors</p>
-            <p className="text-meta text-[12px]">
+            <p className="text-ui font-medium">Open to contributors</p>
+            <p className="text-meta text-micro">
               Lists the project in Discover and lets people ask to join.
             </p>
           </div>
@@ -275,26 +275,26 @@ function Invite({ projectId, onError }: { projectId: string; onError: (m: string
         </select>
       </div>
 
-      <p className="text-meta mt-1.5 text-[12px]">
+      <p className="text-meta mt-1.5 text-micro">
         {ROLES.find((r) => r.key === role)?.hint}
       </p>
 
       {q.trim().length >= 2 && (
         <ul className="mt-3 flex flex-col gap-1">
           {searching && (
-            <li className="text-[13px]" style={{ color: "var(--text-faint)" }}>
+            <li className="text-dense" style={{ color: "var(--text-faint)" }}>
               Searching…
             </li>
           )}
           {!searching && results.length === 0 && (
-            <li className="text-[13px]" style={{ color: "var(--text-faint)" }}>
+            <li className="text-dense" style={{ color: "var(--text-faint)" }}>
               Nobody matches that.
             </li>
           )}
           {results.map((p) => (
             <li key={p.userId} className="flex items-center gap-2.5">
               <Avatar author={p} size={28} />
-              <span className="min-w-0 flex-1 truncate text-[13px]">{p.name}</span>
+              <span className="min-w-0 flex-1 truncate text-dense">{p.name}</span>
               <ActionButton
                 className="btn btn-secondary btn-sm"
                 icon={<UserPlus size={13} />}

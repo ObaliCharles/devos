@@ -162,7 +162,7 @@ export function ChallengeLibrary({
 
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex items-center gap-3">
-            <p className="num text-[13px]" style={{ color: "var(--text-muted)" }}>
+            <p className="num text-dense" style={{ color: "var(--text-muted)" }}>
               {pending ? "Loading…" : `${data.total} ${data.total === 1 ? "challenge" : "challenges"}`}
             </p>
 
@@ -170,7 +170,7 @@ export function ChallengeLibrary({
               <Filter size={14} /> Filters
               {activeCount > 0 && (
                 <span
-                  className="num grid h-4 min-w-4 place-items-center rounded-[var(--radius-pill)] px-1 text-[11px]"
+                  className="num grid h-4 min-w-4 place-items-center rounded-[var(--radius-pill)] px-1 text-micro"
                   style={{ background: "var(--primary)", color: "var(--primary-ink)" }}
                 >
                   {activeCount}
@@ -181,7 +181,7 @@ export function ChallengeLibrary({
             <label className="ml-auto">
               <span className="sr-only">Sort challenges</span>
               <select
-                className="select h-8 text-[13px]"
+                className="select h-8 text-dense"
                 value={params.sort}
                 onChange={(e) => apply({ sort: e.target.value })}
               >
@@ -224,7 +224,7 @@ export function ChallengeLibrary({
               >
                 <ChevronLeft size={14} /> Previous
               </button>
-              <span className="num text-[13px]" style={{ color: "var(--text-faint)" }}>
+              <span className="num text-dense" style={{ color: "var(--text-faint)" }}>
                 Page {params.page} of {pages}
               </span>
               <button
@@ -283,7 +283,7 @@ function Filters({
       <div className="flex items-center justify-between gap-3">
         <h2 className="eyebrow">Filter</h2>
         {activeCount > 0 && (
-          <button className="text-[12px]" style={{ color: "var(--primary)" }} onClick={onReset}>
+          <button className="text-micro" style={{ color: "var(--primary)" }} onClick={onReset}>
             Reset
           </button>
         )}
@@ -415,20 +415,20 @@ function Row({ challenge: c }: { challenge: ChallengeCard }) {
           {c.solved && (
             <CheckCircle2 size={13} className="shrink-0" style={{ color: "var(--success)" }} />
           )}
-          <h3 className="min-w-0 text-[14px] font-medium">{c.title}</h3>
-          <span className="text-[12px] capitalize" style={{ color: colour }}>
+          <h3 className="min-w-0 text-ui font-medium">{c.title}</h3>
+          <span className="text-micro capitalize" style={{ color: colour }}>
             {c.difficulty}
           </span>
         </div>
 
         {c.description && (
-          <p className="mt-1 line-clamp-1 text-[13px]" style={{ color: "var(--text-muted)" }}>
+          <p className="mt-1 line-clamp-1 text-dense" style={{ color: "var(--text-muted)" }}>
             {c.description}
           </p>
         )}
 
         <div
-          className="mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[12px]"
+          className="mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-micro"
           style={{ color: "var(--text-faint)" }}
         >
           <LanguageMarks challenge={c} />
@@ -492,7 +492,7 @@ function LanguageMarks({ challenge }: { challenge: ChallengeCard }) {
           <span
             key={l}
             title={l}
-            className="num grid h-[18px] min-w-[24px] place-items-center rounded-[4px] px-1 text-[10px] font-bold tracking-wide"
+            className="num grid h-[18px] min-w-[24px] place-items-center rounded-[4px] px-1 text-micro font-bold tracking-wide"
             style={{
               color: meta.colour,
               background: `color-mix(in srgb, ${meta.colour} 14%, transparent)`,
@@ -546,7 +546,7 @@ function ProgressCard({ solved, total, accuracy }: LibraryProgress) {
         </svg>
         <span className="num absolute text-[19px] font-bold">{pct}%</span>
       </div>
-      <p className="text-meta text-center text-[12px]">
+      <p className="text-meta text-center text-micro">
         {solved} of {total} solved
         {accuracy > 0 && ` · ${accuracy}% accuracy`}
       </p>
@@ -562,14 +562,14 @@ function DailyBanner({ streak }: { streak: number }) {
       aria-label="Daily challenge"
     >
       <Target size={16} style={{ color: "var(--primary)" }} className="shrink-0" />
-      <span className="min-w-0 flex-1 text-[13px]">
+      <span className="min-w-0 flex-1 text-dense">
         <span className="font-medium">Daily challenge</span>
         <span className="ml-2" style={{ color: "var(--text-faint)" }}>
           {streak > 0 ? "Keep the streak alive." : "Solve one today and start a streak."}
         </span>
       </span>
       {streak > 0 && (
-        <span className="num shrink-0 text-[13px] font-medium" style={{ color: "var(--warning)" }}>
+        <span className="num shrink-0 text-dense font-medium" style={{ color: "var(--warning)" }}>
           {streak}d
         </span>
       )}
@@ -592,8 +592,8 @@ function Empty({
       <span className="icon-tile icon-tile-lg">
         {saved ? <Bookmark size={18} /> : <Dumbbell size={18} />}
       </span>
-      <p className="text-[14px] font-medium">{saved ? "Nothing saved yet" : "No challenges match"}</p>
-      <p className="text-body max-w-sm text-[13px]">
+      <p className="text-ui font-medium">{saved ? "Nothing saved yet" : "No challenges match"}</p>
+      <p className="text-body max-w-sm text-dense">
         {saved
           ? "Bookmark a challenge from its page and it waits for you here."
           : "Loosen a filter, or clear them all and start again."}

@@ -75,7 +75,7 @@ export function GoalsPanel({ goals }: { goals: Record<string, unknown>[] }) {
                   </div>
                   <div className="flex items-center gap-2">
                     {g.metric === "custom" && (
-                      <button className="btn btn-ghost h-8 px-2.5 text-[12px]" onClick={() => run(() => bumpGoalProgress(String(g.id), 1))} disabled={pending}>+1</button>
+                      <button className="btn btn-ghost h-8 px-2.5 text-micro" onClick={() => run(() => bumpGoalProgress(String(g.id), 1))} disabled={pending}>+1</button>
                     )}
                     <span className="text-sm font-semibold tabular-nums" style={{ color: g.achieved ? "var(--success)" : "var(--text)" }}>
                       {value}/{target}

@@ -473,3 +473,105 @@ confirms `role` and `xp` cannot be smuggled through it. Account deletion is the
 honest counterpart to data export: it removes every collection keyed to the
 user and the user row itself, gated behind typing DELETE, and is covered by the
 smoke test end to end (refused without the word, complete with it).
+
+## 025 — A lesson body becomes typed activities, and mastery becomes evidence
+
+**Status:** accepted
+
+Two changes that only make sense together, both additive.
+
+**A lesson is a list of typed activities, not one markdown string.** Prose in a
+`body` column cannot be seen into: the renderer cannot lay it out, the generator
+has no target beyond "write an essay", and nothing a learner does inside a
+lesson can produce a record, because nothing in the document knows it is an
+exercise. `Lesson.sections` holds the structure and `lib/lesson-schema.ts` holds
+the contract. `body` stays required and stays the whole lesson wherever
+`sections` is empty, which is all 92 catalog lessons and every roadmap generated
+before this — the two-field seam is what makes the change need no migration.
+
+**Mongoose stores, Zod validates.** `activities` is a `Mixed` column because it
+is a discriminated union of twenty-odd payload shapes, which Mongoose models
+badly (its discriminators are per-collection, not per-subdocument) and Zod
+models exactly. Defining the union twice, in two languages, is how the two
+definitions drift, so there is one union and every writer — the generator, the
+admin builder, the seed script — parses through it. Readers go through
+`readSections`, which is lenient in the one place leniency is right: it is
+reading documents written by earlier versions of the schema, and one activity
+that no longer parses should cost that activity, not the lesson. Same
+containment argument as the two-pass generator in 018's neighbour.
+
+**The activity type decides what evidence it can produce.** `ACTIVITY_META` maps
+each type to one of eight competency dimensions, or to `null` for the ones that
+demonstrate nothing — reading a paragraph, writing a reflection. That table is
+the join to `lib/competency.ts` and the reason competence can be *derived*
+rather than authored.
+
+**`Evidence` is an append-only log; competence is a query.** Nothing stores "the
+current level" of a skill, because storing a level forces you to decide what
+invalidates it, and the honest answer — forgetting — cannot be observed. So the
+collection stores artefacts (this quiz, that commit, this teach-back, at this
+time, with this much help) and `competencyFrom` derives the judgement at read
+time. Two rules in the weighting carry the product's claim: unverified evidence
+is halved, and a self-report is worth 0.15 against an assessment's 1.0, so no
+amount of ticking boxes reaches mastery. `mastered` additionally requires at
+least one machine-verified artefact; without that clause a diligent clicker
+could self-report their way there and the number would mean nothing.
+
+This does not touch the mastery gate. `GATE_STEPS` answers "did you do the five
+things for this lesson", per-lesson and binary, and is unchanged. Competence
+answers the larger question the gate structurally cannot: across everything you
+have done, can you do this skill.
+
+**The executing activity types are named so they can be gated.**
+`coding_exercise`, `debugging_exercise`, `fill_in_code`, `interactive_example`
+and `assessment` all run learner code, which today means `lib/runner.ts` —
+Node's `vm`, isolation without containment, and per 018 a known RCE path.
+Embedding them in lessons would take that surface from one page to every lesson
+in the product, so `EXECUTING_ACTIVITY_TYPES` is exported for the renderer to
+refuse until the sandbox behind `runner.ts` is a real one. The schema is
+deliberately ready before the runtime is, rather than the other way round.
+
+## 026 — Evidence is written by the grader, never by the client
+
+**Status:** accepted
+
+`lib/evidence.ts` has no `"use server"` directive and is not re-exported from
+the actions barrel, deliberately. Every function in it takes `verified`,
+`strength` and `dimension` and writes them; if any were reachable as a server
+action, a client that can post `{ verified: true, strength: 1 }` in a loop
+reaches mastery without opening a lesson, and the whole competency model becomes
+decorative. The smoke test asserts the exported surface stays clean, because
+this is the kind of property a later refactor breaks silently.
+
+The callers are the four places that have already graded something server-side
+and therefore know the truth about it: `submitQuiz`, `submitCode`,
+`gradeReview`, `setGateStep`. The rule for adding a fifth is the rule the
+mastery gate already follows — if a human asserted the outcome, `verified` is
+false; only a machine's verdict sets it true.
+
+Three consequences worth stating:
+
+**Recording is best-effort.** Evidence is a derived record of something that
+already happened. A failure writing it must not fail the action that triggered
+it, or a bookkeeping error costs the learner the XP and the gate they earned.
+Every recorder runs inside `safely()`.
+
+**Failures are recorded, not just successes.** A quiz at 40% and a submission
+that passes 3 of 12 tests are real facts about what was known that day, and the
+diminishing returns in `competency.ts` are what handle repetition — not
+refusing to write the row. A log of only successes cannot answer "am I actually
+improving".
+
+**`read` and `reviewed` record nothing.** Reading a page demonstrates nothing,
+which is exactly what `ACTIVITY_META` says about `text` and `reflection`; the
+two files agree on purpose. `exercised` does record, as a self-report at 0.15
+weight halved for being unverified — weak evidence rather than none.
+
+### The assist level has no default
+
+`Evidence.assistLevel` is optional with **no default**, and `independenceFrom`
+excludes rows that lack it rather than counting them as unaided. Defaulting it
+to 0 would report every learner as 100% independent from the day this shipped —
+a flattering number produced by measuring nothing, on the one metric the product
+exists to move. Nothing writes it until the hint ladder lands, so `sample` is
+honestly 0 today and callers must check it before drawing anything.

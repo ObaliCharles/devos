@@ -241,7 +241,7 @@ export function PromptInput({
           placeholder={listening ? "Listening…" : placeholder}
           aria-label="Message"
           disabled={listening}
-          className={`block w-full resize-none bg-transparent px-3.5 pb-11 pt-3 text-[14px] leading-relaxed outline-none ${
+          className={`block w-full resize-none bg-transparent px-3.5 pb-11 pt-3 text-ui leading-relaxed outline-none ${
             scrolled ? "overflow-y-auto" : "overflow-y-hidden"
           }`}
           style={{ minHeight: MIN_H, color: "var(--text)" }}
@@ -329,7 +329,7 @@ export function PromptInput({
                   role="option"
                   aria-selected={m.id === model}
                   disabled={!m.available}
-                  className={`row-link flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[13px] ${
+                  className={`row-link flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-dense ${
                     m.id === model ? "nav-row-on" : ""
                   }`}
                   style={!m.available ? { opacity: 0.45 } : undefined}
@@ -343,7 +343,7 @@ export function PromptInput({
                   {/* An unconfigured provider is listed but disabled, so it is
                       obvious the option exists and why it cannot be picked. */}
                   {!m.available && (
-                    <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="text-micro" style={{ color: "var(--text-faint)" }}>
                       no key
                     </span>
                   )}
@@ -385,7 +385,7 @@ function Thumb({
         <img src={attachment.url} alt="" className="h-full w-full object-cover" draggable={false} />
       ) : (
         <span
-          className="num px-1 text-center text-[10px] leading-tight"
+          className="num px-1 text-center text-micro leading-tight"
           style={{ color: "var(--text-faint)" }}
         >
           {attachment.name.split(".").pop()?.slice(0, 4).toUpperCase() ?? "FILE"}

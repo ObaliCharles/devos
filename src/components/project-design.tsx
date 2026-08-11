@@ -185,7 +185,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                   />
                 )}
                 {(["required", "unique", "indexed"] as const).map((flag) => (
-                  <label key={flag} className="flex items-center gap-1 text-[12px]" style={{ color: "var(--text-muted)" }}>
+                  <label key={flag} className="flex items-center gap-1 text-micro" style={{ color: "var(--text-muted)" }}>
                     <input
                       type="checkbox"
                       checked={Boolean(field[flag])}
@@ -211,7 +211,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
           </div>
 
           <button
-            className="btn btn-ghost mt-2 h-8 px-2.5 text-[12px]"
+            className="btn btn-ghost mt-2 h-8 px-2.5 text-micro"
             onClick={() => setEditing({ ...editing, fields: [...editing.fields, { name: "", type: "String" }] })}
           >
             <Plus size={13} /> Field
@@ -221,7 +221,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
             <label className="eyebrow" htmlFor="s-indexes">Indexes (one per line, e.g. `user: 1, day: -1`)</label>
             <textarea
               id="s-indexes"
-              className="input mt-2 min-h-[60px] resize-y font-[family-name:var(--font-mono)] text-[12px]"
+              className="input mt-2 min-h-[60px] resize-y font-[family-name:var(--font-mono)] text-micro"
               value={editing.indexes.join("\n")}
               onChange={(e) => setEditing({ ...editing, indexes: e.target.value.split("\n") })}
             />
@@ -254,12 +254,12 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                   <div className="min-w-0">
                     <h3 className="font-semibold">{s.name}</h3>
                     {s.description && (
-                      <p className="mt-0.5 text-[14px]" style={{ color: "var(--text-muted)" }}>{s.description}</p>
+                      <p className="mt-0.5 text-ui" style={{ color: "var(--text-muted)" }}>{s.description}</p>
                     )}
                   </div>
                   <div className="flex shrink-0 gap-1">
                     <button
-                      className="btn btn-ghost h-8 px-2.5 text-[12px]"
+                      className="btn btn-ghost h-8 px-2.5 text-micro"
                       onClick={() => setEditing(s)}
                     >
                       Edit
@@ -275,7 +275,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                   </div>
                 </div>
 
-                <table className="mt-4 w-full text-[14px]">
+                <table className="mt-4 w-full text-ui">
                   <tbody>
                     {s.fields.map((f) => (
                       <tr key={f.name} style={{ borderTop: "1px solid var(--border)" }}>
@@ -283,7 +283,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                         <td className="py-1.5 pr-3" style={{ color: "var(--text-muted)" }}>
                           {f.type}{f.ref ? ` → ${f.ref}` : ""}
                         </td>
-                        <td className="py-1.5 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                        <td className="py-1.5 text-micro" style={{ color: "var(--text-faint)" }}>
                           {[f.required && "required", f.unique && "unique", f.indexed && "index"]
                             .filter(Boolean)
                             .join(" · ")}
@@ -294,7 +294,7 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                 </table>
 
                 <button
-                  className="mt-3 flex items-center gap-1.5 text-[12px]"
+                  className="mt-3 flex items-center gap-1.5 text-micro"
                   style={{ color: "var(--text-muted)" }}
                   onClick={() => setExpanded(isOpen ? null : s.id)}
                 >
@@ -305,13 +305,13 @@ export function SchemaDesigner({ projectId, schemas }: { projectId: string; sche
                 {isOpen && (
                   <div className="relative mt-2">
                     <pre
-                      className="overflow-x-auto rounded-[var(--radius-control)] border p-3 text-[12px]"
+                      className="overflow-x-auto rounded-[var(--radius-control)] border p-3 text-micro"
                       style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
                     >
                       <code>{code}</code>
                     </pre>
                     <button
-                      className="btn btn-ghost absolute right-2 top-2 h-7 px-2 text-[12px]"
+                      className="btn btn-ghost absolute right-2 top-2 h-7 px-2 text-micro"
                       onClick={() => {
                         navigator.clipboard?.writeText(code);
                         setCopied(s.id);
@@ -432,14 +432,14 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
 
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <textarea
-              className="input min-h-[100px] resize-y font-[family-name:var(--font-mono)] text-[12px]"
+              className="input min-h-[100px] resize-y font-[family-name:var(--font-mono)] text-micro"
               value={editing.requestBody ?? ""}
               onChange={(e) => setEditing({ ...editing, requestBody: e.target.value })}
               placeholder='Request body&#10;{ "title": "string" }'
               aria-label="Request body"
             />
             <textarea
-              className="input min-h-[100px] resize-y font-[family-name:var(--font-mono)] text-[12px]"
+              className="input min-h-[100px] resize-y font-[family-name:var(--font-mono)] text-micro"
               value={editing.responseBody ?? ""}
               onChange={(e) => setEditing({ ...editing, responseBody: e.target.value })}
               placeholder='Response&#10;{ "id": "string" }'
@@ -447,7 +447,7 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
             />
           </div>
 
-          <label className="mt-3 flex items-center gap-2 text-[14px]" style={{ color: "var(--text-muted)" }}>
+          <label className="mt-3 flex items-center gap-2 text-ui" style={{ color: "var(--text-muted)" }}>
             <input
               type="checkbox"
               checked={editing.auth}
@@ -479,22 +479,22 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
                     <li key={e.id} className="card p-4">
                       <div className="flex flex-wrap items-center gap-3">
                         <span
-                          className="w-16 shrink-0 font-[family-name:var(--font-mono)] text-[12px] font-semibold"
+                          className="w-16 shrink-0 font-[family-name:var(--font-mono)] text-micro font-semibold"
                           style={{ color: METHOD_COLOR[e.method] }}
                         >
                           {e.method}
                         </span>
                         <button
-                          className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)] text-[14px]"
+                          className="min-w-0 flex-1 truncate text-left font-[family-name:var(--font-mono)] text-ui"
                           onClick={() => setExpanded(expanded === e.id ? null : e.id)}
                         >
                           {e.path}
                         </button>
                         {!e.auth && (
-                          <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>public</span>
+                          <span className="text-micro" style={{ color: "var(--text-faint)" }}>public</span>
                         )}
                         <button
-                          className="btn btn-ghost h-7 px-2 text-[12px]"
+                          className="btn btn-ghost h-7 px-2 text-micro"
                           onClick={() => setEditing(e)}
                         >
                           Edit
@@ -510,7 +510,7 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
                       </div>
 
                       {e.description && (
-                        <p className="mt-1.5 text-[14px]" style={{ color: "var(--text-muted)" }}>{e.description}</p>
+                        <p className="mt-1.5 text-ui" style={{ color: "var(--text-muted)" }}>{e.description}</p>
                       )}
 
                       {expanded === e.id && (e.requestBody || e.responseBody) && (
@@ -520,7 +520,7 @@ export function ApiDesigner({ projectId, endpoints }: { projectId: string; endpo
                               <div key={label as string}>
                                 <p className="eyebrow mb-1">{label as string}</p>
                                 <pre
-                                  className="overflow-x-auto rounded-[var(--radius-control)] border p-2.5 text-[12px]"
+                                  className="overflow-x-auto rounded-[var(--radius-control)] border p-2.5 text-micro"
                                   style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}
                                 >
                                   <code>{body as string}</code>

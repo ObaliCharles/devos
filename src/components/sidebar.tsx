@@ -208,7 +208,7 @@ export function Sidebar({
           >
             <span className="relative shrink-0">
               <span
-                className="grid h-[30px] w-[30px] place-items-center rounded-full text-[12px] font-medium"
+                className="grid h-[30px] w-[30px] place-items-center rounded-full text-micro font-medium"
                 style={{
                   background: "var(--surface-3)",
                   border: "1px solid var(--border)",
@@ -228,8 +228,8 @@ export function Sidebar({
             {!collapsed && (
               <>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-medium">{user.name}</span>
-                  <span className="block truncate text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="block truncate text-ui font-medium">{user.name}</span>
+                  <span className="block truncate text-micro" style={{ color: "var(--text-faint)" }}>
                     {user.plan}
                   </span>
                 </span>
@@ -247,10 +247,10 @@ export function Sidebar({
               aria-label={`Level ${user.level}, ${user.title}. ${user.into} of ${user.need} XP`}
             >
               <span className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+                <span className="truncate text-micro font-medium" style={{ color: "var(--text-muted)" }}>
                   Level {user.level} · {user.title}
                 </span>
-                <span className="num shrink-0 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                <span className="num shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
                   {user.into} / {user.need}
                 </span>
               </span>

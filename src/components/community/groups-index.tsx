@@ -65,7 +65,7 @@ export function GroupsIndex({ groups }: { groups: GroupCard[] }) {
             onChange={(e) => setTopic(e.target.value)}
           />
           {error && (
-            <p className="text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+            <p className="text-dense" style={{ color: "var(--danger)" }} role="alert">
               {error}
             </p>
           )}
@@ -88,8 +88,8 @@ export function GroupsIndex({ groups }: { groups: GroupCard[] }) {
           <span className="icon-tile icon-tile-lg">
             <Users size={18} />
           </span>
-          <p className="text-[14px] font-medium">No groups yet</p>
-          <p className="text-body max-w-sm text-[13px]">
+          <p className="text-ui font-medium">No groups yet</p>
+          <p className="text-body max-w-sm text-dense">
             A group is the home for one topic — its own feed, its own members.
           </p>
         </div>
@@ -102,14 +102,14 @@ export function GroupsIndex({ groups }: { groups: GroupCard[] }) {
                   <Users size={18} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-semibold">{g.name}</span>
-                  <span className="text-meta mt-0.5 block line-clamp-2 text-[12px]">
+                  <span className="block truncate text-ui font-semibold">{g.name}</span>
+                  <span className="text-meta mt-0.5 block line-clamp-2 text-micro">
                     {g.description || "No description yet."}
                   </span>
                 </span>
               </Link>
               <div className="mt-auto flex items-center gap-2">
-                <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                   {g.memberCount} {g.memberCount === 1 ? "member" : "members"} · {g.postCount}{" "}
                   {g.postCount === 1 ? "post" : "posts"}
                 </span>

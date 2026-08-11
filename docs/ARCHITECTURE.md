@@ -38,14 +38,51 @@ webhook, a CLI. Note that in `DECISIONS.md` when it happens.
 Roadmap
   └── Phase          (order, locked when previous phase < 80% mastered)
         └── Skill    (difficulty, estimated hours)
-              └── Lesson   (body markdown, objectives, exercise, quiz[])
+              └── Lesson   (body markdown, objectives, exercise, quiz[],
+                            learningObjectives[], sections[])
 
 User (clerkId, xp, currentStreak, longestStreak, lastActiveDay)
   ├── LessonProgress  (state, gate{5 booleans}, quizScore)  — unique per user+lesson
   ├── Note            (title, body, optional lesson)
   ├── Review          (dueAt, step, lapses)                 — unique per user+lesson
+  ├── Evidence        (skill, dimension, source, strength,  — append-only
+  │                    verified, assistLevel)
   └── StudySession    (day "YYYY-MM-DD", minutes, counts)   — unique per user+day
 ```
+
+### The structured lesson
+
+`sections[]` is the typed replacement for a markdown `body`: a list of sections,
+each holding a list of activities discriminated on `type`. **Mongoose stores,
+Zod validates** — the activity payload column is `Mixed`, and `lib/lesson-schema.ts`
+is the contract every writer parses through. Both fields coexist on purpose:
+`sections` empty means "render `body`", which is every lesson authored before
+this and needs no migration. Read stored sections with `readSections()`, never
+by casting — documents written by earlier schema versions are expected, and it
+drops what no longer parses rather than losing the lesson.
+
+`learningObjectives[]` is the measurable form of `objectives: [String]`, which
+stays and is still read. `checkObjective()` rejects "Understand APIs"
+deterministically, with no model call, the way the ATS scorer grades a resume.
+
+### Evidence, and why competence is a query
+
+`Evidence` is append-only. Nothing anywhere stores "the current mastery level"
+of a skill — `lib/competency.ts` derives it from the rows at read time, pure and
+with no database, the way `lib/srs.ts` holds the review ladder. Unverified
+evidence is halved and a self-report is worth a fraction of an assessment, so
+ticking boxes cannot reach mastery; `mastered` also requires at least one
+machine-verified artefact.
+
+This is **separate from the mastery gate below**, which is unchanged. The gate
+asks "did you do the five things for this lesson". Evidence asks "across
+everything you have done, can you do this skill". Do not merge them — the first
+is per-lesson and binary and has to stay that way.
+
+Writes go through `lib/evidence.ts`, which is **not a server action and must not
+become one** — see DECISIONS 026. Reads go through `lib/queries/competency.ts`;
+use `getCompetencyMap()` for more than one skill rather than looping
+`getSkillCompetency()`, for the same reason `getRoadmap()` is four queries.
 
 Content collections are **global**. There is no owner on Roadmap, because there
 is one user. That is the single biggest thing to change before this is
@@ -121,7 +158,9 @@ largest documents in the database and the tree does not need them.
 |---|---|
 | A new page in the app shell | `src/app/(app)/<name>/page.tsx` — layout, sidebar and auth come free |
 | A new collection | `src/lib/models/index.ts`, with its indexes |
+| A lesson activity type | `ACTIVITY_TYPES` + `ACTIVITY_META` + the union in `src/lib/lesson-schema.ts` — all three, or the renderer has a case it cannot handle |
 | A mutation | `src/lib/actions.ts`, as a server action |
+| A new source of skill evidence | a recorder in `src/lib/evidence.ts`, called from the action that grades it — never exposed to the client |
 | A read used by more than one page | `src/lib/queries.ts` |
 | A sidebar entry | `NAV` in `src/components/sidebar.tsx` |
 | A colour, radius or font | `src/app/globals.css` — never a hex value in a component |

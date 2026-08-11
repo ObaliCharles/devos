@@ -108,7 +108,7 @@ export function ResumeEditor({ resume, projectTitles }: { resume: ResumeData; pr
                 <input className="input" value={item.end ?? ""} onChange={(e) => update({ end: e.target.value })} placeholder="End (or Present)" aria-label="End" />
               </div>
               <textarea
-                className="input mt-2 min-h-[70px] resize-y text-[14px]"
+                className="input mt-2 min-h-[70px] resize-y text-ui"
                 value={(item.bullets ?? []).join("\n")}
                 onChange={(e) => update({ bullets: e.target.value.split("\n") })}
                 placeholder={"One achievement per line. Start with a verb, include a number.\nBuilt X, reducing Y by 30%."}
@@ -144,20 +144,20 @@ export function ResumeEditor({ resume, projectTitles }: { resume: ResumeData; pr
           {ats && ats.findings.length > 0 && (
             <ul className="mt-3 flex flex-col gap-1.5">
               {ats.findings.slice(0, 5).map((finding) => (
-                <li key={finding} className="text-[12px]" style={{ color: "var(--text-muted)" }}>• {finding}</li>
+                <li key={finding} className="text-micro" style={{ color: "var(--text-muted)" }}>• {finding}</li>
               ))}
             </ul>
           )}
           {ats && ats.strengths.length > 0 && (
             <ul className="mt-2 flex flex-col gap-1">
               {ats.strengths.map((s) => (
-                <li key={s} className="flex items-center gap-1 text-[12px]" style={{ color: "var(--success)" }}>
+                <li key={s} className="flex items-center gap-1 text-micro" style={{ color: "var(--success)" }}>
                   <Check size={11} /> {s}
                 </li>
               ))}
             </ul>
           )}
-          <p className="mt-3 text-[12px]" style={{ color: "var(--text-faint)" }}>Recomputed on every save.</p>
+          <p className="mt-3 text-micro" style={{ color: "var(--text-faint)" }}>Recomputed on every save.</p>
         </div>
 
         <div className="card p-4">
@@ -198,7 +198,7 @@ function ListSection<T>({
     <section className="card p-5">
       <div className="flex items-center justify-between">
         <p className="eyebrow">{title}</p>
-        <button className="btn btn-ghost h-8 px-3 text-[14px]" onClick={() => onChange([...items, { ...blank }])}>
+        <button className="btn btn-ghost h-8 px-3 text-ui" onClick={() => onChange([...items, { ...blank }])}>
           <Plus size={14} /> Add
         </button>
       </div>
@@ -207,7 +207,7 @@ function ListSection<T>({
           <div key={i} className="rounded-[var(--radius-card)] border p-3" style={{ borderColor: "var(--border)" }}>
             {render(item, (patch) => onChange(items.map((x, j) => (j === i ? { ...x, ...patch } : x))))}
             <button
-              className="mt-2 flex items-center gap-1 text-[12px]"
+              className="mt-2 flex items-center gap-1 text-micro"
               style={{ color: "var(--danger)" }}
               onClick={() => onChange(items.filter((_, j) => j !== i))}
             >

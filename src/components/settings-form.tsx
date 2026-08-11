@@ -89,7 +89,7 @@ export function SettingsForm({
           <div>
             <label className="text-sm font-medium" htmlFor="s-email">Email</label>
             <input id="s-email" className="input mt-1.5" value={email} disabled style={{ opacity: 0.6 }} />
-            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>Managed by your sign-in provider.</p>
+            <p className="mt-1 text-micro" style={{ color: "var(--text-faint)" }}>Managed by your sign-in provider.</p>
           </div>
         </div>
       </section>
@@ -103,7 +103,7 @@ export function SettingsForm({
           {pub.username && (
             <Link
               href={`/u/${pub.username}`}
-              className="flex items-center gap-1.5 text-[13px]"
+              className="flex items-center gap-1.5 text-dense"
               style={{ color: "var(--primary)" }}
             >
               View profile <ExternalLink size={12} />
@@ -121,7 +121,7 @@ export function SettingsForm({
               value={pub.username}
               onChange={(e) => setPub({ ...pub, username: e.target.value })}
             />
-            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <p className="mt-1 text-micro" style={{ color: "var(--text-faint)" }}>
               Your profile lives at /u/{pub.username || "your-handle"}.
             </p>
           </div>
@@ -175,14 +175,14 @@ export function SettingsForm({
               value={pub.skills}
               onChange={(e) => setPub({ ...pub, skills: e.target.value })}
             />
-            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <p className="mt-1 text-micro" style={{ color: "var(--text-faint)" }}>
               Comma separated, up to twelve.
             </p>
           </div>
         </div>
 
         {error && (
-          <p className="mt-3 text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+          <p className="mt-3 text-dense" style={{ color: "var(--danger)" }} role="alert">
             {error}
           </p>
         )}
@@ -225,7 +225,7 @@ export function SettingsForm({
               value={p.weeklyChallengeGoal}
               onChange={(e) => setP({ ...p, weeklyChallengeGoal: Number(e.target.value) })}
             />
-            <p className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <p className="mt-1 text-micro" style={{ color: "var(--text-faint)" }}>
               The target the week strip on Practice measures against.
             </p>
           </div>

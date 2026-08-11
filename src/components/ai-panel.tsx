@@ -44,7 +44,7 @@ export function AiPanel({ lessonId }: { lessonId: string }) {
         {PRESETS.map((p) => (
           <button
             key={p.mode}
-            className="btn btn-ghost h-8 px-3 text-[14px]"
+            className="btn btn-ghost h-8 px-3 text-ui"
             disabled={loading}
             onClick={() => ask(p.mode)}
           >
@@ -82,7 +82,7 @@ export function AiPanel({ lessonId }: { lessonId: string }) {
 
       {answer && (
         <div
-          className="prose-doc rounded-[var(--radius-control)] border p-4 text-[14px]"
+          className="prose-doc rounded-[var(--radius-control)] border p-4 text-ui"
           style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
         >
           <Markdown remarkPlugins={[remarkGfm]}>{answer}</Markdown>

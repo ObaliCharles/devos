@@ -23,7 +23,7 @@ export default async function ChallengePage({ params }: { params: Promise<{ chal
       {/* A trail rather than a back button: the workspace is two levels deep,
           and from here you are as likely to want the catalogue as the page you
           arrived from. */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px]">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-dense">
         {TRAIL.map((crumb) => (
           <span key={crumb.href} className="flex items-center gap-1.5">
             <Link

@@ -10,6 +10,7 @@
  *                    SupportTicket, AuditLog, FeatureFlag
  *   content.ts       Roadmap → Phase → Skill → Topic → Lesson,
  *                    LessonProgress, Review, GATE_STEPS
+ *   evidence.ts      Evidence, SkillCompetency
  *   knowledge.ts     Note, NoteVersion, Backlink, NoteCollection, Snippet,
  *                    Flashcard
  *   projects.ts      Project, Task, Milestone, Bug, Deployment, ApiEndpoint,
@@ -36,6 +37,7 @@
 
 export * from "./core";
 export * from "./content";
+export * from "./evidence";
 export * from "./knowledge";
 export * from "./projects";
 export * from "./practice";

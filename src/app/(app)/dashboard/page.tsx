@@ -226,7 +226,7 @@ export default async function DashboardPage() {
       {/* ============================================================ Greeting */}
       <header className="rise">
         <Greeting name={user.name?.split(" ")[0] || "Developer"} className="title-page" />
-        <p className="text-body mt-1 text-[14px]">
+        <p className="text-body mt-1 text-ui">
           {next
             ? `You're ${lessonTotal - lessonIndex + 1} lesson${lessonTotal - lessonIndex + 1 === 1 ? "" : "s"} from finishing ${next.skill.title}.`
             : "Nothing queued. Pick a path to get started."}
@@ -287,25 +287,25 @@ export default async function DashboardPage() {
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-medium leading-snug">{next.skill.title}</p>
-                  <p className="text-meta mt-1 truncate text-[12px]">
+                  <p className="truncate text-ui font-medium leading-snug">{next.skill.title}</p>
+                  <p className="text-meta mt-1 truncate text-micro">
                     {next.phase.title} · Lesson {lessonIndex} of {lessonTotal}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-4 truncate text-[14px] font-medium">{next.lesson.title}</p>
+              <p className="mt-4 truncate text-ui font-medium">{next.lesson.title}</p>
 
               <div className="mt-2.5 flex items-center gap-2.5">
                 <div className="progress flex-1">
                   <div className="progress-bar" style={{ width: `${skillPct}%` }} />
                 </div>
-                <span className="num text-[12px]" style={{ color: "var(--text-faint)" }}>
+                <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
                   {skillPct}%
                 </span>
               </div>
 
-              <p className="text-meta mt-2 flex items-center gap-1.5 text-[12px]">
+              <p className="text-meta mt-2 flex items-center gap-1.5 text-micro">
                 <Clock size={12} /> {next.lesson.estimatedMinutes} min left
               </p>
 
@@ -322,7 +322,7 @@ export default async function DashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-body mt-4 text-[14px]">
+            <p className="text-body mt-4 text-ui">
               No lesson queued. Pick a path from Learning to start.
             </p>
           )}
@@ -332,7 +332,7 @@ export default async function DashboardPage() {
         <div className="card flex flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="title-card">Your learning path</h2>
-            <Link href="/learning/roadmap" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+            <Link href="/learning/roadmap" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
               View full path
             </Link>
           </div>
@@ -349,7 +349,7 @@ export default async function DashboardPage() {
                 {phases.map((p) => (
                   <li key={p.id} className="relative flex items-start gap-3">
                     <span
-                      className="relative z-[1] grid h-[23px] w-[23px] shrink-0 place-items-center rounded-full text-[12px] font-medium"
+                      className="relative z-[1] grid h-[23px] w-[23px] shrink-0 place-items-center rounded-full text-micro font-medium"
                       style={{
                         background: p.pct === 100 ? "var(--primary)" : "var(--surface-3)",
                         border: `1px solid ${p.current ? "var(--primary)" : "var(--border)"}`,
@@ -359,8 +359,8 @@ export default async function DashboardPage() {
                       {p.pct === 100 ? <Check size={11} strokeWidth={3} /> : p.locked ? <Lock size={10} /> : null}
                     </span>
                     <span className="min-w-0 flex-1 pt-0.5">
-                      <span className="block truncate text-[14px] font-medium">{p.title}</span>
-                      <span className="text-meta block text-[12px]">
+                      <span className="block truncate text-ui font-medium">{p.title}</span>
+                      <span className="text-meta block text-micro">
                         {p.pct === 100
                           ? "Completed"
                           : p.locked
@@ -384,12 +384,12 @@ export default async function DashboardPage() {
                   style={{ background: "var(--surface-2)", border: "1px solid var(--border-faint)" }}
                 >
                   <p className="group-heading">Next up</p>
-                  <p className="mt-2 text-[14px] font-medium leading-snug">{next.lesson.title}</p>
-                  <p className="text-meta mt-1.5 flex items-center gap-1.5 text-[12px]">
+                  <p className="mt-2 text-ui font-medium leading-snug">{next.lesson.title}</p>
+                  <p className="text-meta mt-1.5 flex items-center gap-1.5 text-micro">
                     <Clock size={11} /> {next.lesson.estimatedMinutes} min
                   </p>
                   {next.lesson.gateDone > 0 && (
-                    <p className="text-meta mt-2 text-[12px]">
+                    <p className="text-meta mt-2 text-micro">
                       {next.lesson.gateDone} of 5 requirements done
                     </p>
                   )}
@@ -397,7 +397,7 @@ export default async function DashboardPage() {
               )}
             </div>
           ) : (
-            <p className="text-body mt-4 text-[14px]">No path loaded yet.</p>
+            <p className="text-body mt-4 text-ui">No path loaded yet.</p>
           )}
         </div>
 
@@ -405,7 +405,7 @@ export default async function DashboardPage() {
         <div className="card flex flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="title-card">Today</h2>
-            <span className="text-meta num text-[12px]">{today.length} left</span>
+            <span className="text-meta num text-micro">{today.length} left</span>
           </div>
 
           <ul className="-mx-1.5 mt-3 flex flex-col">
@@ -418,10 +418,10 @@ export default async function DashboardPage() {
                     aria-hidden
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[14px] font-medium">{t.label}</span>
-                    <span className="text-meta block truncate text-[12px]">{t.sub}</span>
+                    <span className="block truncate text-ui font-medium">{t.label}</span>
+                    <span className="text-meta block truncate text-micro">{t.sub}</span>
                   </span>
-                  <span className="num shrink-0 pt-0.5 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="num shrink-0 pt-0.5 text-micro" style={{ color: "var(--text-faint)" }}>
                     {t.meta}
                   </span>
                 </Link>
@@ -437,11 +437,11 @@ export default async function DashboardPage() {
                 const isToday = i === week.length - 1;
                 return (
                   <li key={d.day} className="flex flex-1 flex-col items-center gap-1.5">
-                    <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+                    <span className="text-micro" style={{ color: "var(--text-faint)" }}>
                       {DAY_LABELS[i]}
                     </span>
                     <span
-                      className="num grid h-[26px] w-full place-items-center rounded-[7px] text-[12px]"
+                      className="num grid h-[26px] w-full place-items-center rounded-[7px] text-micro"
                       style={{
                         background: isToday ? "var(--primary)" : "transparent",
                         color: isToday ? "var(--primary-ink)" : "var(--text-muted)",
@@ -468,7 +468,7 @@ export default async function DashboardPage() {
         <div className="card flex flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="title-card">Learning analytics</h2>
-            <Link href="/analytics" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+            <Link href="/analytics" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
               Details
             </Link>
           </div>
@@ -511,7 +511,7 @@ export default async function DashboardPage() {
               );
             })}
           </div>
-          <div className="mt-2 flex justify-between text-[12px]" style={{ color: "var(--text-faint)" }}>
+          <div className="mt-2 flex justify-between text-micro" style={{ color: "var(--text-faint)" }}>
             <span>{strip[0]?.day.slice(5)}</span>
             <span>Today</span>
           </div>
@@ -524,7 +524,7 @@ export default async function DashboardPage() {
               <h2 className="title-card">Achievements</h2>
               <Link
                 href="/analytics/achievements"
-                className="text-[12px] font-medium"
+                className="text-micro font-medium"
                 style={{ color: "var(--primary)" }}
               >
                 View all
@@ -547,15 +547,15 @@ export default async function DashboardPage() {
                     >
                       <Award size={15} />
                     </span>
-                    <span className="line-clamp-2 text-[12px] font-medium leading-tight">{b.title}</span>
-                    <span className="text-meta text-[12px]">
+                    <span className="line-clamp-2 text-micro font-medium leading-tight">{b.title}</span>
+                    <span className="text-meta text-micro">
                       {b.unlocked ? "Earned" : `${b.progress}%`}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-body mt-3 text-[14px]">
+              <p className="text-body mt-3 text-ui">
                 Master a lesson to earn your first one.
               </p>
             )}
@@ -566,7 +566,7 @@ export default async function DashboardPage() {
               <h2 className="title-card">Latest certificate</h2>
               <Link
                 href="/career/certificates"
-                className="text-[12px] font-medium"
+                className="text-micro font-medium"
                 style={{ color: "var(--primary)" }}
               >
                 View all
@@ -581,8 +581,8 @@ export default async function DashboardPage() {
                   <Award size={18} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-medium">{latestCert.name}</p>
-                  <p className="text-meta truncate text-[12px]">
+                  <p className="truncate text-ui font-medium">{latestCert.name}</p>
+                  <p className="text-meta truncate text-micro">
                     {latestCert.issuedAt ? `Issued ${formatDate(latestCert.issuedAt)}` : latestCert.provider}
                   </p>
                 </div>
@@ -599,7 +599,7 @@ export default async function DashboardPage() {
                 )}
               </div>
             ) : (
-              <p className="text-body mt-3 text-[14px]">
+              <p className="text-body mt-3 text-ui">
                 Finish a course and one is issued with a code anyone can verify.
               </p>
             )}
@@ -611,7 +611,7 @@ export default async function DashboardPage() {
       <section className="section-stack">
         <div className="flex items-center justify-between gap-3">
           <h2 className="title-section">Recommended for you</h2>
-          <Link href="/learning" className="text-[12px] font-medium" style={{ color: "var(--primary)" }}>
+          <Link href="/learning" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
             View all
           </Link>
         </div>
@@ -620,9 +620,9 @@ export default async function DashboardPage() {
             <li key={c.slug}>
               <Link href={`/learning/course/${c.slug}`} className="card card-link flex h-full flex-col p-5">
                 <TechLogo name={c.tech!} mode="plate" size={34} />
-                <p className="mt-3 text-[14px] font-medium leading-snug">{c.title}</p>
-                <p className="text-meta mt-1 line-clamp-2 text-[12px]">{c.tagline}</p>
-                <p className="text-meta mt-auto flex items-center gap-2 pt-3 text-[12px]">
+                <p className="mt-3 text-ui font-medium leading-snug">{c.title}</p>
+                <p className="text-meta mt-1 line-clamp-2 text-micro">{c.tagline}</p>
+                <p className="text-meta mt-auto flex items-center gap-2 pt-3 text-micro">
                   <span>{c.level}</span>
                   <span aria-hidden>·</span>
                   <span>{c.hours}h</span>
@@ -681,13 +681,13 @@ function Signal({
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[12px]" style={{ color: "var(--text-muted)" }}>
+        <p className="text-micro" style={{ color: "var(--text-muted)" }}>
           {label}
         </p>
         <p className="mt-1 flex items-baseline gap-1">
           <span className="num text-[22px] font-semibold leading-none">{value}</span>
           {unit && (
-            <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <span className="text-micro" style={{ color: "var(--text-faint)" }}>
               {unit}
             </span>
           )}
@@ -697,7 +697,7 @@ function Signal({
             <div className="progress-bar" style={{ width: `${bar}%` }} />
           </div>
         )}
-        <p className="text-meta mt-1.5 truncate text-[12px]">{foot}</p>
+        <p className="text-meta mt-1.5 truncate text-micro">{foot}</p>
       </div>
     </div>
   );
@@ -709,12 +709,12 @@ function Mini({ value, unit, label }: { value: number | string; unit?: string; l
       <p className="flex items-baseline gap-1">
         <span className="num text-[16px] font-semibold leading-none">{value}</span>
         {unit && (
-          <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+          <span className="text-micro" style={{ color: "var(--text-faint)" }}>
             {unit}
           </span>
         )}
       </p>
-      <p className="text-meta mt-1 truncate text-[12px]">{label}</p>
+      <p className="text-meta mt-1 truncate text-micro">{label}</p>
     </div>
   );
 }

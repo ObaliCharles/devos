@@ -62,7 +62,7 @@ export default async function CourseLessonPage({
       {/* Back to the course overview */}
       <Link
         href={`/learning/course/${course.slug}`}
-        className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[14px] font-medium"
+        className="-ml-1 inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-ui font-medium"
         style={{ color: "var(--text-muted)" }}
       >
         <ArrowLeft size={15} /> {course.title}
@@ -70,7 +70,7 @@ export default async function CourseLessonPage({
 
       {/* Course progress rail — reflects lessons actually completed */}
       <div>
-        <div className="flex items-center justify-between text-[12px]">
+        <div className="flex items-center justify-between text-micro">
           <span style={{ color: "var(--text-muted)" }}>
             Lesson {idx + 1} of {all.length} · {completed.length} completed
           </span>
@@ -92,7 +92,7 @@ export default async function CourseLessonPage({
           {current.moduleTitle} · {current.minutes} min
         </p>
         <h1 className="title-page mt-2">{current.title}</h1>
-        <p className="text-body mt-2 flex items-start gap-2 text-[14px]">
+        <p className="text-body mt-2 flex items-start gap-2 text-ui">
           <span className="shrink-0" style={{ color: "var(--primary)" }} aria-hidden>
             →
           </span>
@@ -111,7 +111,7 @@ export default async function CourseLessonPage({
       <section className="card p-5">
         <p className="eyebrow">Didn&apos;t fully click?</p>
         <h2 className="title-card mt-1.5">Ask the AI tutor</h2>
-        <p className="text-body mt-1 text-[14px]">
+        <p className="text-body mt-1 text-ui">
           Get a worked example, another angle, or the mistakes to avoid — it has this lesson&apos;s
           context.
         </p>
@@ -161,8 +161,8 @@ export default async function CourseLessonPage({
           >
             <ArrowLeft size={16} style={{ color: "var(--text-faint)" }} className="shrink-0" />
             <span className="min-w-0">
-              <span className="text-meta block text-[12px]">Previous</span>
-              <span className="block truncate text-[14px] font-medium">{prev.title}</span>
+              <span className="text-meta block text-micro">Previous</span>
+              <span className="block truncate text-ui font-medium">{prev.title}</span>
             </span>
           </Link>
         ) : (
@@ -174,8 +174,8 @@ export default async function CourseLessonPage({
             className="card card-link flex items-center justify-end gap-3 p-4 text-right"
           >
             <span className="min-w-0">
-              <span className="text-meta block text-[12px]">Next</span>
-              <span className="block truncate text-[14px] font-medium">{next.title}</span>
+              <span className="text-meta block text-micro">Next</span>
+              <span className="block truncate text-ui font-medium">{next.title}</span>
             </span>
             <ArrowRight size={16} style={{ color: "var(--primary)" }} className="shrink-0" />
           </Link>
@@ -186,8 +186,8 @@ export default async function CourseLessonPage({
             style={{ background: "var(--success-faint)", borderColor: "var(--success)" }}
           >
             <span className="min-w-0">
-              <span className="text-meta block text-[12px]">Course complete</span>
-              <span className="block truncate text-[14px] font-medium">Back to overview</span>
+              <span className="text-meta block text-micro">Course complete</span>
+              <span className="block truncate text-ui font-medium">Back to overview</span>
             </span>
             <Check size={16} style={{ color: "var(--success)" }} className="shrink-0" />
           </Link>
@@ -219,7 +219,7 @@ export default async function CourseLessonPage({
                     <Link
                       href={`/learning/course/${course.slug}/${l.index + 1}`}
                       aria-current={here ? "page" : undefined}
-                      className="row-link flex items-start gap-2 px-2 py-1.5 text-[12px]"
+                      className="row-link flex items-start gap-2 px-2 py-1.5 text-micro"
                       style={{
                         background: here ? "var(--neutral-faint)" : undefined,
                         color: here ? "var(--text)" : "var(--text-muted)",

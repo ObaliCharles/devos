@@ -18,7 +18,7 @@ export default async function PostPage({ params }: { params: Promise<{ postId: s
 
   return (
     <div className="page-body">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px]">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-dense">
         <Link
           href="/community/discussions"
           className="transition-colors hover:text-[var(--text)]"
@@ -48,8 +48,8 @@ export default async function PostPage({ params }: { params: Promise<{ postId: s
         <div className="flex items-center gap-2.5">
           <Avatar author={post.author} size={32} />
           <div className="min-w-0">
-            <p className="text-[13px] font-medium">{post.author.name}</p>
-            <p className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+            <p className="text-dense font-medium">{post.author.name}</p>
+            <p className="text-micro" style={{ color: "var(--text-faint)" }}>
               {ago(post.createdAt)}
             </p>
           </div>

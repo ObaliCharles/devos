@@ -92,7 +92,7 @@ export function Breadcrumbs() {
 
   return (
     <nav aria-label="Breadcrumb" className="mb-4">
-      <ol className="flex flex-wrap items-center gap-1 text-[12px]">
+      <ol className="flex flex-wrap items-center gap-1 text-micro">
         {trail.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {crumb.last ? (

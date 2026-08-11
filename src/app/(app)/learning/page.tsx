@@ -253,7 +253,7 @@ export default async function LearningPage() {
         <section id="build" className="section-stack scroll-mt-4">
           <div>
             <h2 className="text-[22px] font-bold tracking-[-0.025em]">Build with AI</h2>
-            <p className="text-body mt-1 text-[14px]">
+            <p className="text-body mt-1 text-ui">
               Create a personalised curriculum in minutes.
             </p>
           </div>
@@ -344,8 +344,8 @@ export default async function LearningPage() {
           ))}
           {roadmaps.length === 0 && (
             <div className="card col-span-full p-5 text-center">
-              <p className="text-[14px] font-medium">No paths loaded yet</p>
-              <p className="text-body mt-1 text-[14px]">
+              <p className="text-ui font-medium">No paths loaded yet</p>
+              <p className="text-body mt-1 text-ui">
                 Generate one with the builder below, or run the seed script to load the curated
                 library.
               </p>
@@ -375,8 +375,8 @@ export default async function LearningPage() {
         />
         {challenges.length === 0 ? (
           <div className="card p-5 text-center">
-            <p className="text-[14px] font-medium">No challenges loaded yet</p>
-            <p className="text-body mt-1 text-[14px]">
+            <p className="text-ui font-medium">No challenges loaded yet</p>
+            <p className="text-body mt-1 text-ui">
               Run the seed script to load the practice library.
             </p>
           </div>
@@ -395,7 +395,7 @@ export default async function LearningPage() {
                       {c.solved ? <CheckCircle2 size={18} /> : <Dumbbell size={18} />}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[14px] font-semibold">{c.title}</span>
+                      <span className="block truncate text-ui font-semibold">{c.title}</span>
                       <span className="mt-2 flex flex-wrap items-center gap-1.5">
                         <span
                           className="chip chip-sm capitalize"
@@ -412,7 +412,7 @@ export default async function LearningPage() {
                       </span>
                     </span>
                     <span
-                      className="num flex shrink-0 items-center gap-1 text-[12px]"
+                      className="num flex shrink-0 items-center gap-1 text-micro"
                       style={{ color: "var(--text-faint)" }}
                     >
                       <Zap size={12} style={{ color: "var(--warning)" }} /> {c.xp}
@@ -478,12 +478,12 @@ function SectionTitle({
     <div className="flex items-end justify-between gap-4">
       <div className="min-w-0">
         <h2 className="text-[22px] font-bold tracking-[-0.025em] sm:text-[23px]">{title}</h2>
-        {sub && <p className="text-body mt-1 max-w-[70ch] text-[14px]">{sub}</p>}
+        {sub && <p className="text-body mt-1 max-w-[70ch] text-ui">{sub}</p>}
       </div>
       {href && (
         <Link
           href={href}
-          className="flex shrink-0 items-center gap-1 text-[14px] font-medium"
+          className="flex shrink-0 items-center gap-1 text-ui font-medium"
           style={{ color: "var(--primary)" }}
         >
           {hrefLabel ?? "View all"} <ArrowRight size={14} />
@@ -531,7 +531,7 @@ function ContinueLearning({
 
       {hasPath && (
         <div className="mt-4">
-          <div className="flex items-center justify-between text-[12px]">
+          <div className="flex items-center justify-between text-micro">
             <span style={{ color: "var(--text-muted)" }}>Progress</span>
             <span className="num font-semibold" style={{ color: "var(--text)" }}>
               {pct}%
@@ -549,8 +549,8 @@ function ContinueLearning({
       >
         <Target size={15} style={{ color: "var(--primary)" }} className="shrink-0" />
         <div className="min-w-0">
-          <p className="text-meta text-[12px]">Current mission</p>
-          <p className="truncate text-[14px] font-medium">
+          <p className="text-meta text-micro">Current mission</p>
+          <p className="truncate text-ui font-medium">
             {next ? next.lesson.title : "Choose a roadmap to start"}
           </p>
         </div>
@@ -601,7 +601,7 @@ function Mission({
         <div className="p-5" style={{ background: "var(--surface)" }}>
           <div className="flex items-center justify-between">
             <p className="eyebrow eyebrow-accent">Your Mission</p>
-            <span className="num text-[12px] font-semibold" style={{ color: "var(--primary)" }}>
+            <span className="num text-micro font-semibold" style={{ color: "var(--primary)" }}>
               {pct}%
             </span>
           </div>
@@ -618,12 +618,12 @@ function Mission({
             style={{ borderColor: "var(--warning-faint)", background: "var(--warning-faint)" }}
           >
             <p
-              className="text-[12px] font-semibold uppercase tracking-wide"
+              className="text-micro font-semibold uppercase tracking-wide"
               style={{ color: "var(--warning)" }}
             >
               Current mission
             </p>
-            <p className="mt-1 flex items-center justify-between gap-2 text-[14px] font-semibold">
+            <p className="mt-1 flex items-center justify-between gap-2 text-ui font-semibold">
               <span className="truncate">{next ? next.lesson.title : "Pick a roadmap"}</span>
               <ChevronRight size={15} style={{ color: "var(--text-faint)" }} className="shrink-0" />
             </p>
@@ -633,19 +633,19 @@ function Mission({
 
         {/* Rewards + upcoming */}
         <div className="p-5" style={{ background: "var(--surface)" }}>
-          <p className="text-meta text-[12px] font-semibold uppercase tracking-wide">Rewards</p>
+          <p className="text-meta text-micro font-semibold uppercase tracking-wide">Rewards</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
             <Reward icon={<Zap size={15} />} label="+50 XP" />
             <Reward icon={<Award size={15} />} label="Badge" />
             <Reward icon={<Trophy size={15} />} label="Progress" />
           </div>
 
-          <p className="text-meta mt-5 text-[12px] font-semibold uppercase tracking-wide">
+          <p className="text-meta mt-5 text-micro font-semibold uppercase tracking-wide">
             Up next
           </p>
           <ul className="mt-2.5 flex flex-col gap-2">
             {(upcoming.length > 0 ? upcoming : ["You're all caught up on this skill"]).map((u) => (
-              <li key={u} className="flex items-center gap-2.5 text-[14px]">
+              <li key={u} className="flex items-center gap-2.5 text-ui">
                 <span
                   className="h-3.5 w-3.5 shrink-0 rounded-full border-2"
                   style={{ borderColor: "var(--border-strong)" }}
@@ -666,8 +666,8 @@ function Mission({
           >
             <Flame size={20} style={{ color: "var(--warning)" }} />
             <div>
-              <p className="text-meta text-[12px]">Learning streak</p>
-              <p className="num text-[14px] font-bold" style={{ color: "var(--warning)" }}>
+              <p className="text-meta text-micro">Learning streak</p>
+              <p className="num text-ui font-bold" style={{ color: "var(--warning)" }}>
                 {streak} {streak === 1 ? "Day" : "Days"}
               </p>
             </div>
@@ -678,8 +678,8 @@ function Mission({
           >
             <CheckCircle2 size={18} style={{ color: "var(--success)" }} />
             <div>
-              <p className="text-meta text-[12px]">Lessons remaining</p>
-              <p className="num text-[14px] font-semibold">{Math.max(0, remaining)} to master</p>
+              <p className="text-meta text-micro">Lessons remaining</p>
+              <p className="num text-ui font-semibold">{Math.max(0, remaining)} to master</p>
             </div>
           </div>
           <Link href={href} className="btn btn-primary btn-block mt-auto">
@@ -703,7 +703,7 @@ function Reward({
       style={{ background: "var(--surface-2)" }}
     >
       <span className="icon-tile h-9 w-9">{icon}</span>
-      <span className="text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+      <span className="text-micro font-medium" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
     </div>
@@ -745,7 +745,7 @@ function LearningActivity({
             className="grid h-full min-h-[120px] place-items-center rounded-[var(--radius-tile)] text-center"
             style={{ background: "var(--surface-2)" }}
           >
-            <p className="text-body text-[14px]">Your activity graph fills in as you study.</p>
+            <p className="text-body text-ui">Your activity graph fills in as you study.</p>
           </div>
         )}
       </div>
@@ -757,8 +757,8 @@ function LearningActivity({
         >
           <Flame size={17} style={{ color: "var(--warning)" }} />
           <div>
-            <p className="num text-[14px] font-bold">{streak}</p>
-            <p className="text-meta text-[12px]">Day streak</p>
+            <p className="num text-ui font-bold">{streak}</p>
+            <p className="text-meta text-micro">Day streak</p>
           </div>
         </div>
         <div
@@ -767,8 +767,8 @@ function LearningActivity({
         >
           <Zap size={17} style={{ color: "var(--primary)" }} />
           <div>
-            <p className="num text-[14px] font-bold">{xp.toLocaleString()}</p>
-            <p className="text-meta text-[12px]">Total XP</p>
+            <p className="num text-ui font-bold">{xp.toLocaleString()}</p>
+            <p className="text-meta text-micro">Total XP</p>
           </div>
         </div>
       </div>
@@ -800,7 +800,7 @@ function Achievements({ achievements }: { achievements: EarnedAchievement[] }) {
         <h3 className="title-card">Achievements</h3>
         <Link
           href="/analytics/achievements"
-          className="text-[14px] font-medium"
+          className="text-ui font-medium"
           style={{ color: "var(--primary)" }}
         >
           View all
@@ -832,8 +832,8 @@ function Achievements({ achievements }: { achievements: EarnedAchievement[] }) {
               <ContentIcon name={TIER_ICON[a.tier] ?? "Star"} size={18} />
             </span>
             <div>
-              <p className="text-[12px] font-semibold leading-tight">{a.title}</p>
-              <p className="text-meta text-[12px]">
+              <p className="text-micro font-semibold leading-tight">{a.title}</p>
+              <p className="text-meta text-micro">
                 {a.unlocked ? "Earned" : `${a.progress}%`}
               </p>
             </div>
@@ -873,7 +873,7 @@ function ProgressOverview({
         <Ring value={completedPct} label="" size={92} tone="var(--primary)" />
         <ul className="flex flex-1 flex-col gap-2.5">
           {segments.map((s) => (
-            <li key={s.label} className="flex items-center justify-between text-[14px]">
+            <li key={s.label} className="flex items-center justify-between text-ui">
               <span className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
                 <span style={{ color: "var(--text-muted)" }}>{s.label}</span>
@@ -940,8 +940,8 @@ function Metric({
       style={{ background: "var(--surface-2)" }}
     >
       <span style={{ color: "var(--primary)" }}>{icon}</span>
-      <span className="num text-[14px] font-bold">{value}</span>
-      <span className="text-meta text-[12px]">{label}</span>
+      <span className="num text-ui font-bold">{value}</span>
+      <span className="text-meta text-micro">{label}</span>
     </Link>
   );
 }

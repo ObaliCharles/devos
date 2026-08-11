@@ -24,10 +24,10 @@ export function AuthShell({
         <div className="mb-8 text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2.5 text-[14px] font-semibold tracking-[-0.02em]"
+            className="inline-flex items-center gap-2.5 text-ui font-semibold tracking-[-0.02em]"
           >
             <span
-              className="grid h-[28px] w-[28px] place-items-center rounded-[var(--radius-tile)] text-[14px] font-bold"
+              className="grid h-[28px] w-[28px] place-items-center rounded-[var(--radius-tile)] text-ui font-bold"
               style={{
                 background: "var(--primary)",
                 color: "var(--primary-ink)",
@@ -41,7 +41,7 @@ export function AuthShell({
 
           <p className="eyebrow eyebrow-accent mt-8">{eyebrow}</p>
           <h1 className="mt-2 text-[26px] font-bold tracking-[-0.03em]">{title}</h1>
-          <p className="text-body mx-auto mt-2 max-w-[38ch] text-[14px]">{description}</p>
+          <p className="text-body mx-auto mt-2 max-w-[38ch] text-ui">{description}</p>
         </div>
 
         <div className="flex justify-center">{children}</div>

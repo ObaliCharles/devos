@@ -56,7 +56,7 @@ export function Heatmap({ days }: { days: { day: string; minutes: number }[] }) 
           {DAY_LABELS.map((label, i) => (
             <span
               key={i}
-              className="flex h-[13px] items-center text-[12px] leading-none"
+              className="flex h-[13px] items-center text-micro leading-none"
               style={{ color: "var(--text-faint)" }}
             >
               {label}
@@ -91,7 +91,7 @@ export function Heatmap({ days }: { days: { day: string; minutes: number }[] }) 
       </div>
 
       <div
-        className="mt-3 flex items-center gap-1.5 text-[12px]"
+        className="mt-3 flex items-center gap-1.5 text-micro"
         style={{ color: "var(--text-faint)" }}
       >
         Less

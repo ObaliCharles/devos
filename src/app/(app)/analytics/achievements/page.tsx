@@ -35,13 +35,13 @@ export default async function AchievementsPage() {
             </div>
             <div className="min-w-0">
               <p className="font-medium">{a.title}</p>
-              <p className="text-[12px]" style={{ color: "var(--text-muted)" }}>{a.description}</p>
+              <p className="text-micro" style={{ color: "var(--text-muted)" }}>{a.description}</p>
               {!a.unlocked && (
                 <div className="mt-2 flex items-center gap-2">
                   <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "var(--border)" }}>
                     <div className="h-full rounded-full" style={{ width: `${a.progress}%`, background: TIER_COLOR[a.tier] }} />
                   </div>
-                  <span className="text-[12px] tabular-nums" style={{ color: "var(--text-faint)" }}>{a.value}/{a.threshold}</span>
+                  <span className="text-micro tabular-nums" style={{ color: "var(--text-faint)" }}>{a.value}/{a.threshold}</span>
                 </div>
               )}
             </div>

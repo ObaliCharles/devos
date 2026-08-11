@@ -110,7 +110,7 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
               }}
             >
               <div className="flex items-center justify-between px-1.5 py-1">
-                <h3 className="text-[14px] font-semibold">
+                <h3 className="text-ui font-semibold">
                   {column.label}
                   <span className="ml-2 tabular-nums" style={{ color: "var(--text-faint)" }}>
                     {items.length}
@@ -131,7 +131,7 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
                 {adding === column.key && (
                   <div className="rounded-[var(--radius-card)] border p-2" style={{ borderColor: "var(--primary)" }}>
                     <textarea
-                      className="input min-h-[56px] resize-none text-[14px]"
+                      className="input min-h-[56px] resize-none text-ui"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -143,10 +143,10 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
                       aria-label="New task title"
                     />
                     <div className="mt-2 flex gap-2">
-                      <button className="btn btn-primary h-7 px-2.5 text-[12px]" onClick={() => add(column.key)}>
+                      <button className="btn btn-primary h-7 px-2.5 text-micro" onClick={() => add(column.key)}>
                         Add
                       </button>
-                      <button className="btn btn-ghost h-7 px-2.5 text-[12px]" onClick={() => setAdding(null)}>
+                      <button className="btn btn-ghost h-7 px-2.5 text-micro" onClick={() => setAdding(null)}>
                         Cancel
                       </button>
                     </div>
@@ -167,9 +167,9 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
                       opacity: dragging === task.id ? 0.4 : 1,
                     }}
                   >
-                    <p className="text-[14px] leading-snug">{task.title}</p>
+                    <p className="text-ui leading-snug">{task.title}</p>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px]">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-micro">
                       <span style={{ color: statusColor(task.priority) }}>{task.priority}</span>
                       {task.checklistTotal > 0 && (
                         <span style={{ color: "var(--text-faint)" }}>
@@ -186,7 +186,7 @@ export function Kanban({ projectId, tasks }: { projectId: string; tasks: KanbanT
                 ))}
 
                 {items.length === 0 && adding !== column.key && (
-                  <p className="px-1.5 py-3 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  <p className="px-1.5 py-3 text-micro" style={{ color: "var(--text-faint)" }}>
                     Nothing here
                   </p>
                 )}
@@ -270,7 +270,7 @@ function TaskDialog({
         </div>
 
         <textarea
-          className="input mt-3 min-h-[110px] resize-y text-[14px]"
+          className="input mt-3 min-h-[110px] resize-y text-ui"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What does done look like?"

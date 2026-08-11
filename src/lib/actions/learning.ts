@@ -7,6 +7,7 @@ import { GATE_STEPS, Lesson, LessonProgress, Note, Review, TimeEntry } from "../
 import type { GateKey } from "../models";
 import { addXp, recordActivity, requireUser } from "../user";
 import { grade, nextDue } from "../srs";
+import { evidenceFromExerciseClaim, evidenceFromQuiz, evidenceFromReview } from "../evidence";
 
 const PASS_MARK = 0.8;
 
@@ -89,12 +90,20 @@ export async function setGateStep(lessonId: string, key: GateKey, value: boolean
 
   const { progress } = await progressFor(user._id, lessonId);
 
+  const was = progress.gate[key];
   progress.gate[key] = value;
   // Mastery is not undone by fiddling with a checkbox afterwards.
   if (progress.state !== "mastered") {
     progress.state = progress.gate.exercised ? "practicing" : "learning";
   }
   await progress.save();
+
+  // Only the exercise claim, and only on the transition. `read` and `reviewed`
+  // demonstrate nothing so they record nothing, and writing a row on every
+  // toggle would let one impatient click produce a pile of identical evidence.
+  if (key === "exercised" && value && !was) {
+    await evidenceFromExerciseClaim(user._id, lessonId);
+  }
 
   revalidatePath(`/learning/lesson/${lessonId}`);
 }
@@ -111,6 +120,12 @@ export async function submitQuiz(lessonId: string, correct: number, total: numbe
   progress.gate.quizzed ||= score >= PASS_MARK;
   if (progress.gate.quizzed && progress.state !== "mastered") progress.state = "confident";
   await progress.save();
+
+  // Every graded attempt is an artefact, including the failed ones — the log is
+  // append-only and a failure at 40% is a real fact about what was known that
+  // day. Repetition is handled by the diminishing returns in competency.ts, not
+  // by refusing to write the row.
+  await evidenceFromQuiz(user._id, lessonId, score);
 
   revalidatePath(`/learning/lesson/${lessonId}`);
   // The score reported back is this attempt's, so the result line matches what
@@ -180,6 +195,7 @@ export async function gradeReview(reviewId: string, remembered: boolean) {
   }
   await review.save();
 
+  await evidenceFromReview(user._id, review.lesson, remembered);
   await recordActivity(user._id, { reviewsDone: 1 });
   await addXp(user._id, 15);
 

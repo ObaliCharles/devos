@@ -13,6 +13,7 @@
  */
 
 export * from "./learning";
+export * from "./competency";
 export * from "./knowledge";
 export * from "./projects";
 export * from "./practice";

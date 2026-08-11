@@ -63,7 +63,7 @@ export function Topbar({
         aria-label="Search anything (Command K)"
       >
         <Search size={14} className="shrink-0" style={{ color: "var(--text-faint)" }} />
-        <span className="flex-1 truncate text-[14px]">Search anything…</span>
+        <span className="flex-1 truncate text-ui">Search anything…</span>
         <kbd className="hidden sm:inline-flex">⌘K</kbd>
       </button>
 

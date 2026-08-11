@@ -373,6 +373,95 @@ samp {
     gap: var(--space-4);
   }
 
+  /* ---- Regions that are not objects ----
+
+     Every container in this file until now draws a box: .card, .panel and
+     .well all have a fill and a hairline. That is why pages drifted into walls
+     of rounded rectangles — not carelessness at the call sites, but a missing
+     primitive. There was no way to say "this is a region of the page" without
+     also saying "this is a thing you could pick up".
+
+     A card is an *object*: a project, a lesson, a challenge, a discussion —
+     something with an identity that could be moved, opened or listed. A
+     section is a *part of the page*. Numbers, prose, a settings group and a
+     list of links are all sections; none of them is an object, and boxing them
+     makes the reader parse the boxes instead of the content.
+
+     Separation here is done with space, a rule, and typography. In that order. */
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  /* A major region: air above it, and a hairline only where the space alone is
+     not enough to say "new part of the page". Never both a rule and a box. */
+  .section-major {
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border-faint);
+  }
+  /* The first region under a page header does not need a rule above it — the
+     header already ended. A rule there reads as a stray line. */
+  .page-body > .section-major:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* A tonal band. Runs to the edges of the content column and shifts the
+     surface by one step — the difference between --bg and --bg-elevated is
+     about 2%, which is meant to be felt rather than seen. This is the whole of
+     "sections should transition smoothly": no coloured rectangles, no
+     gradients, one almost-imperceptible change of ground. */
+  .section-band {
+    background: var(--bg-elevated);
+    border-block: 1px solid var(--border-faint);
+    margin-inline: calc(var(--page-pad) * -1);
+    padding: var(--space-8) var(--page-pad);
+  }
+  @media (max-width: 640px) {
+    .section-band {
+      margin-inline: -16px;
+      padding-inline: 16px;
+    }
+  }
+
+  /* ---- Statistics without cards ----
+
+     A number is not an object, so it does not get a box. A run of them is one
+     region divided by hairlines, which is also how it reads: these belong
+     together and are being compared. Four cards side by side say the opposite. */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0;
+  }
+  .stat-row > * {
+    padding: var(--space-4) var(--space-5);
+    border-left: 1px solid var(--border-faint);
+  }
+  .stat-row > *:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+  /* Wrapping onto a second row would leave an orphaned left rule. Below the
+     breakpoint the divider becomes horizontal, which is the honest reading
+     when the items are stacked. */
+  @media (max-width: 640px) {
+    .stat-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-row > * {
+      padding-inline: var(--space-3);
+    }
+    .stat-row > *:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .stat-row > *:nth-child(n + 3) {
+      border-top: 1px solid var(--border-faint);
+    }
+  }
+
   /* A page that fills the viewport instead of growing the document, chat is
      the one case. It sizes itself to exactly the room inside the shell gutter
      (the container adds page-top top and bottom), so the outer <main> never
@@ -387,6 +476,83 @@ samp {
   @media (min-width: 768px) {
     .fills-viewport {
       height: calc(100vh - var(--topbar-h) - var(--page-top) * 2);
+    }
+  }
+
+  /* ============================================================== Bottom nav */
+
+  /* Mobile primary navigation. Only exists below `md`, where the sidebar does
+     not. Sits above content rather than floating over it as a pill: a floating
+     bar hides whatever is underneath, and a list you are reading is exactly the
+     thing you do not want covered.
+
+     `env(safe-area-inset-bottom)` is the home indicator on a modern iPhone.
+     Without it the labels sit under the gesture bar and the last row of every
+     list is unreachable. */
+  .bottom-nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .bottom-nav-item {
+    position: relative; /* anchors the active marker below */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    /* 52px + the label keeps every target above the ~44px a thumb needs. */
+    min-height: 52px;
+    padding: 7px 2px 6px;
+    color: var(--text-faint);
+    transition: color var(--dur-fast) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bottom-nav-item[data-active] {
+    color: var(--primary);
+  }
+  /* Active state is carried by colour and a top marker, not a filled pill:
+     a filled background at this size reads as a button that is stuck down. */
+  .bottom-nav-item[data-active]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    /* Explicitly centred. An absolutely positioned child of a flex container
+       gets its static position from the flex alignment, which is a subtle
+       enough rule to be a bug waiting to happen — pin it. */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+    background: var(--primary);
+  }
+  /* 12px, not 10.5px. The type floor applies here too — shipping a new
+     component below the line that seven older call sites were just raised to
+     would make the rule advisory. At 12px the longest primary label
+     ("Dashboard") is ~62px against a 64px column on a 320px phone, which is
+     tight but fits; that constraint is why the bar is capped at five items. */
+  .bottom-nav-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+
+  /* Clearance, so the bar never covers the end of a page. Applied to the
+     scroll container rather than the body: the shell scrolls <main>, and
+     padding on the body would do nothing at all here. */
+  @media (max-width: 767px) {
+    .has-bottom-nav {
+      padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
     }
   }
 
@@ -1009,11 +1175,47 @@ samp {
     font-weight: 600;
     letter-spacing: -0.014em;
   }
+  /* ---- The interface scale ----
+
+     An audit found 727 raw `text-[Npx]` call sites against 497 uses of the
+     named classes, and the reason is a flaw in the classes rather than
+     carelessness at the call sites: every tier below defines size *and colour
+     and weight together*. There was no way to say "14px at normal colour", so
+     everyone wrote `text-[14px]` and the scale quietly stopped being the
+     system. `.title-heading` and `.text-small` had zero uses between them.
+
+     So the three sizes the interface actually runs on are now available as
+     size alone. Colour is a separate decision, made with --text / --text-muted
+     / --text-faint, because it is a separate decision.
+
+       16  .text-body    long-form reading, lesson prose
+       14  .text-ui      the interface workhorse — rows, labels, most copy
+       13  .text-dense   dense rows where 14 will not fit
+       12  .text-micro   metadata. The floor. Nothing goes below 12.
+
+     Composed tiers (size + colour) are kept below, unchanged, because 208 call
+     sites use them and they say something a bare size does not.
+
+     Size only, no line-height, deliberately. These replace ~690 `text-[Npx]`
+     call sites that inherited their line-height from context; setting one here
+     would silently reflow all of them in a change nobody could review. The 37
+     sites that do care already pair an explicit `leading-`. Line-height is a
+     separate, later, per-context decision.
+
+     They are declared *after* the composed tiers, and the order is load-bearing.
+     152 call sites read `class="text-body … text-ui"` — an author taking the
+     colour from one tier and overriding the size. That used to work because
+     `text-[14px]` was a Tailwind utility and utilities sit in a later cascade
+     layer than components, so the arbitrary value always won. A component class
+     has no such advantage: it wins only by being declared later. Move these
+     three above `.text-body` and 152 places silently render two sizes too
+     large, with nothing failing to announce it. */
   .text-body {
     font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
   }
+  /* 14px, already faint. `.text-ui` is the same size with the colour left open. */
   .text-meta {
     font-size: 14px;
     color: var(--text-faint);
@@ -1023,6 +1225,17 @@ samp {
     font-size: 12px;
     font-weight: 500;
     color: var(--text-faint);
+  }
+
+  /* The size-only tiers. Declared last on purpose — see the note above. */
+  .text-ui {
+    font-size: 14px;
+  }
+  .text-dense {
+    font-size: 13px;
+  }
+  .text-micro {
+    font-size: 12px;
   }
   .num {
     font-variant-numeric: tabular-nums;
@@ -1048,6 +1261,20 @@ samp {
     }
     .text-meta {
       font-size: 14px;
+    }
+    /* Repeated inside the query for the same cascade reason as above, and this
+       one is easy to miss: the two rules overhead re-declare `.text-body` and
+       `.text-meta` *below* the size tiers, so without these three a call site
+       reading `text-meta text-micro` would render 14px on a phone and 12px on a
+       desktop. An explicit size override has to keep winning at every width. */
+    .text-ui {
+      font-size: 14px;
+    }
+    .text-dense {
+      font-size: 13px;
+    }
+    .text-micro {
+      font-size: 12px;
     }
   }
 

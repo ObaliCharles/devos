@@ -51,7 +51,7 @@ export function PageHeader({
         {back && (
           <Link
             href={back.href}
-            className="mb-3 -ml-1 inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-[12px] font-medium"
+            className="mb-3 -ml-1 inline-flex items-center gap-1.5 rounded-[var(--radius-xs)] px-1 py-0.5 text-micro font-medium"
             style={{ color: "var(--text-muted)" }}
           >
             <BackGlyph />
@@ -61,7 +61,7 @@ export function PageHeader({
         {eyebrow && <p className="eyebrow eyebrow-accent">{eyebrow}</p>}
         <h1 className={`title-page ${eyebrow ? "mt-1.5" : ""}`}>{title}</h1>
         {description && !compact && (
-          <p className="text-body mt-2 max-w-[64ch] text-[14px]">{description}</p>
+          <p className="text-body mt-2 max-w-[64ch] text-ui">{description}</p>
         )}
         {meta && <div className="mt-3.5 flex flex-wrap items-center gap-2.5">{meta}</div>}
       </div>
@@ -240,11 +240,11 @@ export function Meter({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[14px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <span className="text-ui font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </span>
         <span
-          className="num text-[14px]"
+          className="num text-ui"
           style={{ color: near ? "var(--warning)" : "var(--text-faint)" }}
         >
           {value}
@@ -307,7 +307,7 @@ export function Ring({
         </span>
       </div>
       {label && (
-        <span className="text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <span className="text-micro font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </span>
       )}
@@ -349,13 +349,13 @@ export function StatTile({
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+        <p className="text-micro font-medium" style={{ color: "var(--text-muted)" }}>
           {label}
         </p>
         {icon && <IconTile tone={tone}>{icon}</IconTile>}
       </div>
       <p className="num mt-auto pt-3 text-[22px] font-semibold leading-none">{value}</p>
-      {sub && <p className="text-meta mt-1.5 truncate text-[12px]">{sub}</p>}
+      {sub && <p className="text-meta mt-1.5 truncate text-micro">{sub}</p>}
     </>
   );
 
@@ -374,6 +374,116 @@ export function StatTile({
 /** Historical names, both now the same tile. */
 export const StatCard = StatTile;
 export const KPICard = StatTile;
+
+/* --------------------------------------------------------------- Regions
+
+   The unboxed counterparts to Panel. Reach for these first and for Panel only
+   when the region genuinely is an object — see the note above `.section` in
+   globals.css for where the line falls.
+   ---------------------------------------------------------------------- */
+
+/**
+ * A region of a page. No fill, no border: it is separated from what came
+ * before by space, a hairline and its own heading, in that order.
+ *
+ * `band` shifts the ground by one step and runs to the edges of the content
+ * column, for the one or two regions on a long page that want to feel like a
+ * different room without becoming a rectangle.
+ */
+export function Section({
+  title,
+  eyebrow,
+  description,
+  action,
+  band = false,
+  major = true,
+  children,
+  className = "",
+  id,
+}: {
+  title?: string;
+  eyebrow?: string;
+  description?: string;
+  action?: ReactNode;
+  band?: boolean;
+  /** Air and a rule above. Off for a region that continues the one before it. */
+  major?: boolean;
+  children: ReactNode;
+  className?: string;
+  id?: string;
+}) {
+  return (
+    <section
+      id={id}
+      className={[
+        "section",
+        major ? "section-major" : "",
+        band ? "section-band" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {(title || action) && (
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+            {title && <h2 className={`title-section ${eyebrow ? "mt-1.5" : ""}`}>{title}</h2>}
+            {description && (
+              <p className="text-body mt-2 max-w-[68ch]">{description}</p>
+            )}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
+        </div>
+      )}
+      {children}
+    </section>
+  );
+}
+
+/**
+ * A run of numbers, divided by hairlines rather than boxed into tiles.
+ *
+ * The rule this exists to enforce: a number is not an object. Four cards side
+ * by side say "four separate things"; one row divided by rules says "these
+ * belong together and are being compared", which is what a stat row always
+ * means.
+ */
+export function StatRow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`stat-row ${className}`}>{children}</div>;
+}
+
+/** One reading inside a StatRow. */
+export function Stat({
+  label,
+  value,
+  sub,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  tone?: Tone;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-micro font-medium" style={{ color: "var(--text-faint)" }}>
+        {label}
+      </p>
+      <p
+        className="num text-[22px] font-semibold leading-none"
+        style={tone === "neutral" ? undefined : { color: `var(--${tone})` }}
+      >
+        {value}
+      </p>
+      {sub && (
+        <p className="text-micro truncate" style={{ color: "var(--text-faint)" }}>
+          {sub}
+        </p>
+      )}
+    </div>
+  );
+}
 
 /* ------------------------------------------------------------ Empty states */
 
@@ -419,8 +529,8 @@ export function EmptyState({
             {icon}
           </span>
         )}
-        <p className="text-[14px] font-semibold tracking-[-0.014em]">{title}</p>
-        <p className="text-body mx-auto mt-1.5 max-w-[46ch] text-[14px]">{body}</p>
+        <p className="text-ui font-semibold tracking-[-0.014em]">{title}</p>
+        <p className="text-body mx-auto mt-1.5 max-w-[46ch] text-ui">{body}</p>
         {(action || secondary) && (
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             {action}

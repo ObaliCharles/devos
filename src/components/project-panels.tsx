@@ -182,7 +182,7 @@ export function BugsPanel({ projectId, bugs }: { projectId: string; bugs: BugIte
             aria-label="Bug title"
           />
           <textarea
-            className="input min-h-[70px] resize-y text-[14px]"
+            className="input min-h-[70px] resize-y text-ui"
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
             placeholder="Steps to reproduce. Write them now while you remember."
@@ -229,18 +229,18 @@ export function BugsPanel({ projectId, bugs }: { projectId: string; bugs: BugIte
                         <div className="min-w-0">
                           <p className="font-medium">{b.title}</p>
                           {b.steps && (
-                            <p className="mt-1 whitespace-pre-wrap text-[14px]" style={{ color: "var(--text-muted)" }}>
+                            <p className="mt-1 whitespace-pre-wrap text-ui" style={{ color: "var(--text-muted)" }}>
                               {b.steps}
                             </p>
                           )}
-                          <p className="mt-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                          <p className="mt-2 text-micro" style={{ color: "var(--text-faint)" }}>
                             <span style={{ color: statusColor(b.severity) }}>{b.severity}</span>
                             {" · logged "}{relativeDate(b.createdAt)}
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <select
-                            className="input h-8 w-28 py-0 text-[12px]"
+                            className="input h-8 w-28 py-0 text-micro"
                             value={b.status}
                             disabled={pending}
                             onChange={(e) => run(() => setBugStatus(b.id, e.target.value))}
@@ -375,7 +375,7 @@ export function DeploymentsPanel({
                   {d.url.replace(/^https?:\/\//, "")}
                 </a>
               )}
-              <span className="ml-auto text-[12px]" style={{ color: "var(--text-faint)" }}>
+              <span className="ml-auto text-micro" style={{ color: "var(--text-faint)" }}>
                 {formatDate(d.deployedAt)}
               </span>
             </li>

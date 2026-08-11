@@ -27,7 +27,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ handle
       <section className="card p-4">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="eyebrow">Contributions</h2>
-          <span className="text-meta text-[12px]">Last 26 weeks</span>
+          <span className="text-meta text-micro">Last 26 weeks</span>
         </div>
         <div className="mt-3">
           <Heatmap days={profile.activity} />

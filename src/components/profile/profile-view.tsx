@@ -53,7 +53,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
 
           <div className="min-w-0 flex-1">
             <h1 className="title-page">{profile.name}</h1>
-            <p className="num text-[13px]" style={{ color: "var(--text-faint)" }}>
+            <p className="num text-dense" style={{ color: "var(--text-faint)" }}>
               @{profile.username}
             </p>
 
@@ -94,7 +94,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
         </div>
 
         {error && (
-          <p className="mt-2 text-[13px]" style={{ color: "var(--danger)" }} role="alert">
+          <p className="mt-2 text-dense" style={{ color: "var(--danger)" }} role="alert">
             {error}
           </p>
         )}
@@ -102,7 +102,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
         {/* XP to the next level — the one progress bar that belongs up here,
             because it is the only number still in motion. */}
         <div className="mt-4">
-          <div className="flex items-baseline justify-between text-[12px]">
+          <div className="flex items-baseline justify-between text-micro">
             <span style={{ color: "var(--text-faint)" }}>
               <span className="num">{profile.xp.toLocaleString()}</span> XP
             </span>
@@ -115,7 +115,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
           </div>
         </div>
 
-        <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4 text-[13px]"
+        <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4 text-dense"
             style={{ borderColor: "var(--border-faint)" }}>
           <Stat label="Solved" value={profile.solved} icon={<CheckCircle2 size={13} />} />
           <Stat label="Shipped" value={profile.projectsShipped} icon={<Zap size={13} />} />
@@ -134,7 +134,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
               Recently solved
             </h2>
             {profile.recentSolves.length === 0 ? (
-              <p className="text-body p-4 text-[13px]">
+              <p className="text-body p-4 text-dense">
                 {profile.isSelf
                   ? "Solve a challenge and it shows up here."
                   : "Nothing solved yet."}
@@ -156,9 +156,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
                         style={{ background: DIFFICULTY_COLOR[c.difficulty] ?? "var(--border)" }}
                         aria-hidden
                       />
-                      <span className="min-w-0 flex-1 truncate text-[13px]">{c.title}</span>
+                      <span className="min-w-0 flex-1 truncate text-dense">{c.title}</span>
                       <span
-                        className="shrink-0 text-[12px] capitalize"
+                        className="shrink-0 text-micro capitalize"
                         style={{ color: DIFFICULTY_COLOR[c.difficulty] }}
                       >
                         {c.difficulty}
@@ -174,9 +174,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
           {(profile.bio || profile.location || profile.website || profile.githubUsername) && (
             <section className="card p-4">
               <h2 className="eyebrow">About</h2>
-              {profile.bio && <p className="text-body mt-2 text-[14px]">{profile.bio}</p>}
+              {profile.bio && <p className="text-body mt-2 text-ui">{profile.bio}</p>}
               <div
-                className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[13px]"
+                className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-dense"
                 style={{ color: "var(--text-faint)" }}
               >
                 {profile.location && (
@@ -230,7 +230,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
               <h2 className="eyebrow">Badges</h2>
               <ul className="mt-3 flex flex-col gap-1.5">
                 {profile.badgeNames.map((b) => (
-                  <li key={b} className="flex items-center gap-2 text-[13px]">
+                  <li key={b} className="flex items-center gap-2 text-dense">
                     <Trophy size={13} style={{ color: "var(--warning)" }} />
                     {b}
                   </li>
@@ -247,7 +247,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
                   <li key={g.slug}>
                     <Link
                       href={`/community/groups/${g.slug}`}
-                      className="row-link -mx-2 block truncate px-2 py-1.5 text-[13px]"
+                      className="row-link -mx-2 block truncate px-2 py-1.5 text-dense"
                     >
                       {g.name}
                     </Link>
@@ -260,7 +260,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
           <section className="card p-4">
             <h2 className="eyebrow">Streak</h2>
             <p className="num mt-2 text-[24px] font-bold">{profile.streak}</p>
-            <p className="text-meta text-[12px]">
+            <p className="text-meta text-micro">
               current · best {profile.longestStreak}
             </p>
           </section>
