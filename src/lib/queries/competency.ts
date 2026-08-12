@@ -160,6 +160,64 @@ export async function getDiagnosticProfile(userId: unknown): Promise<Competency 
   return competencyFrom(toInputs(rows), dimensions);
 }
 
+export type AiFreePerformance = {
+  /** Performance on evidence from activities explicitly designed to measure
+   *  independent ability with no AI available at all — today that is the
+   *  diagnostic (`/diagnostic`, no AI panel exists on the page) and a graded
+   *  teach-back. Spec §30's "AI-free mode". */
+  aiFree: { avgStrength: number; sample: number };
+  /**
+   * Performance on everything else. **Not** "AI-assisted performance",
+   * despite that being spec §30's own phrase for the comparison — most of
+   * this bucket (a quiz, a solved challenge) never had an AI tutor involved
+   * at all; `aiFree: false` is this evidence's default, not a claim that AI
+   * was used. The genuinely AI-*assisted* signal is `assistLevel`
+   * (`getIndependence`), a different, non-overlapping view: hint-ladder
+   * evidence always has `aiFree: false` and never has a measured
+   * `assistLevel` on `aiFree: true` evidence, because the diagnostic and
+   * teach-back do not go through the ladder at all. Naming this bucket
+   * "assisted" would overclaim what is actually tracked.
+   */
+  other: { avgStrength: number; sample: number };
+  /** False below the sample floor on either side — see the same reasoning
+   *  `Independence.sample`'s doc comment gives for its own threshold. */
+  comparable: boolean;
+};
+
+/** Below this many verified artefacts on a side, a comparison is noise, not
+ *  a metric. Lower than `getIndependence`'s 10: today only two sources ever
+ *  produce `aiFree: true` evidence at all, so demanding the same floor would
+ *  make this permanently `comparable: false` for almost every real learner. */
+const AI_FREE_MIN_SAMPLE = 5;
+
+/**
+ * "AI-assisted performance vs. independent performance" (spec §30) — as
+ * honestly as what is actually tracked can answer it. See `AiFreePerformance`
+ * for why the second bucket is called `other`, not `assisted`.
+ */
+export async function getAiFreePerformance(userId: unknown, days = 90): Promise<AiFreePerformance> {
+  await connectDB();
+  const since = new Date(Date.now() - days * 86_400_000);
+  // Verified only: comparing demonstrated ability against demonstrated
+  // ability. Mixing in unverified self-reports would let an optimistic
+  // self-report on one side quietly outweigh a machine-graded result on the
+  // other, which is exactly the kind of thing DECISIONS 026 exists to prevent.
+  const rows = await Evidence.find({ user: userId, createdAt: { $gte: since }, verified: true })
+    .select("strength aiFree")
+    .lean<{ strength: number; aiFree?: boolean }[]>();
+
+  const aiFreeRows = rows.filter((r) => r.aiFree === true);
+  const otherRows = rows.filter((r) => r.aiFree !== true);
+  const avg = (list: { strength: number }[]) =>
+    list.length > 0 ? list.reduce((sum, r) => sum + r.strength, 0) / list.length : 0;
+
+  return {
+    aiFree: { avgStrength: avg(aiFreeRows), sample: aiFreeRows.length },
+    other: { avgStrength: avg(otherRows), sample: otherRows.length },
+    comparable: aiFreeRows.length >= AI_FREE_MIN_SAMPLE && otherRows.length >= AI_FREE_MIN_SAMPLE,
+  };
+}
+
 export type EvidenceItem = {
   id: string;
   dimension: string;

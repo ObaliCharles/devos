@@ -899,11 +899,12 @@ async function checkDiagnostic() {
   check("half right, half wrong, is what got submitted", result.score === Math.ceil(DIAGNOSTIC_QUESTIONS.length / 2));
 
   const rows = await Evidence.find({ user: user._id, source: "diagnostic" }).lean<
-    { dimension: string; strength: number; verified: boolean; skill?: unknown }[]
+    { dimension: string; strength: number; verified: boolean; skill?: unknown; aiFree?: boolean }[]
   >();
   check("one evidence row per question", rows.length === DIAGNOSTIC_QUESTIONS.length);
   check("every diagnostic row is machine-graded, so verified", rows.every((r) => r.verified === true));
   check("and carries no skill — there is no roadmap yet to attach it to", rows.every((r) => r.skill === undefined));
+  check("and is tagged aiFree — there really is no AI panel on that page", rows.every((r) => r.aiFree === true));
   check(
     "strength reflects right vs wrong, not a flat participation score",
     rows.some((r) => r.strength === 1) && rows.some((r) => r.strength === 0)
@@ -1081,6 +1082,91 @@ async function checkTeachBackGuard() {
   check("an empty explanation is refused before any grading call", empty.ok === false);
   check("and says what to do, not a generic error", !empty.ok && empty.message === "Write an explanation first.");
 
+  delete process.env.SMOKE_CLERK_ID;
+}
+
+/* ---------------------------------------------------------- AI-free mode */
+
+async function checkAiFreePerformance() {
+  console.log("\nAI-free mode — independent performance vs. everything else");
+
+  const { Evidence } = await import("../src/lib/models");
+  const { getAiFreePerformance } = await import("../src/lib/queries");
+
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  const user = await requireUser();
+  await Evidence.deleteMany({ user: user._id });
+
+  const empty = await getAiFreePerformance(user._id);
+  check("no evidence at all is not comparable, not a fabricated split", !empty.comparable && empty.aiFree.sample === 0);
+
+  // Below the sample floor on the aiFree side — three rows, floor is five.
+  await Evidence.create(
+    Array.from({ length: 3 }, () => ({
+      user: user._id,
+      dimension: "explanation",
+      source: "teach_back",
+      strength: 0.9,
+      verified: true,
+      aiFree: true,
+    })),
+  );
+  await Evidence.create(
+    Array.from({ length: 8 }, () => ({
+      user: user._id,
+      dimension: "knowledge",
+      source: "quiz",
+      strength: 0.6,
+      verified: true,
+      aiFree: false,
+    })),
+  );
+  const tooFew = await getAiFreePerformance(user._id);
+  check("still not comparable below the floor on one side", !tooFew.comparable);
+  check("but the samples it did find are reported, not hidden", tooFew.aiFree.sample === 3 && tooFew.other.sample === 8);
+
+  await Evidence.deleteMany({ user: user._id });
+
+  // Over the floor on both sides, with a real, deliberate gap between them.
+  await Evidence.create(
+    Array.from({ length: 6 }, () => ({
+      user: user._id,
+      dimension: "explanation",
+      source: "teach_back",
+      strength: 0.9,
+      verified: true,
+      aiFree: true,
+    })),
+  );
+  await Evidence.create(
+    Array.from({ length: 6 }, () => ({
+      user: user._id,
+      dimension: "knowledge",
+      source: "quiz",
+      strength: 0.5,
+      verified: true,
+      aiFree: false,
+    })),
+  );
+  const compared = await getAiFreePerformance(user._id);
+  check("comparable once both sides clear the floor", compared.comparable);
+  check("the aiFree average reflects only aiFree rows", Math.abs(compared.aiFree.avgStrength - 0.9) < 1e-9);
+  check("the other average reflects only the rest", Math.abs(compared.other.avgStrength - 0.5) < 1e-9);
+
+  // Unverified evidence must not sneak into either side of the comparison.
+  await Evidence.create({
+    user: user._id,
+    dimension: "application",
+    source: "self_report",
+    strength: 1,
+    verified: false,
+    aiFree: true,
+  });
+  const withUnverified = await getAiFreePerformance(user._id);
+  check("an unverified row does not inflate the aiFree sample", withUnverified.aiFree.sample === 6);
+
+  await Evidence.deleteMany({ user: user._id });
   delete process.env.SMOKE_CLERK_ID;
 }
 
@@ -1344,6 +1430,61 @@ async function checkProjects() {
   console.log("\nprojects — activity feed");
   const activity = await ActivityLog.countDocuments({ project: projectId });
   check("meaningful actions were logged to the feed", activity >= 3);
+
+  console.log("\nprojects — the planning assistant");
+  {
+    const { submitProjectPlan, submitProjectRetro } = await import("../src/lib/actions");
+
+    // The guard, before any model call is attempted — same reasoning as the
+    // teach-back guard test: this sandbox has a real provider key configured,
+    // so a "does it save" test would fire a live network request, and the
+    // smoke suite's reliability must not depend on that. See DECISIONS 032/033.
+    const missingBoth = await submitProjectPlan(projectId, { building: "", need: "", steps: "", risks: "" });
+    check("a plan with nothing in it is refused before any review", missingBoth.ok === false);
+
+    const missingSteps = await submitProjectPlan(projectId, {
+      building: "A thing",
+      need: "",
+      steps: "",
+      risks: "",
+    });
+    check("building alone, with no steps, is still refused", missingSteps.ok === false);
+
+    // The retro is a plain save, not an AI call — fully testable. Seed a plan
+    // directly rather than through the action, for the same reason as above.
+    check("a retro is refused with no plan to compare against", (await submitProjectRetro(projectId, "Went fine.")).ok === false);
+
+    await Project.updateOne(
+      { _id: projectId },
+      { $set: { "plan.building": "A smoke-tested thing", "plan.steps": "Step one. Step two.", "plan.submittedAt": new Date() } },
+    );
+    check("an empty retro is refused", (await submitProjectRetro(projectId, "   ")).ok === false);
+
+    const retro = await submitProjectRetro(projectId, "It took longer than the plan expected.");
+    check("a real retro against a real plan is accepted", retro.ok === true);
+
+    const withRetro = await Project.findById(projectId).lean<{ plan?: { retro?: string; retroAt?: Date } }>();
+    check("the retro is persisted on the project", withRetro?.plan?.retro === "It took longer than the plan expected.");
+    check("with a timestamp", withRetro?.plan?.retroAt instanceof Date);
+
+    const updated = await submitProjectRetro(projectId, "Actually, it went about as expected.");
+    check("saving again updates the same retro rather than appending a new one", updated.ok === true);
+    const afterUpdate = await Project.findById(projectId).lean<{ plan?: { retro?: string } }>();
+    check(
+      "and the update actually landed",
+      afterUpdate?.plan?.retro === "Actually, it went about as expected.",
+    );
+
+    // Planning was deliberately kept out of the competency system — none of
+    // the eight dimensions is "planning ability" (DECISIONS on the diagnostic
+    // made the same call). Real assertion, not a query that can never fail:
+    // the count before and after a full plan+retro round trip must be equal.
+    const { Evidence } = await import("../src/lib/models");
+    const before = await Evidence.countDocuments({ user: user._id });
+    await submitProjectRetro(projectId, "One more pass, to be sure.");
+    const after = await Evidence.countDocuments({ user: user._id });
+    check("a full plan-and-retro round trip writes no Evidence at all", before === after);
+  }
 
   console.log("\nprojects — deletion cascades");
   await deleteProject(projectId);
@@ -1910,6 +2051,7 @@ async function main() {
   await checkDiagnostic();
   await checkTutorState();
   await checkTeachBackGuard();
+  await checkAiFreePerformance();
   await checkProjects();
   await checkKnowledge();
   await checkPractice();

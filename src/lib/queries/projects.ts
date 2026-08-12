@@ -114,6 +114,17 @@ export type ProjectDoc = {
   archived?: boolean;
   counts?: { tasks?: number; tasksDone?: number; bugsOpen?: number };
   minutesSpent?: number;
+  plan?: {
+    building?: string;
+    need?: string;
+    steps?: string;
+    risks?: string;
+    aiReview?: string;
+    aiGaps?: string[];
+    submittedAt?: Date;
+    retro?: string;
+    retroAt?: Date;
+  };
 };
 
 /** The project workspace header, one read, used by every sub-page. */

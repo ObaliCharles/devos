@@ -22,6 +22,39 @@ const StackSchema = new Schema(
   { _id: false }
 );
 
+/**
+ * The planning assistant (learning-upgrade spec §13). One plan per project,
+ * not a collection of its own — a plan belongs to exactly one project the way
+ * `goal` and `stack` do, and "track planning quality over time" (the spec's
+ * own phrase) means *across a learner's projects*, which is a query over
+ * `Project.find({ user })` once more than one exists, not a separate
+ * evidence-shaped model. See DECISIONS on why this does not feed `Evidence`:
+ * none of the eight competency dimensions is "planning ability", and
+ * force-fitting it into one would produce a number that means nothing — the
+ * same call already made for the diagnostic.
+ *
+ * `aiGaps` is the AI's review — what the plan does not consider — never the
+ * solution. `retro` is filled in later, after building starts, so the plan
+ * and what actually happened can sit side by side; nothing computes a
+ * "planning accuracy" score from the gap between them, because inventing a
+ * distance metric between two paragraphs of prose would be precision the
+ * spec never asked for.
+ */
+const ProjectPlanSchema = new Schema(
+  {
+    building: String,
+    need: String,
+    steps: String,
+    risks: String,
+    aiReview: String,
+    aiGaps: [String],
+    submittedAt: Date,
+    retro: String,
+    retroAt: Date,
+  },
+  { _id: false }
+);
+
 const ProjectSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
@@ -43,6 +76,7 @@ const ProjectSchema = new Schema(
     visibility: { type: String, enum: ["private", "public"], default: "private" },
     thumbnailUrl: String,
     stack: { type: StackSchema, default: () => ({}) },
+    plan: { type: ProjectPlanSchema, default: () => ({}) },
     features: [String],
 
     /**

@@ -30,6 +30,10 @@ export async function submitDiagnostic(answers: DiagnosticAnswer[], explanationT
   // One verified row per graded question — machine-decided, so `verified:
   // true` is honest here in exactly the way DECISIONS 026 requires. No
   // `skill`: see the field's own note on why a diagnostic cannot have one.
+  // `aiFree: true` because it is true: `/diagnostic` has no AI panel, by
+  // construction — the page's own copy already promises "No AI, no notes",
+  // and until this the evidence it produced did not back that claim up. See
+  // DECISIONS on `getAiFreePerformance`, which this is the write side of.
   await Promise.all(
     graded.map((g) =>
       recordEvidence({
@@ -38,6 +42,7 @@ export async function submitDiagnostic(answers: DiagnosticAnswer[], explanationT
         source: "diagnostic",
         strength: g.correct ? 1 : 0,
         verified: true,
+        aiFree: true,
         detail: g.correct ? "Answered correctly in the diagnostic" : "Missed in the diagnostic",
       }),
     ),

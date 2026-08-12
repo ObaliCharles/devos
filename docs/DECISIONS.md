@@ -1096,3 +1096,120 @@ Verified: `tsc --noEmit` clean, `npm run smoke` 322/322 (up from 317 by 5 —
 3 covering the new skill-level `teachBack` extra's containment, including that
 an empty rubric is dropped rather than sent through with nothing in it, and 2
 covering the pre-network guard).
+
+## 037 — AI-free performance is honestly two smaller claims, not one big one
+
+**Status:** accepted
+
+Spec §30 wants a metric comparing "AI-assisted performance vs. independent
+performance", called out as "one of the most important metrics in the
+platform." The infrastructure to tag evidence `aiFree` has existed on the
+`Evidence` model since Phase 1a; nothing had ever set it to `true` on purpose.
+
+**The diagnostic's own copy claimed something its evidence did not back up.**
+`/diagnostic` tells the learner "No AI, no notes" — true, there is no AI
+panel on that page — but `submitDiagnostic` never passed `aiFree` to
+`recordEvidence`, so every row defaulted to `false`. Fixed: diagnostic
+evidence is now tagged `aiFree: true`, alongside the graded teach-back from
+DECISIONS 036, which already was.
+
+**`getAiFreePerformance`'s second bucket is called `other`, not `assisted`,
+and that took overriding the spec's own word for it.** The natural read of
+"AI-assisted vs. independent" is that every non-aiFree row represents AI
+assistance. It does not: `aiFree: false` is the *default* on almost every
+piece of evidence in the product — a quiz, a solved challenge — most of which
+never had an AI tutor anywhere near it. Calling that bucket "assisted" would
+manufacture a claim about AI involvement the data does not support, which is
+the exact overclaiming this whole rewrite's evidence model exists to refuse.
+The genuinely AI-*assisted* signal already exists and is a different,
+non-overlapping thing: `assistLevel`, read by `getIndependence`. Hint-ladder
+evidence always has `aiFree: false` and no `aiFree: true` evidence carries a
+measured `assistLevel`, because the two sources that produce it — the
+diagnostic, a teach-back — do not go through the hint ladder at all. Two
+honest, narrower comparisons, kept distinct, instead of one comparison with a
+misleading name.
+
+**Verified only, on both sides.** Mixing in unverified self-reports would let
+an optimistic self-report on one side quietly outweigh a machine-graded
+result on the other — the same reasoning DECISIONS 026 already applies to
+weighting, applied here to which rows are even eligible for the comparison.
+
+**A lower sample floor than `getIndependence`'s, for an honest reason.** Five,
+not ten: only two sources produce `aiFree: true` evidence at all today, so
+reusing the ten-sample floor would leave this permanently `comparable: false`
+for nearly every real learner. `comparable` is still checked and still
+reported plainly rather than silently loosened — a caller must check it
+before drawing anything, same discipline as `Independence.sample`.
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 330/330 (up from 322 by 8 — one
+confirming the diagnostic's tag fix, seven covering the comparison query: the
+empty case, below-floor-on-one-side, a real gap between two verified
+populations, and that an unverified row cannot inflate either sample).
+
+## 038 — The planning assistant attaches to a status Project already had, and stays out of Evidence
+
+**Status:** accepted
+
+Learning-spec §13, and the last of Phase 2's six items. Unlike the other
+five — hint ladder, tutor state, teach-back, AI-free mode, and the diagnostic
+before them — this one had no existing infrastructure already anticipating
+it. It needed real inspection before anything was built.
+
+**It attaches to `Project.status: "planning"`**, which has been the default
+status on every project since before this rewrite and meant nothing beyond a
+label. A project is "a significant coding task" in exactly the sense spec §13
+means, so rather than inventing a new place for planning to live, it is a
+field on `Project` — `ProjectPlanSchema` — the same way `goal` and `stack`
+already are, not a new collection.
+
+**It does not write to `Evidence`, on purpose, for the same reason the
+diagnostic doesn't test Planning as a dimension.** None of the eight real
+competency dimensions in `lib/competency.ts` is "planning ability" — that
+call was already made once (DECISIONS on the diagnostic) and is repeated here
+rather than revisited: force-fitting planning quality into `implementation`
+or `problem_solving` would produce a number that means nothing. "Track
+planning quality over time" (the spec's own phrase) is answered honestly by
+persisting the plan, the AI's review, and the retro on the project itself —
+a query over a learner's projects once they have more than one — not by
+inventing a parallel evidence-shaped model for a concept the real one was
+never built to hold. Smoke asserts this directly: a full plan-and-retro round
+trip leaves the `Evidence` count for the user unchanged.
+
+**The AI's job here is narrower than everywhere else it appears in this
+product.** It does not teach, hint, or grade — it reads the four answers and
+says what is missing, and the system prompt is built to refuse solving the
+problem even if asked, matching spec's own line: "identify missing
+considerations without immediately solving the problem." A plan is still
+saved in full even if the review call fails or no provider is configured —
+the four answers are the part that matters most, and are never lost to a
+model error.
+
+**"Compare your plan with what actually happened" is a self-comparison, not
+an AI-scored one.** `submitProjectRetro` does not call a model at all; the
+plan and the retro are shown side by side and the learner does the comparing.
+Computing a numeric distance between two paragraphs of prose and calling it a
+"planning accuracy score" would be precision the spec never asked for.
+
+**One plan per project, not a ledger.** Unlike `Evidence`, which is
+append-only by design, `plan` is a single field: writing a new plan replaces
+the old one, and saving a retro twice updates it rather than accumulating
+duplicates. A plan is a living document while a project is in progress, not a
+historical record of every draft.
+
+Reachable, not forced, the same way the diagnostic is: a "Plan" tab on every
+project, matching the existing `board`/`milestones`/`database` sub-route
+pattern exactly, with no change to how or when a project's status actually
+changes.
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 340/340 (up from 330 by 10 —
+the refusal guards on both actions, that a retro genuinely requires an
+existing plan, that saving a retro twice updates rather than duplicates, and
+the direct assertion that none of this touches `Evidence`). The AI review
+call itself is untested by smoke, for the same reason as every other
+AI-dependent path in this product — see DECISIONS 032/033.
+
+---
+
+**Learning-spec Phase 2 (AI tutor) is now complete — all six items**: tutor
+state, hint ladder, AI dependency tracking, planning assistant, teach-back
+mode, AI-free mode.

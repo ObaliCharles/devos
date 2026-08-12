@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { connectDB } from "../db";
 import { dayKey } from "../day";
@@ -18,6 +19,9 @@ import {
 } from "../models";
 import { recordActivity, requireUser } from "../user";
 import { docWithAccess, requireProjectAccess, type ProjectRole } from "../project-access";
+import { checkCap, isConfigured, recordUsage } from "../ai";
+import { completeChat } from "../ai-provider";
+import { extractJson } from "../ai-json";
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -368,6 +372,117 @@ export async function logProjectTime(projectId: string, minutes: number, taskId?
 
   await recordActivity(user._id, { minutes: clamped });
   revalidateProject(projectId);
+}
+
+/* ------------------------------------------------------------------ planning */
+
+/**
+ * The planning assistant (spec §13). A project is "a significant coding
+ * task" in exactly the sense the spec means, and it already starts life with
+ * `status: "planning"` — a state that meant nothing beyond a label until now.
+ *
+ * The AI's job here is narrower than everywhere else it appears in this
+ * product: it does not teach, hint, or grade. It reads the four answers and
+ * says what is missing — a step skipped, a risk not considered — and stops.
+ * "Identify missing considerations without immediately solving the problem"
+ * is the spec's own line, and the system prompt below is built to refuse the
+ * solve even if asked.
+ */
+const AiReview = z.object({
+  review: z.string().catch(""),
+  gaps: z.array(z.string()).catch([]),
+});
+
+export async function submitProjectPlan(
+  projectId: string,
+  input: { building: string; need: string; steps: string; risks: string },
+) {
+  const user = await requireUser();
+  const project = await writableProject(user._id, projectId);
+
+  const building = input.building.trim();
+  const need = input.need.trim();
+  const steps = input.steps.trim();
+  const risks = input.risks.trim();
+  if (!building || !steps) {
+    return { ok: false as const, message: "At least what you're building and the steps." };
+  }
+
+  await connectDB();
+
+  let aiReview = "";
+  let aiGaps: string[] = [];
+  if (isConfigured()) {
+    const cap = await checkCap(user._id);
+    if (cap.ok) {
+      try {
+        const reply = await completeChat({
+          maxTokens: 600,
+          system:
+            "You review a developer's plan before they start building. You do not solve the " +
+            "problem, write code, or propose an architecture of your own. You read what they wrote " +
+            "and say what is missing — a step they skipped, a risk they did not consider, a " +
+            "dependency between two of their own steps they did not notice. If the plan is genuinely " +
+            "solid, say so plainly instead of inventing a gap to fill space. Output ONLY this JSON: " +
+            '{"review": string (2-4 sentences), "gaps": string[] (0 to 5 short, specific items — empty if none)}.',
+          messages: [
+            {
+              role: "user",
+              content:
+                `Project: ${project.title}\n\n` +
+                `What they're building: ${building}\n\n` +
+                `What they think they need: ${need || "(not answered)"}\n\n` +
+                `Their steps: ${steps}\n\n` +
+                `What they think could go wrong: ${risks || "(not answered)"}`,
+            },
+          ],
+        });
+        await recordUsage(user._id, reply.usage.input, reply.usage.output, reply.provider);
+        const parsed = AiReview.safeParse(extractJson(reply.text));
+        if (parsed.success) {
+          aiReview = parsed.data.review;
+          aiGaps = parsed.data.gaps;
+        }
+      } catch (err) {
+        // A plan with no review is still a saved plan — the four answers below
+        // are the part that matters most, and are never lost to a model error.
+        console.error("[project plan]", err);
+      }
+    }
+  }
+
+  project.plan = { building, need, steps, risks, aiReview, aiGaps, submittedAt: new Date() };
+  await project.save();
+  await log(user._id, projectId, "plan", "Wrote a plan before starting");
+
+  revalidateProject(projectId);
+  return { ok: true as const, aiReview, aiGaps };
+}
+
+/**
+ * "Compare your original plan with what actually happened" (spec §13) — a
+ * self-comparison, not an AI-scored one. The plan and the retro are shown
+ * side by side; nothing here computes a distance between two paragraphs of
+ * prose and calls it a planning-accuracy score, which would be manufactured
+ * precision the spec never asked for.
+ */
+export async function submitProjectRetro(projectId: string, retro: string) {
+  const user = await requireUser();
+  const project = await writableProject(user._id, projectId);
+
+  const trimmed = retro.trim();
+  if (!trimmed) return { ok: false as const, message: "Write something first." };
+  if (!project.plan?.building) {
+    return { ok: false as const, message: "There is no plan on this project to compare against." };
+  }
+
+  project.plan.retro = trimmed;
+  project.plan.retroAt = new Date();
+  await project.save();
+  await log(user._id, projectId, "plan", "Compared the plan to what actually happened");
+
+  revalidateProject(projectId);
+  return { ok: true as const };
 }
 
 /* --------------------------------------------------------------- milestones */

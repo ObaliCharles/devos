@@ -108,6 +108,13 @@ shared by `buildSystemContext` (the concept tutor) and `requestExerciseHint`
 below real thresholds (no competency evidence, or an independence sample under
 10) rather than reporting a number that would mean nothing. See DECISIONS 035.
 
+`Evidence.aiFree` is set `true` by exactly two writers — the diagnostic and a
+graded teach-back — the only two activities with no AI panel available at
+all. `getAiFreePerformance()` compares verified performance between that
+bucket and everything else; the second bucket is named `other`, deliberately
+not `assisted`, because `aiFree: false` is most evidence's default and does
+not mean AI was actually involved. See DECISIONS 037.
+
 ### The reader
 
 `components/learn/lesson-reader.tsx` and `activity-renderer.tsx` render
