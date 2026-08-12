@@ -27,10 +27,21 @@ const EvidenceSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
 
     /**
-     * The skill this is evidence for. Required: evidence that is not attached
-     * to a competency is an activity log, and there is already one of those.
+     * The skill this is evidence for. Normally required — evidence that is not
+     * attached to a competency is an activity log, and there is already one of
+     * those — with exactly one exception: `source: "diagnostic"` rows from the
+     * onboarding assessment, which happen before a learner has picked a
+     * roadmap and so cannot be scoped to any Skill document. Those exist to
+     * answer a genuinely different question — "what is this person's baseline
+     * in problem-solving, in general" rather than "in this specific skill" —
+     * and `getDiagnosticProfile` in lib/queries/diagnostic.ts is the one place
+     * that reads across evidence with no skill. Every skill-scoped query
+     * (`getSkillCompetency`, `getCompetencyMap`) filters *by* skill, so a
+     * skill-less row simply never appears there, which is the correct
+     * behaviour — a diagnostic baseline should not silently inflate one
+     * specific skill's score.
      */
-    skill: { type: Schema.Types.ObjectId, ref: "Skill", required: true, index: true },
+    skill: { type: Schema.Types.ObjectId, ref: "Skill", index: true },
     /** Where it happened, when it happened inside a lesson. */
     lesson: { type: Schema.Types.ObjectId, ref: "Lesson", index: true },
     /** Or inside a project, which is the other place real evidence comes from. */

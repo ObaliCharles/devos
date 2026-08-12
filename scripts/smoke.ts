@@ -44,6 +44,9 @@ import {
   GATE_STEPS,
 } from "../src/lib/models";
 import { grade, nextDue, INTERVALS_DAYS } from "../src/lib/srs";
+import { isLevelAllowed, nextAllowedLevel, LADDER_INSTRUCTION } from "../src/lib/hint-ladder";
+import { buildGeneratedObjectives, buildGeneratedSections } from "../src/lib/roadmap-gen-sections";
+import { DIAGNOSTIC_QUESTIONS, gradeAnswer, gradeDiagnostic } from "../src/lib/diagnostic";
 import {
   DIMENSIONS,
   assistMultiplier,
@@ -310,6 +313,166 @@ function checkPureLogic() {
     "a section whose activities are all broken is dropped",
     readSections([{ kind: "concept", activities: [{ type: "nonsense" }] }]).length === 0
   );
+
+  console.log("\nhint ladder");
+  check("starting from nothing, the next allowed level is 1", nextAllowedLevel(0) === 1);
+  check("the ladder climbs one rung at a time", nextAllowedLevel(3) === 4);
+  check("the ladder tops out at 6, not past it", nextAllowedLevel(6) === 6 && nextAllowedLevel(99) === 6);
+  check("level 1 is allowed from a cold start", isLevelAllowed(1, 0));
+  check("level 2 is not allowed from a cold start — no skipping", !isLevelAllowed(2, 0));
+  check("level 4 is allowed once level 3 has been reached", isLevelAllowed(4, 3));
+  check("level 6 is still refused after only reaching level 3", !isLevelAllowed(6, 3));
+  check("level 0 is never a valid request — it is the ambient default", !isLevelAllowed(0, 0));
+  check("every level from 1 to 6 has an instruction", [1, 2, 3, 4, 5, 6].every((l) => typeof LADDER_INSTRUCTION[l as 1] === "string"));
+
+  console.log("\ndiagnostic — grading");
+  check("has two questions per dimension", DIAGNOSTIC_QUESTIONS.length === 8);
+  check(
+    "covers exactly the four testable dimensions, not planning",
+    new Set(DIAGNOSTIC_QUESTIONS.map((q) => q.dimension)).size === 4
+  );
+
+  const mc = DIAGNOSTIC_QUESTIONS.find((q) => q.kind === "multiple_choice")!;
+  check("the right multiple-choice answer grades correct", gradeAnswer(mc, { id: mc.id, kind: "multiple_choice", choiceIndex: mc.answerIndex }));
+  check("any other choice grades incorrect", !gradeAnswer(mc, { id: mc.id, kind: "multiple_choice", choiceIndex: (mc.answerIndex + 1) % mc.choices.length }));
+  check("an answer to the wrong question id never grades correct", !gradeAnswer(mc, { id: "not-this-one", kind: "multiple_choice", choiceIndex: mc.answerIndex }));
+  check("no answer at all grades incorrect, not undefined behaviour", !gradeAnswer(mc, undefined));
+
+  const trace = DIAGNOSTIC_QUESTIONS.find((q) => q.kind === "code_tracing")!;
+  check("the exact expected output grades correct", gradeAnswer(trace, { id: trace.id, kind: "code_tracing", text: trace.expectedOutput }));
+  check(
+    "whitespace and case around the answer do not cost the grade",
+    gradeAnswer(trace, { id: trace.id, kind: "code_tracing", text: `  ${trace.expectedOutput.toUpperCase()}  ` })
+  );
+  check("a wrong output grades incorrect", !gradeAnswer(trace, { id: trace.id, kind: "code_tracing", text: "definitely wrong" }));
+
+  const fill = DIAGNOSTIC_QUESTIONS.find((q) => q.kind === "fill_in_code")!;
+  check("the canonical answer grades correct", gradeAnswer(fill, { id: fill.id, kind: "fill_in_code", text: fill.answer }));
+  if (fill.accept.length > 0) {
+    check("an accepted alternative also grades correct", gradeAnswer(fill, { id: fill.id, kind: "fill_in_code", text: fill.accept[0] }));
+  }
+  check("an unrelated answer grades incorrect", !gradeAnswer(fill, { id: fill.id, kind: "fill_in_code", text: "nonsense" }));
+
+  const allCorrect = gradeDiagnostic(
+    DIAGNOSTIC_QUESTIONS.map((q) =>
+      q.kind === "multiple_choice"
+        ? { id: q.id, kind: "multiple_choice" as const, choiceIndex: q.answerIndex }
+        : q.kind === "code_tracing"
+          ? { id: q.id, kind: "code_tracing" as const, text: q.expectedOutput }
+          : { id: q.id, kind: "fill_in_code" as const, text: q.answer }
+    )
+  );
+  check("answering everything correctly scores 8 for 8", allCorrect.graded.every((g) => g.correct));
+  check("and every dimension reports 100%", Object.values(allCorrect.perDimension).every((b) => b!.correct === b!.total));
+
+  const nothingAnswered = gradeDiagnostic([]);
+  check("answering nothing grades every question incorrect, not a crash", nothingAnswered.graded.every((g) => !g.correct));
+  check("and still reports every dimension, at 0", Object.values(nothingAnswered.perDimension).every((b) => b!.correct === 0));
+
+  console.log("\nroadmap generation — sections from the model's small wire shape");
+  check("no extras produces no sections, not a crash", buildGeneratedSections({ pitfall: "", reflection: "" }).length === 0);
+  check(
+    "a pitfall alone becomes one callout section",
+    (() => {
+      const s = buildGeneratedSections({ pitfall: "Forgetting to close the connection.", reflection: "" });
+      return s.length === 1 && s[0].kind === "concept" && s[0].activities[0]?.type === "callout";
+    })()
+  );
+  check(
+    "a check alone becomes one interactive_understanding section",
+    (() => {
+      const s = buildGeneratedSections({
+        pitfall: "",
+        reflection: "",
+        check: { prompt: "Which is idempotent?", choices: ["POST", "PUT"], answerIndex: 1, explanation: "" },
+      });
+      return s.length === 1 && s[0].kind === "interactive_understanding" && s[0].activities[0]?.type === "multiple_choice";
+    })()
+  );
+  check(
+    "an out-of-range answerIndex is clamped, not dropped",
+    (() => {
+      const s = buildGeneratedSections({
+        pitfall: "",
+        reflection: "",
+        check: { prompt: "Which is idempotent?", choices: ["POST", "PUT"], answerIndex: 9, explanation: "" },
+      });
+      const mc = s[0]?.activities[0];
+      return mc?.type === "multiple_choice" && mc.answerIndex === 0;
+    })()
+  );
+  check(
+    "a check with too few choices is dropped rather than crashing the lesson",
+    buildGeneratedSections({ pitfall: "", reflection: "", check: { prompt: "?", choices: ["only one"], answerIndex: 0, explanation: "" } }).length === 0
+  );
+  check(
+    "all three together produce three sections",
+    buildGeneratedSections({
+      pitfall: "A real mistake.",
+      reflection: "What surprised you?",
+      check: { prompt: "?", choices: ["a", "b"], answerIndex: 0, explanation: "" },
+    }).length === 3
+  );
+  check(
+    "a teach-back becomes its own section, aiFree by construction",
+    (() => {
+      const s = buildGeneratedSections({
+        pitfall: "",
+        reflection: "",
+        teachBack: { prompt: "Explain it.", rubric: ["Covers X", "Covers Y"] },
+      });
+      const tb = s[0]?.activities[0];
+      return s.length === 1 && s[0].kind === "teach_back" && tb?.type === "teach_back" && tb.aiFree === true;
+    })()
+  );
+  check(
+    "a teach-back with no rubric at all is dropped, not sent with an empty one",
+    buildGeneratedSections({ pitfall: "", reflection: "", teachBack: { prompt: "Explain it.", rubric: [] } }).length === 0
+  );
+  check(
+    "all four extras together produce four sections",
+    buildGeneratedSections({
+      pitfall: "A real mistake.",
+      reflection: "What surprised you?",
+      check: { prompt: "?", choices: ["a", "b"], answerIndex: 0, explanation: "" },
+      teachBack: { prompt: "Explain it.", rubric: ["Covers X"] },
+    }).length === 4
+  );
+
+  console.log("\nroadmap generation — measurable objectives from plain text + tags");
+  const objs = buildGeneratedObjectives(
+    ["Explain the difference between GET and POST", "Implement a REST endpoint with validation"],
+    [
+      { dimension: "knowledge", cognitiveLevel: "understand" },
+      { dimension: "implementation", cognitiveLevel: "apply" },
+    ],
+    { difficulty: "beginner", estimatedMinutes: 30 }
+  );
+  check("both objectives survive with their real statements", objs.length === 2 && objs[1].statement.includes("REST endpoint"));
+  check("each keeps the dimension tag it was given", objs[0].dimensions[0] === "knowledge" && objs[1].dimensions[0] === "implementation");
+  check("and the cognitive level", objs[1].cognitiveLevel === "apply");
+  check(
+    "estimated minutes are split across the objectives, not duplicated on each",
+    objs[0].estimatedMinutes === 15 && objs[1].estimatedMinutes === 15
+  );
+
+  const untagged = buildGeneratedObjectives(
+    ["Write a function that reverses a string"],
+    [], // the model returned no tags at all
+    { difficulty: "beginner", estimatedMinutes: 20 }
+  );
+  check("an objective with no tag still survives, defaulted rather than dropped", untagged.length === 1);
+  check("defaulted to knowledge/understand", untagged[0].dimensions[0] === "knowledge" && untagged[0].cognitiveLevel === "understand");
+
+  // Objective.statement is `min(1)` on raw length, not trimmed content — so
+  // this has to be truly empty, not whitespace, to actually exercise the
+  // rejection. Written out because that distinction is exactly the kind of
+  // thing a test using "   " would get wrong silently.
+  const blank = buildGeneratedObjectives([""], [{ dimension: "knowledge", cognitiveLevel: "understand" }], {
+    difficulty: "beginner",
+    estimatedMinutes: 10,
+  });
+  check("an empty statement is dropped by the schema's own min-length rule", blank.length === 0);
 }
 
 /* --------------------------------------------- the structured lesson, stored */
@@ -615,6 +778,309 @@ async function checkEvidenceWritePath() {
 
   await Challenge.deleteMany({ _id: { $in: [challenge._id, debugChallenge._id, orphan._id] } });
   await Evidence.deleteMany({ user: user._id });
+  delete process.env.SMOKE_CLERK_ID;
+}
+
+/* ------------------------------------------------------------- hint ladder */
+
+async function checkHintLadder() {
+  console.log("\nhint ladder — server-enforced progression and evidence");
+
+  const { Evidence, Lesson, LessonProgress } = await import("../src/lib/models");
+  const { setGateStep, requestExerciseHint } = await import("../src/lib/actions");
+  const { getIndependence } = await import("../src/lib/queries");
+
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  const user = await requireUser();
+
+  const lesson = await Lesson.findOne().sort({ order: 1 }).lean<{ _id: unknown; skill: unknown }>();
+  if (!lesson) {
+    failures.push("no lessons in the database — run `npm run seed` first");
+    return;
+  }
+  const lessonId = String(lesson._id);
+  await Evidence.deleteMany({ user: user._id });
+  await LessonProgress.updateOne({ user: user._id, lesson: lessonId }, { $set: { hintLevel: 0 } });
+
+  // ---- the skip-refusal is checked before any model call, so it is testable
+  // with no AI provider configured — the same property a cold-start CI run
+  // needs to hold.
+  const skipped = await requestExerciseHint(lessonId, 4);
+  check("a request more than one rung past the current level is refused", skipped.ok === false);
+  check(
+    "and the lesson's own progress is untouched by the refusal",
+    (await LessonProgress.findOne({ user: user._id, lesson: lessonId }).lean<{ hintLevel?: number }>())
+      ?.hintLevel === 0
+  );
+
+  // ---- the level a learner actually reached flows into the evidence that
+  // ticking the exercise produces. This is the property the whole ladder
+  // exists for — exercised without asking recorded no assist level at all
+  // (DECISIONS 026); this is the first thing that gives it a real number.
+  await LessonProgress.updateOne({ user: user._id, lesson: lessonId }, { $set: { hintLevel: 3 } });
+  await setGateStep(lessonId, "exercised", false);
+  await setGateStep(lessonId, "exercised", true);
+
+  const claim = await Evidence.findOne({ user: user._id, source: "self_report" }).lean<{
+    assistLevel?: number;
+    detail?: string;
+  }>();
+  check("the exercise claim carries the level the ladder actually reached", claim?.assistLevel === 3);
+  check("and says so in its own detail line", (claim?.detail ?? "").includes("level 3"));
+
+  const afterClaim = await LessonProgress.findOne({ user: user._id, lesson: lessonId }).lean<{
+    hintLevel?: number;
+  }>();
+  check("the ladder resets once the exercise is marked done", afterClaim?.hintLevel === 0);
+
+  // ---- an unaided claim is still distinguishable from a hinted one: no
+  // level recorded at all, not a fabricated zero that looks the same as
+  // "measured and found to be zero".
+  await Evidence.deleteMany({ user: user._id });
+  await setGateStep(lessonId, "exercised", false);
+  await setGateStep(lessonId, "exercised", true);
+  const unaided = await Evidence.findOne({ user: user._id, source: "self_report" }).lean<{
+    assistLevel?: number;
+    detail?: string;
+  }>();
+  check("an unaided claim records no assist level", unaided?.assistLevel === undefined);
+  check("and its detail line says so", (unaided?.detail ?? "").includes("unaided"));
+
+  // ---- the independence metric this was all built to feed. Phase 1 shipped
+  // it honestly reporting sample: 0 forever, because nothing wrote a real
+  // assist level. This is the first real number it has ever seen.
+  await LessonProgress.updateOne({ user: user._id, lesson: lessonId }, { $set: { hintLevel: 2 } });
+  await setGateStep(lessonId, "exercised", false);
+  await setGateStep(lessonId, "exercised", true);
+  const independence = await getIndependence(user._id);
+  check("a hinted claim finally gives the independence metric a sample", independence.sample >= 1);
+  check("and counts it as hinted, not independent", independence.hinted > 0);
+
+  await Evidence.deleteMany({ user: user._id });
+  await LessonProgress.updateOne({ user: user._id, lesson: lessonId }, { $set: { hintLevel: 0 } });
+  delete process.env.SMOKE_CLERK_ID;
+}
+
+/* ------------------------------------------------------------- diagnostic */
+
+async function checkDiagnostic() {
+  console.log("\ndiagnostic — the recorded assessment");
+
+  const { Evidence, Skill, User } = await import("../src/lib/models");
+  const { submitDiagnostic } = await import("../src/lib/actions");
+  const { getDiagnosticProfile, getSkillCompetency } = await import("../src/lib/queries");
+
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  const user = await requireUser();
+
+  await Evidence.deleteMany({ user: user._id });
+  await User.updateOne({ _id: user._id }, { $unset: { onboardedAt: "" } });
+
+  // Answer half right, half wrong, on purpose — a diagnostic that only ever
+  // gets tested with a perfect score would not catch a grading bug that only
+  // shows up on a miss.
+  const answers = DIAGNOSTIC_QUESTIONS.map((q, i) => {
+    const rightAnswer =
+      q.kind === "multiple_choice"
+        ? { id: q.id, kind: "multiple_choice" as const, choiceIndex: q.answerIndex }
+        : q.kind === "code_tracing"
+          ? { id: q.id, kind: "code_tracing" as const, text: q.expectedOutput }
+          : { id: q.id, kind: "fill_in_code" as const, text: q.answer };
+    if (i % 2 === 0) return rightAnswer;
+    return q.kind === "multiple_choice"
+      ? { id: q.id, kind: "multiple_choice" as const, choiceIndex: (q.answerIndex + 1) % q.choices.length }
+      : { id: q.id, kind: q.kind, text: "definitely wrong" };
+  });
+
+  const result = await submitDiagnostic(answers, "A short, real answer about two threads touching one variable.");
+  check("submission reports a score out of the real question count", result.total === DIAGNOSTIC_QUESTIONS.length);
+  check("half right, half wrong, is what got submitted", result.score === Math.ceil(DIAGNOSTIC_QUESTIONS.length / 2));
+
+  const rows = await Evidence.find({ user: user._id, source: "diagnostic" }).lean<
+    { dimension: string; strength: number; verified: boolean; skill?: unknown }[]
+  >();
+  check("one evidence row per question", rows.length === DIAGNOSTIC_QUESTIONS.length);
+  check("every diagnostic row is machine-graded, so verified", rows.every((r) => r.verified === true));
+  check("and carries no skill — there is no roadmap yet to attach it to", rows.every((r) => r.skill === undefined));
+  check(
+    "strength reflects right vs wrong, not a flat participation score",
+    rows.some((r) => r.strength === 1) && rows.some((r) => r.strength === 0)
+  );
+
+  const selfReport = await Evidence.findOne({ user: user._id, source: "self_report", dimension: "explanation" }).lean<{
+    verified: boolean;
+  } | null>();
+  check("a real free-response answer is recorded", !!selfReport);
+  check("as an honest self-report, not a graded diagnostic row", selfReport?.verified === false);
+
+  const trivial = await submitDiagnostic([], "idk");
+  check("submitting again does not error", trivial.total === DIAGNOSTIC_QUESTIONS.length);
+  const selfReportCount = await Evidence.countDocuments({ user: user._id, source: "self_report", dimension: "explanation" });
+  check("a trivially short free-response is not recorded as an attempt", selfReportCount === 1);
+
+  const afterFirst = await User.findById(user._id).lean<{ onboardedAt?: Date }>();
+  check("the first diagnostic sets onboardedAt", !!afterFirst?.onboardedAt);
+  const firstStamp = afterFirst!.onboardedAt;
+
+  await submitDiagnostic(answers, "");
+  const afterRetake = await User.findById(user._id).lean<{ onboardedAt?: Date }>();
+  check(
+    "retaking it does not move the original onboarded date",
+    afterRetake?.onboardedAt?.getTime() === firstStamp?.getTime()
+  );
+
+  // ---- reading it back
+  const profile = await getDiagnosticProfile(user._id);
+  check("a diagnostic profile is derivable from the recorded evidence", profile !== null);
+  check(
+    "it covers the four tested dimensions, not eight",
+    profile!.dimensions.length === 4 && profile!.dimensions.every((d) => ["knowledge", "problem_solving", "implementation", "debugging"].includes(d.dimension))
+  );
+
+  // ---- the property the skill-less design exists for: every diagnostic row
+  // written above is real, verified evidence, and none of it counts toward
+  // any specific skill, because none of it carries one.
+  const skill = await Skill.findOne();
+  if (skill) {
+    const skillProfile = await getSkillCompetency(user._id, skill._id);
+    check(
+      "diagnostic evidence never inflates a specific skill's competency",
+      skillProfile.dimensions.every((d) => d.count === 0)
+    );
+  }
+
+  const noProfile = await getDiagnosticProfile("000000000000000000000000");
+  check("a user with no diagnostic evidence gets null, not a fabricated empty profile", noProfile === null);
+
+  await Evidence.deleteMany({ user: user._id });
+  await User.updateOne({ _id: user._id }, { $unset: { onboardedAt: "" } });
+  delete process.env.SMOKE_CLERK_ID;
+}
+
+/* ---------------------------------------------------------------- tutor state */
+
+async function checkTutorState() {
+  console.log("\ntutor state — what the AI is actually told");
+
+  const { Evidence, Lesson } = await import("../src/lib/models");
+  const { learnerStateSummary } = await import("../src/lib/ai-context");
+
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  const user = await requireUser();
+
+  const lesson = await Lesson.findOne().sort({ order: 1 }).lean<{ _id: unknown; skill: unknown }>();
+  if (!lesson) {
+    failures.push("no lessons in the database — run `npm run seed` first");
+    return;
+  }
+  const skillId = lesson.skill;
+  await Evidence.deleteMany({ user: user._id });
+
+  const empty = await learnerStateSummary(user._id, skillId);
+  check("nothing recorded says nothing, rather than a mastery of zero", empty === "");
+
+  // ---- competency half
+  await Evidence.create([
+    { user: user._id, skill: skillId, dimension: "implementation", source: "challenge", strength: 1, verified: true },
+    { user: user._id, skill: skillId, dimension: "implementation", source: "challenge", strength: 1, verified: true },
+  ]);
+  const withCompetency = await learnerStateSummary(user._id, skillId);
+  check("real skill evidence produces a competency line", withCompetency.includes("competency in this skill"));
+  check("it names what is still missing", /Weakest|already has evidence/.test(withCompetency));
+
+  const wrongSkill = await learnerStateSummary(user._id, "000000000000000000000000");
+  check("evidence for one skill does not leak into a summary for another", !wrongSkill.includes("competency in this skill"));
+
+  await Evidence.deleteMany({ user: user._id });
+
+  // ---- independence half — below the sample floor
+  await Evidence.create(
+    Array.from({ length: 4 }, () => ({
+      user: user._id,
+      skill: skillId,
+      dimension: "implementation",
+      source: "challenge",
+      strength: 1,
+      verified: true,
+      assistLevel: 0,
+    })),
+  );
+  const tooFewSamples = await learnerStateSummary(user._id);
+  check("fewer than ten measured pieces of work says nothing about dependency", !tooFewSamples.includes("graded pieces of work"));
+  await Evidence.deleteMany({ user: user._id });
+
+  // ---- independence half — heavy on being shown the answer
+  await Evidence.create(
+    Array.from({ length: 10 }, (_, i) => ({
+      user: user._id,
+      skill: skillId,
+      dimension: "implementation",
+      source: "challenge",
+      strength: 1,
+      verified: true,
+      assistLevel: i < 5 ? 6 : 0, // 50% shown the full solution, well over the 30% guidance threshold
+    })),
+  );
+  const heavyOnSolutions = await learnerStateSummary(user._id);
+  check("ten or more samples does report the dependency split", heavyOnSolutions.includes("graded pieces of work"));
+  check(
+    "leaning on full solutions steers the tutor toward lower hints, not silence",
+    heavyOnSolutions.includes("favour the lower rungs")
+  );
+  await Evidence.deleteMany({ user: user._id });
+
+  // ---- independence half — mostly unaided
+  await Evidence.create(
+    Array.from({ length: 10 }, (_, i) => ({
+      user: user._id,
+      skill: skillId,
+      dimension: "implementation",
+      source: "challenge",
+      strength: 1,
+      verified: true,
+      assistLevel: i < 7 ? 0 : 6, // 70% unaided, over the 60% threshold
+    })),
+  );
+  const mostlyUnaided = await learnerStateSummary(user._id);
+  check("mostly unaided work steers toward trusting them, not over-explaining", mostlyUnaided.includes("a small nudge is usually enough"));
+
+  await Evidence.deleteMany({ user: user._id });
+  delete process.env.SMOKE_CLERK_ID;
+}
+
+/* -------------------------------------------------------------- teach-back */
+
+/**
+ * `gradeTeachBack` calls a real model — every other AI-dependent action in
+ * this suite (`requestExerciseHint`, `generateRoadmap`) is tested the same
+ * way for the same reason, see DECISIONS 032/033: the suite's reliability
+ * must not depend on a provider key happening to be present in whatever
+ * environment it runs in. This only exercises the guard that returns before
+ * any network call is made.
+ */
+async function checkTeachBackGuard() {
+  console.log("\nteach-back — the guard before any model call");
+
+  const { Lesson } = await import("../src/lib/models");
+  const { gradeTeachBack } = await import("../src/lib/actions");
+
+  process.env.SMOKE_CLERK_ID = CLERK_ID;
+  const { requireUser } = await import("../src/lib/user");
+  await requireUser();
+
+  const lesson = await Lesson.findOne().sort({ order: 1 }).lean<{ _id: unknown }>();
+  if (!lesson) {
+    failures.push("no lessons in the database — run `npm run seed` first");
+    return;
+  }
+
+  const empty = await gradeTeachBack(String(lesson._id), "Explain it.", ["Covers X"], "   ");
+  check("an empty explanation is refused before any grading call", empty.ok === false);
+  check("and says what to do, not a generic error", !empty.ok && empty.message === "Write an explanation first.");
+
   delete process.env.SMOKE_CLERK_ID;
 }
 
@@ -1440,6 +1906,10 @@ async function main() {
   await checkTheLoop();
   await checkLearningSchema();
   await checkEvidenceWritePath();
+  await checkHintLadder();
+  await checkDiagnostic();
+  await checkTutorState();
+  await checkTeachBackGuard();
   await checkProjects();
   await checkKnowledge();
   await checkPractice();

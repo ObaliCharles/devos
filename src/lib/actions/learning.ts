@@ -8,6 +8,10 @@ import type { GateKey } from "../models";
 import { addXp, recordActivity, requireUser } from "../user";
 import { grade, nextDue } from "../srs";
 import { evidenceFromExerciseClaim, evidenceFromQuiz, evidenceFromReview } from "../evidence";
+import { checkCap, isConfigured, recordUsage } from "../ai";
+import { completeChat } from "../ai-provider";
+import { LADDER_INSTRUCTION, isLevelAllowed, type HintLevel } from "../hint-ladder";
+import { learnerStateSummary } from "../ai-context";
 
 const PASS_MARK = 0.8;
 
@@ -96,16 +100,99 @@ export async function setGateStep(lessonId: string, key: GateKey, value: boolean
   if (progress.state !== "mastered") {
     progress.state = progress.gate.exercised ? "practicing" : "learning";
   }
+
+  // Read before the reset below, so the evidence call after `save()` reports
+  // how much help *this* attempt used, not zero.
+  const hintLevelUsed = progress.hintLevel ?? 0;
+  const isExerciseTransition = key === "exercised" && value && !was;
+  if (isExerciseTransition) {
+    // Fresh ladder for next time — see the field's own comment on
+    // LessonProgress. Redoing the exercise later should not inherit today's
+    // assistance.
+    progress.hintLevel = 0;
+  }
   await progress.save();
 
   // Only the exercise claim, and only on the transition. `read` and `reviewed`
   // demonstrate nothing so they record nothing, and writing a row on every
   // toggle would let one impatient click produce a pile of identical evidence.
-  if (key === "exercised" && value && !was) {
-    await evidenceFromExerciseClaim(user._id, lessonId);
+  if (isExerciseTransition) {
+    await evidenceFromExerciseClaim(user._id, lessonId, hintLevelUsed);
   }
 
   revalidatePath(`/learning/lesson/${lessonId}`);
+}
+
+/**
+ * The hint ladder (lib/hint-ladder.ts), for the exercise on this lesson.
+ *
+ * `level` is what the client is asking for; whether it gets it is decided
+ * here, against the deepest level already reached — the same "client disables
+ * as a courtesy, server refuses as a rule" split the mastery gate uses. A
+ * request for level 6 from someone who has not yet asked for level 1 is
+ * refused, not served at a lower level and not silently capped: the caller
+ * needs to know its request did not go through, or a client bug would look
+ * like the ladder working.
+ */
+export async function requestExerciseHint(lessonId: string, level: number) {
+  await connectDB();
+  const user = await requireUser();
+
+  const { progress } = await progressFor(user._id, lessonId);
+  const current = progress.hintLevel ?? 0;
+
+  if (!isLevelAllowed(level, current)) {
+    return { ok: false as const, message: "Try the level below first." };
+  }
+
+  if (!isConfigured()) {
+    return { ok: false as const, message: "The AI tutor is not configured." };
+  }
+  const cap = await checkCap(user._id);
+  if (!cap.ok) return { ok: false as const, message: cap.reason };
+
+  const lesson = await Lesson.findById(lessonId).select("title exercise skill").lean<{
+    title: string;
+    exercise?: { brief?: string; acceptance?: string[] };
+    skill?: unknown;
+  } | null>();
+  if (!lesson?.exercise?.brief) {
+    return { ok: false as const, message: "This lesson has no exercise to get a hint on." };
+  }
+
+  // §10's "current mastery" and "AI dependency" made concrete: the same
+  // learner state the concept tutor reads, here at the point it matters most
+  // — someone already on the hint ladder is exactly who "have they been
+  // leaning on full solutions lately" should change the tone for.
+  const state = await learnerStateSummary(user._id, lesson.skill);
+
+  const { text, usage, provider } = await completeChat({
+    maxTokens: 500,
+    system:
+      "You are the tutor inside DeveloperOS, walking a learner down a hint ladder on their " +
+      "exercise. Answer at exactly the level you are given, never more. Be concrete and use code " +
+      "where the level allows it. Stay under 200 words unless writing a full solution.\n\n" +
+      `Level ${level} of 6: ${LADDER_INSTRUCTION[level as HintLevel]}` +
+      (state ? `\n\nWhat you know about this learner:\n${state}` : ""),
+    messages: [
+      {
+        role: "user",
+        content:
+          `Lesson: ${lesson.title}\n\nExercise:\n${lesson.exercise.brief}` +
+          (lesson.exercise.acceptance?.length
+            ? `\n\nDone when:\n${lesson.exercise.acceptance.map((a) => `- ${a}`).join("\n")}`
+            : ""),
+      },
+    ],
+  });
+
+  await recordUsage(user._id, usage.input, usage.output, provider);
+
+  progress.hintLevel = Math.max(current, level);
+  await progress.save();
+
+  revalidatePath(`/learning/lesson/${lessonId}`);
+  return { ok: true as const, text, level };
 }
 
 export async function submitQuiz(lessonId: string, correct: number, total: number) {

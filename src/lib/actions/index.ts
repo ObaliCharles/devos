@@ -20,6 +20,8 @@
  */
 
 export * from "./learning";
+export * from "./diagnostic";
+export * from "./teach-back";
 export * from "./roadmaps";
 export * from "./catalog";
 export * from "./knowledge";

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Bug, Clock, FolderKanban, Pin, Plus, Rocket, Timer } from "lucide-react";
+import { Bug, FolderKanban, Pin, Plus, Rocket, Timer } from "lucide-react";
 import { requireUser } from "@/lib/user";
 import { getProjects, getProjectStats } from "@/lib/queries";
-import { Badge, EmptyState, PageHeader, ProgressBar, StatTile, type Tone } from "@/components/ui";
+import { Badge, EmptyState, PageHeader, ProgressBar, Section, Stat, StatRow, type Tone } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -44,33 +44,23 @@ export default async function ProjectsPage({
         }
       />
 
-      <section className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Project summary">
-        <StatTile
-          label="Active"
-          value={stats.active}
-          sub={`${stats.complete} complete`}
-          icon={<FolderKanban size={17} />}
-        />
-        <StatTile
-          label="Tasks open"
-          value={stats.tasksDue}
-          sub="across all projects"
-          icon={<Timer size={17} />}
-        />
-        <StatTile
-          label="Open bugs"
-          value={stats.bugs}
-          sub={stats.bugs ? "needs attention" : "all clear"}
-          icon={<Bug size={17} />}
-          tone={stats.bugs ? "danger" : "success"}
-        />
-        <StatTile
-          label="Time logged"
-          value={`${stats.hours}h`}
-          sub={`${stats.deployments} deployments`}
-          icon={<Clock size={17} />}
-        />
-      </section>
+      {/* Four separate cards said "four unrelated things"; these are one
+          reading of the same portfolio, so one divided row — same conversion
+          as /analytics and the dashboard. The icons are gone with them: a
+          folder beside "Active" added nothing the word did not already say. */}
+      <Section major={false}>
+        <StatRow className="stagger" aria-label="Project summary">
+          <Stat label="Active" value={stats.active} sub={`${stats.complete} complete`} />
+          <Stat label="Tasks open" value={stats.tasksDue} sub="across all projects" />
+          <Stat
+            label="Open bugs"
+            value={stats.bugs}
+            sub={stats.bugs ? "needs attention" : "all clear"}
+            tone={stats.bugs ? "danger" : "success"}
+          />
+          <Stat label="Time logged" value={`${stats.hours}h`} sub={`${stats.deployments} deployments`} />
+        </StatRow>
+      </Section>
 
       <div className="section-stack">
         <nav className="segmented w-fit" aria-label="Filter projects">

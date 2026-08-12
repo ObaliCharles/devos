@@ -1,22 +1,25 @@
 import { getAdminOverview } from "@/lib/queries";
-import { StatCard } from "@/components/ui";
+import { Section, Stat, StatRow } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
   const o = await getAdminOverview();
   return (
-    <div className="flex flex-col gap-6">
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Users" value={o.users} sub={`${o.admins} admin`} />
-        <StatCard label="Lessons" value={o.lessons} sub={`${o.roadmaps} roadmap`} />
-        <StatCard label="Challenges" value={o.challenges} />
-        <StatCard label="Projects" value={o.projects} sub="across all users" />
-      </section>
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Notes" value={o.notes} />
-        <StatCard label="AI spend today" value={`$${o.aiSpendUsd.toFixed(2)}`} sub={`${o.aiRequests} requests`} />
-      </section>
+    <div className="page-body">
+      {/* Six numbers as two 4-up and 2-up card grids — the same pattern
+          already fixed on /analytics, the dashboard, /projects. One reading
+          of the same platform, one row. */}
+      <Section major={false}>
+        <StatRow>
+          <Stat label="Users" value={o.users} sub={`${o.admins} admin`} />
+          <Stat label="Lessons" value={o.lessons} sub={`${o.roadmaps} roadmap`} />
+          <Stat label="Challenges" value={o.challenges} />
+          <Stat label="Projects" value={o.projects} sub="across all users" />
+          <Stat label="Notes" value={o.notes} />
+          <Stat label="AI spend today" value={`$${o.aiSpendUsd.toFixed(2)}`} sub={`${o.aiRequests} requests`} />
+        </StatRow>
+      </Section>
       <section className="card p-5">
         <p className="eyebrow">About this panel</p>
         <p className="mt-3 text-ui leading-relaxed" style={{ color: "var(--text-muted)" }}>

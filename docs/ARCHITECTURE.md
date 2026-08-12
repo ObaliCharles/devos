@@ -65,6 +65,15 @@ drops what no longer parses rather than losing the lesson.
 stays and is still read. `checkObjective()` rejects "Understand APIs"
 deterministically, with no model call, the way the ATS scorer grades a resume.
 
+`lib/roadmap-gen.ts` is what actually populates both on a generated path.
+Pass 2 does not ask the model for `Section`/`Activity` JSON — that union is 23
+variants, too much to ask for reliably alongside a body, a quiz and tasks in
+one call. It asks for a small flat wire shape instead (one pitfall paragraph,
+one check question, one reflection prompt, one dimension tag per objective);
+`lib/roadmap-gen-sections.ts` — pure, no network, so it is smoke-tested
+directly — turns that into real, `Section.safeParse`/`Objective.safeParse`-
+validated data. A malformed piece is dropped, never the lesson.
+
 ### Evidence, and why competence is a query
 
 `Evidence` is append-only. Nothing anywhere stores "the current mastery level"
@@ -83,6 +92,37 @@ Writes go through `lib/evidence.ts`, which is **not a server action and must not
 become one** — see DECISIONS 026. Reads go through `lib/queries/competency.ts`;
 use `getCompetencyMap()` for more than one skill rather than looping
 `getSkillCompetency()`, for the same reason `getRoadmap()` is four queries.
+
+`Evidence.skill` is normally required and optional for exactly one case:
+`source: "diagnostic"` rows from `/diagnostic` (lib/diagnostic.ts,
+lib/actions/diagnostic.ts), taken before a learner has a roadmap to scope them
+to. Read them back with `getDiagnosticProfile()`, never by looping a
+skill-scoped query — see DECISIONS 034.
+
+### What the AI tutor is told
+
+`lib/ai-context.ts`'s `learnerStateSummary()` is the one place "current
+mastery" and "AI dependency" get turned into a paragraph a model can act on —
+shared by `buildSystemContext` (the concept tutor) and `requestExerciseHint`
+(the hint ladder) rather than each callsite phrasing it separately. Silent
+below real thresholds (no competency evidence, or an independence sample under
+10) rather than reporting a number that would mean nothing. See DECISIONS 035.
+
+### The reader
+
+`components/learn/lesson-reader.tsx` and `activity-renderer.tsx` render
+`sections` when a lesson has them, falling back to the `body` markdown card
+otherwise — same seam, same rule. **Almost nothing in the renderer writes
+evidence.** Every activity answer is local client state; only the five server
+actions that already grade something (`submitQuiz`, `submitCode`,
+`gradeReview`, `setGateStep`, and now `gradeTeachBack`) call into
+`lib/evidence.ts`. `teach_back` is the one deliberate exception — a real,
+AI-graded server action, which is why `ActivityRenderer` takes a `lessonId`
+prop every other activity type ignores. See DECISIONS 027 and 036.
+
+The four executing activity types (`coding_exercise`, `debugging_exercise`,
+`interactive_example`, `assessment`) render locked until `lib/runner.ts` is a
+real sandbox — checked via `EXECUTING_ACTIVITY_TYPES`, not by omission.
 
 Content collections are **global**. There is no owner on Roadmap, because there
 is one user. That is the single biggest thing to change before this is

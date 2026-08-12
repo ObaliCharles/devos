@@ -1,6 +1,14 @@
 import { z } from "zod";
 import { completeChat, researchResources, type Resource } from "./ai-provider";
 import { planShape } from "./plan-shape";
+import { extractJson } from "./ai-json";
+import type { Objective, Section } from "./lesson-schema";
+import {
+  GeneratedExtras,
+  ObjectiveTag,
+  buildGeneratedObjectives,
+  buildGeneratedSections,
+} from "./roadmap-gen-sections";
 
 /**
  * Turning a topic and a goal into a full learning path.
@@ -61,6 +69,16 @@ const Lesson = z.object({
   body: z.string().optional().default(""),
   quiz: z.array(Question).max(5).optional().default([]),
   tasks: z.array(Task).max(6).optional().default([]),
+  /**
+   * The structured additions from Pass 2 — see roadmap-gen-sections.ts. Empty
+   * on every lesson until that stage runs, and stays empty for any lesson
+   * whose content call failed, so a lesson with no sections still has its
+   * `body` and renders exactly as a generated path always has. This is the
+   * same two-field seam DECISIONS 025 put on the Lesson model, arrived at
+   * from the generator's side rather than the schema's.
+   */
+  learningObjectives: z.custom<Objective>().array().default([]),
+  sections: z.custom<Section>().array().default([]),
 });
 
 const Skill = z.object({
@@ -173,9 +191,22 @@ Shape:
       "title": string,      // echo the title you were given, unchanged
       "body": string,       // markdown. See rules.
       "quiz": [ { "prompt": string, "choices": string[], "answerIndex": number, "explanation": string } ],
-      "tasks": [ { "level": 1 | 2 | 3, "prompt": string, "hint": string } ]
+      "tasks": [ { "level": 1 | 2 | 3, "prompt": string, "hint": string } ],
+      "pitfall": string,    // one paragraph: the mistake a beginner actually makes here. See rules.
+      "check": { "prompt": string, "choices": string[], "answerIndex": number, "explanation": string } | null,
+      "reflection": string, // one question for the learner to answer in their own words after finishing
+      "objectiveTags": [    // exactly one per objective you were given, same order
+        {
+          "dimension": "knowledge" | "recall" | "application" | "problem_solving" | "implementation" | "debugging" | "transfer" | "explanation",
+          "cognitiveLevel": "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create"
+        }
+      ]
     }
-  ]
+  ],
+  "teachBack": {          // ONE per skill, not per lesson — see rules. null if this skill does not warrant one.
+    "prompt": string,     // "Explain [the skill's core idea] without looking at your notes."
+    "rubric": string[]    // 2 to 6 things a complete explanation would mention
+  } | null
 }
 
 Body rules:
@@ -192,6 +223,26 @@ Task rules:
 - 3 to 5 tasks. Level 1 is recall you can do straight after reading, level 2 combines two ideas, level 3 is a small problem where the approach is not handed to you.
 - Each task must be something you can actually sit down and do. State the input and what the finished result looks like.
 - Include at least one level 1 and at least one level 2.
+
+Pitfall rules:
+- One real mistake a beginner makes with THIS specific idea, and how it actually shows up (an error message, a wrong result, a subtle bug) — not generic advice like "be careful" or "read the docs".
+
+Check rules:
+- This is a different question from the quiz above — it checks the single core idea of the lesson, asked a different way. It is answered while reading, not graded; write it so a learner who understood the body can answer it in a few seconds.
+- If nothing in the lesson has one clear core idea worth checking this way, omit "check" entirely (send null) rather than inventing a trivial question.
+
+Reflection rule:
+- One question with no single correct answer — "what surprised you", "where would this go wrong in your own project" — that asks the learner to connect the lesson to what they already know.
+
+Objective tag rules:
+- One tag per objective, in the same order as the objectives you were given for that lesson. Do not skip one and do not add extra.
+- "dimension" is what kind of capability the objective demonstrates once met — pick the one that fits best, not several.
+- "cognitiveLevel" follows Bloom's taxonomy. An objective that only asks the learner to recall a fact is "remember", not "analyze".
+
+Teach-back rules:
+- This is for the skill as a whole, once — not one per lesson. Ask the learner to explain the single idea the whole skill was building toward, in their own words, as if teaching someone who has not taken it.
+- Write null if this skill is too narrow or too procedural to have one core idea worth explaining back (a single-fact lesson, a pure syntax reference). A forced teach-back on nothing worth explaining is worse than skipping it.
+- The rubric is graded against later, by a different process — write it as what a strong answer covers, not as the answer itself with the wording changed.
 
 Source rules:
 - You may be given researched sources with real URLs. Where one is relevant, cite it inline in the body as a markdown link and say what to read there.
@@ -265,19 +316,6 @@ function buildContentPrompt(
   ].join("\n");
 }
 
-/** Pull the JSON object out of a model reply, tolerant of stray text/fences. */
-function extractJson(text: string): unknown {
-  const trimmed = text.trim();
-  // Strip a ```json ... ``` fence if the model added one despite instructions.
-  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const candidate = fenced ? fenced[1] : trimmed;
-  const start = candidate.indexOf("{");
-  const end = candidate.lastIndexOf("}");
-  if (start === -1 || end === -1 || end < start) {
-    throw new Error("The model did not return JSON.");
-  }
-  return JSON.parse(candidate.slice(start, end + 1));
-}
 
 export type GenerateResult =
   | { ok: true; roadmap: GeneratedRoadmap; provider: string; resources: Resource[] }
@@ -297,9 +335,22 @@ const SkillContent = z.object({
         body: z.string().default(""),
         quiz: z.array(Question).max(3).optional().default([]),
         tasks: z.array(Task).max(6).optional().default([]),
+        // The small wire shape roadmap-gen-sections.ts turns into real
+        // sections/objectives. Optional throughout: a lesson that returns a
+        // body but no pitfall still gets that body, exactly as before this
+        // existed — see the Lesson schema's own note on the seam.
+        pitfall: z.string().max(600).optional().default(""),
+        check: GeneratedExtras.shape.check.optional(),
+        reflection: z.string().max(300).optional().default(""),
+        objectiveTags: z.array(ObjectiveTag).max(6).optional().default([]),
       }),
     )
     .default([]),
+  // One per *skill*, not per lesson — Chapter 5 is explicit that not every
+  // lesson needs every activity, and teach-back is described as the rarer,
+  // stronger kind of evidence. Attached in code to the skill's last lesson,
+  // as the checkpoint for what the whole skill was building toward.
+  teachBack: GeneratedExtras.shape.teachBack.optional(),
 });
 
 export async function generateRoadmap(
@@ -416,6 +467,25 @@ export async function generateRoadmap(
           if (written.body.trim().length >= 120) lesson.body = written.body;
           if (written.quiz.length) lesson.quiz = written.quiz;
           if (written.tasks.length) lesson.tasks = written.tasks;
+
+          // Best-effort, on top of everything above: sections/objectives are
+          // additive, so a malformed pitfall or a missing check costs exactly
+          // that piece — never the body, quiz or tasks already assigned.
+          // teachBack is skill-level (one per skill call, see the prompt's own
+          // rule on why), so it only ever attaches to the last lesson — the
+          // checkpoint for what the whole skill was building toward, not a
+          // repeat on every lesson in it.
+          const isLastLesson = i === skill.lessons.length - 1;
+          lesson.sections = buildGeneratedSections({
+            pitfall: written.pitfall,
+            check: written.check,
+            reflection: written.reflection,
+            teachBack: isLastLesson ? content.data.teachBack ?? undefined : undefined,
+          });
+          lesson.learningObjectives = buildGeneratedObjectives(lesson.objectives, written.objectiveTags, {
+            difficulty: skill.difficulty,
+            estimatedMinutes: lesson.estimatedMinutes,
+          });
         });
       } catch (err) {
         // A skill whose content call failed keeps its outline and gets a

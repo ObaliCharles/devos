@@ -3,14 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ChevronsUpDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Search, Settings, UserCircle } from "lucide-react";
 import { LogoTile, Wordmark } from "./brand";
-import { isActive, navGroups, type SidebarUser } from "./nav-config";
+import {
+  PRODUCT_AREAS,
+  activeProductArea,
+  isActive,
+  type DetailItem,
+  type SidebarUser,
+} from "./nav-config";
 import { isExternal } from "@/lib/community-links";
 
 export type { SidebarUser };
 
 const STORAGE_KEY = "dos-sidebar-collapsed";
+const softSpring = "cubic-bezier(0.25, 1.1, 0.4, 1)";
 
 export function Sidebar({
   dueCount = 0,
@@ -24,6 +31,7 @@ export function Sidebar({
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [ready, setReady] = useState(false);
+  const [query, setQuery] = useState("");
 
   // The collapse choice belongs to the person, not the session.
   useEffect(() => {
@@ -38,234 +46,268 @@ export function Sidebar({
     });
   }
 
-  const groups = navGroups(isAdmin);
+  const activeArea = activeProductArea(pathname);
+  const visibleSections = filterSections(activeArea.sections, query);
+
+  useEffect(() => {
+    setQuery("");
+  }, [activeArea.href]);
 
   return (
     <aside
-      className="hidden shrink-0 flex-col border-r md:flex"
+      className="hidden shrink-0 border-r md:flex"
       style={{
-        width: collapsed ? "var(--sidebar-w-collapsed)" : "var(--sidebar-w)",
+        width: collapsed ? "var(--sidebar-w-collapsed)" : "calc(var(--sidebar-w-collapsed) + var(--sidebar-w))",
         background: "var(--surface)",
         borderColor: "var(--border)",
-        transition: ready ? "width var(--dur-slow) var(--ease)" : "none",
+        transition: ready ? `width 520ms ${softSpring}` : "none",
       }}
     >
-      {/* ============================================================ Brand */}
+      {/* ======================================================= Icon rail */}
       <div
-        className={`group/brand flex shrink-0 items-center ${
-          collapsed ? "justify-center px-0" : "gap-2.5 px-3"
-        }`}
-        style={{ height: "var(--topbar-h)" }}
+        className="flex shrink-0 flex-col border-r"
+        style={{
+          width: "var(--sidebar-w-collapsed)",
+          borderColor: "var(--border-faint)",
+          background: "var(--surface)",
+        }}
       >
-        {collapsed ? (
-          // Collapsed, the monogram tile and the expand control share one 28px
-          // square: the mark by default, the control on hover or keyboard
-          // focus. A permanent second button in a 68px rail is one control too
-          // many, and a rail with no way out of it is a trap.
-          <span className="relative grid h-[28px] w-[28px] place-items-center">
+        <div
+          className="group/brand flex shrink-0 items-center justify-center"
+          style={{ height: "var(--topbar-h)" }}
+        >
+          <span className="relative grid h-[30px] w-[30px] place-items-center">
             <Link
               href="/dashboard"
               aria-label="DeveloperOS home"
               className="grid place-items-center transition-opacity duration-150 group-hover/brand:pointer-events-none group-hover/brand:opacity-0"
             >
-              <LogoTile size={28} />
+              <LogoTile size={30} />
             </Link>
             <button
               onClick={toggle}
-              aria-label="Expand sidebar"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               className="absolute inset-0 grid place-items-center rounded-[var(--radius-tile)] opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/brand:opacity-100"
               style={{ background: "var(--surface-3)", color: "var(--text)" }}
             >
-              <PanelLeftOpen size={15} />
+              {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
             </button>
           </span>
-        ) : (
-          <>
-            <Link href="/dashboard" aria-label="DeveloperOS home" className="min-w-0">
-              <Wordmark size="sm" />
-            </Link>
+        </div>
 
-            <button
-              onClick={toggle}
-              className="btn-icon btn-icon-sm ml-auto"
-              aria-label="Collapse sidebar"
-            >
-              <PanelLeftClose size={15} />
-            </button>
-          </>
-        )}
+        <nav className="scrollbar-none flex-1 overflow-y-auto px-2 pb-3" aria-label="Product areas">
+          <ul className="flex flex-col gap-1">
+            {PRODUCT_AREAS.map(({ href, label, icon: Icon }) => {
+              const active = activeArea.href === href;
+              return (
+                <li key={href}>
+                  <NavLink
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    title={label}
+                    className={`nav-row justify-center px-0 transition-all duration-500 ${active ? "nav-row-on icon-strong" : ""}`}
+                    style={{ transitionTimingFunction: softSpring }}
+                  >
+                    <span
+                      className="absolute left-[-8px] top-1/2 h-[18px] w-[2px] -translate-y-1/2 rounded-r-full"
+                      style={{
+                        background: "var(--primary)",
+                        opacity: active ? 1 : 0,
+                        transition: "opacity var(--dur-fast) var(--ease-out)",
+                      }}
+                      aria-hidden
+                    />
+                    <Icon size={17} className="shrink-0" />
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="shrink-0 px-2 pb-3">
+          <ul className="flex flex-col gap-1 border-t pt-3" style={{ borderColor: "var(--border-faint)" }}>
+            <li>
+              <NavLink
+                href="/settings"
+                title="Settings"
+                className={`nav-row justify-center px-0 ${isActive(pathname, "/settings") ? "nav-row-on icon-strong" : ""}`}
+              >
+                <Settings size={17} />
+              </NavLink>
+            </li>
+            {user && (
+              <li>
+                <NavLink
+                  href="/settings"
+                  title={user.name}
+                  className="nav-row justify-center px-0"
+                >
+                  <UserCircle size={17} />
+                </NavLink>
+              </li>
+            )}
+          </ul>
+        </div>
       </div>
 
-      {/* ======================================================= Navigation */}
-      <nav
-        className={`scrollbar-none flex-1 overflow-y-auto pb-3 ${collapsed ? "px-2" : "px-2.5"}`}
-        aria-label="Main"
-      >
-        {groups.map((group, gi) => (
-          <div key={group.heading ?? gi}>
-            {/* Expanded, the group heading is the separator and space does the
-                rest. Collapsed there is no heading to read, so a hairline
-                stands in, and the grouping still reads at 68px wide. */}
-            {gi > 0 &&
-              (collapsed ? (
-                <hr
-                  className="my-3 border-0"
-                  style={{ height: 1, background: "var(--border)" }}
-                />
-              ) : (
-                <div style={{ height: "var(--space-6)" }} aria-hidden />
-              ))}
-
-            {group.heading && !collapsed && (
-              <p className="group-heading mb-1.5 px-2.5">{group.heading}</p>
-            )}
-
-            <ul className="flex flex-col gap-[2px]">
-              {group.items.map(({ href, label, icon: Icon }) => {
-                const active = isActive(pathname, href);
-                const badge = href === "/review" && dueCount > 0 ? dueCount : null;
-
-                return (
-                  <li key={href}>
-                    {/* An external destination is a real anchor with a new tab,
-                        not a client-side Link: routing to Discord through the
-                        App Router would 404 before the browser ever saw it. */}
-                    <NavLink
-                      href={href}
-                      aria-current={active ? "page" : undefined}
-                      // A CSS tooltip would be clipped by this nav's own scroll
-                      // container, so collapsed labels use the native one,
-                      // which also survives keyboard focus.
-                      title={collapsed ? label : undefined}
-                      // Selected state is three quiet signals stacked, an accent
-                      // rail, brighter text, a barely-there tint. No coloured
-                      // label, no coloured icon: you should be able to find
-                      // where you are without the sidebar becoming the loudest
-                      // thing on screen.
-                      className={`nav-row ${active ? "nav-row-on icon-strong" : ""} ${
-                        collapsed ? "justify-center px-0" : "gap-2.5 px-2.5"
-                      }`}
-                    >
-                      {/* The rail marker sits in the gutter. Present on every
-                          item so the row never shifts; only opacity changes. */}
-                      <span
-                        className="absolute top-1/2 h-[16px] w-[2px] -translate-y-1/2 rounded-r-full"
-                        style={{
-                          left: collapsed ? -8 : -10,
-                          background: "var(--primary)",
-                          opacity: active ? 1 : 0,
-                          transition: "opacity var(--dur-fast) var(--ease-out)",
-                        }}
-                        aria-hidden
-                      />
-
-                      {/* Every icon in this rail is the same weight and the
-                          same colour as its label. Nothing is tinted. */}
-                      <Icon size={16} className="shrink-0" />
-
-                      {!collapsed && <span className="flex-1 truncate">{label}</span>}
-
-                      {/* The one count in the nav. Neutral, because "4 due" is
-                          information, not an alarm. */}
-                      {badge !== null &&
-                        (collapsed ? (
-                          <span
-                            className="absolute right-1.5 top-1.5 h-[5px] w-[5px] rounded-full"
-                            style={{ background: "var(--primary)" }}
-                            aria-hidden
-                          />
-                        ) : (
-                          <span
-                            className="count shrink-0"
-                            style={{
-                              background: "var(--neutral-faint)",
-                              color: "var(--text-muted)",
-                            }}
-                          >
-                            {badge}
-                          </span>
-                        ))}
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </nav>
-
-      {/* =========================================================== Footer */}
-      {user && (
+      {/* =================================================== Detail sidebar */}
+      {!collapsed && (
         <div
-          className={`shrink-0 border-t ${collapsed ? "px-2 py-2.5" : "p-2.5"}`}
-          style={{ borderColor: "var(--border)" }}
+          className="flex min-w-0 flex-1 flex-col"
+          style={{ opacity: ready ? 1 : 0, transition: `opacity 420ms ${softSpring}` }}
         >
-          <Link
-            href="/settings"
-            title={collapsed ? `${user.name} · ${user.plan}` : undefined}
-            className={`row-link flex items-center ${collapsed ? "justify-center py-1" : "gap-2.5 p-1.5"}`}
-            aria-label={`${user.name}, ${user.plan}. Open settings`}
+          <div
+            className="flex shrink-0 items-center justify-between gap-3 px-4"
+            style={{ height: "var(--topbar-h)" }}
           >
-            <span className="relative shrink-0">
-              <span
-                className="grid h-[30px] w-[30px] place-items-center rounded-full text-micro font-medium"
-                style={{
-                  background: "var(--surface-3)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text-muted)",
-                }}
-              >
-                {user.name.charAt(0).toUpperCase()}
-              </span>
-              {/* Presence dot, you are, by definition, online right now */}
-              <span
-                className="absolute -bottom-px -right-px h-[8px] w-[8px] rounded-full"
-                style={{ background: "var(--success)", boxShadow: "0 0 0 2px var(--surface)" }}
-                aria-hidden
-              />
-            </span>
+            <Link href={activeArea.href} className="min-w-0">
+              <Wordmark size="sm" />
+            </Link>
+            <button onClick={toggle} className="btn-icon btn-icon-sm" aria-label="Collapse sidebar">
+              <PanelLeftClose size={15} />
+            </button>
+          </div>
 
-            {!collapsed && (
-              <>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-ui font-medium">{user.name}</span>
-                  <span className="block truncate text-micro" style={{ color: "var(--text-faint)" }}>
-                    {user.plan}
+          <div className="border-y px-4 py-3" style={{ borderColor: "var(--border-faint)" }}>
+            <p className="group-heading">{activeArea.detailTitle}</p>
+            <p className="mt-1.5 text-ui leading-snug" style={{ color: "var(--text-muted)" }}>
+              {activeArea.purpose}
+            </p>
+            <div
+              className="mt-4 flex h-10 items-center gap-2 rounded-[var(--radius-control)] border px-3"
+              style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
+            >
+              <Search size={15} className="shrink-0" style={{ color: "var(--text-faint)" }} />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={`Search ${activeArea.detailTitle.toLowerCase()}...`}
+                className="min-w-0 flex-1 bg-transparent text-ui outline-none placeholder:text-[var(--text-faint)]"
+              />
+            </div>
+          </div>
+
+          <nav className="scrollbar-none flex-1 overflow-y-auto px-2.5 py-3" aria-label={`${activeArea.detailTitle} navigation`}>
+            {visibleSections.map((section, si) => (
+              <div key={section.title}>
+                {si > 0 && <div style={{ height: "var(--space-6)" }} aria-hidden />}
+                <p className="group-heading mb-1.5 px-2.5">{section.title}</p>
+                <ul className="flex flex-col gap-[2px]">
+                  {section.items.map((item) => (
+                    <DetailNavItem
+                      key={item.href + item.label}
+                      item={item}
+                      pathname={pathname}
+                      dueCount={dueCount}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            {isAdmin && (
+              <div>
+                <div style={{ height: "var(--space-6)" }} aria-hidden />
+                <p className="group-heading mb-1.5 px-2.5">System</p>
+                <ul className="flex flex-col gap-[2px]">
+                  <DetailNavItem item={{ href: "/admin", label: "Admin" }} pathname={pathname} dueCount={dueCount} />
+                  <DetailNavItem item={{ href: "/settings", label: "Settings" }} pathname={pathname} dueCount={dueCount} />
+                </ul>
+              </div>
+            )}
+          </nav>
+
+          {/* =========================================================== Footer */}
+          {user && (
+            <div className="shrink-0 border-t p-2.5" style={{ borderColor: "var(--border)" }}>
+              <Link
+                href="/analytics"
+                className="row-link block px-1.5 py-2"
+                aria-label={`Level ${user.level}, ${user.title}. ${user.into} of ${user.need} XP`}
+              >
+                <span className="flex items-baseline justify-between gap-2">
+                  <span className="truncate text-micro font-medium" style={{ color: "var(--text-muted)" }}>
+                    Level {user.level} · {user.title}
+                  </span>
+                  <span className="num shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
+                    {user.into} / {user.need}
                   </span>
                 </span>
-                <ChevronsUpDown size={14} className="shrink-0" style={{ color: "var(--text-faint)" }} />
-              </>
-            )}
-          </Link>
-
-          {/* Level progress. Real data, and the one number that answers
-              "am I getting anywhere" without opening Analytics. */}
-          {!collapsed && (
-            <Link
-              href="/analytics"
-              className="row-link mt-1 block px-1.5 py-2"
-              aria-label={`Level ${user.level}, ${user.title}. ${user.into} of ${user.need} XP`}
-            >
-              <span className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-micro font-medium" style={{ color: "var(--text-muted)" }}>
-                  Level {user.level} · {user.title}
+                <span className="progress mt-2 block">
+                  <span
+                    className="progress-bar block"
+                    style={{ width: `${Math.min(100, (user.into / user.need) * 100)}%` }}
+                  />
                 </span>
-                <span className="num shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
-                  {user.into} / {user.need}
-                </span>
-              </span>
-              <span className="progress mt-2 block">
-                <span
-                  className="progress-bar block"
-                  style={{ width: `${Math.min(100, (user.into / user.need) * 100)}%` }}
-                />
-              </span>
-            </Link>
+              </Link>
+            </div>
           )}
         </div>
       )}
     </aside>
   );
+}
+
+function DetailNavItem({
+  item,
+  pathname,
+  dueCount,
+}: {
+  item: DetailItem;
+  pathname: string;
+  dueCount: number;
+}) {
+  const active = !isExternal(item.href) && isActive(pathname, item.href);
+  const badge = item.badge === "reviews" && dueCount > 0 ? dueCount : null;
+  const Icon = item.icon;
+
+  return (
+    <li>
+      <NavLink
+        href={item.href}
+        aria-current={active ? "page" : undefined}
+        className={`nav-row gap-2.5 ${active ? "nav-row-on icon-strong" : ""}`}
+        style={{
+          paddingLeft: 10,
+          paddingRight: 10,
+          transitionTimingFunction: softSpring,
+        }}
+      >
+        <span
+          className="absolute left-[-10px] top-1/2 h-[16px] w-[2px] -translate-y-1/2 rounded-r-full"
+          style={{
+            background: "var(--primary)",
+            opacity: active ? 1 : 0,
+            transition: `opacity 220ms ${softSpring}`,
+          }}
+          aria-hidden
+        />
+        {Icon && <Icon size={15} className="shrink-0" />}
+        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+        {badge !== null && (
+          <span
+            className="count shrink-0"
+            style={{ background: "var(--neutral-faint)", color: "var(--text-muted)" }}
+          >
+            {badge}
+          </span>
+        )}
+      </NavLink>
+    </li>
+  );
+}
+
+function filterSections(sections: { title: string; items: DetailItem[] }[], query: string) {
+  const q = query.trim().toLowerCase();
+  if (!q) return sections;
+
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => item.label.toLowerCase().includes(q)),
+    }))
+    .filter((section) => section.items.length > 0);
 }
 
 /**

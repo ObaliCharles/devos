@@ -223,6 +223,14 @@ const LessonProgressSchema = new Schema(
     },
     gate: { type: GateSchema, default: () => ({}) },
     quizScore: Number,
+    /**
+     * The deepest rung of the hint ladder (lib/hint-ladder.ts) reached on the
+     * exercise since it was last marked done. Read once, at the moment
+     * `exercised` flips to true, as the `assistLevel` on the evidence that
+     * claim produces — then reset to 0, so redoing the exercise later starts
+     * the ladder fresh rather than inheriting last time's assistance.
+     */
+    hintLevel: { type: Number, default: 0, min: 0, max: 6 },
     minutesSpent: { type: Number, default: 0 },
     /** Set while the lesson page is open, so time on it can be measured. */
     lastOpenedAt: Date,

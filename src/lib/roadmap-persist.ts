@@ -95,6 +95,12 @@ export async function persistRoadmap({
           order: li + 1,
           title: lesson.title,
           objectives: lesson.objectives,
+          // Additive per DECISIONS 025/032: empty on any lesson whose content
+          // call failed or returned nothing usable, and the lesson still
+          // renders in full from `body` when they are — see roadmap-gen.ts's
+          // note on the seam.
+          learningObjectives: lesson.learningObjectives,
+          sections: lesson.sections,
           estimatedMinutes: lesson.estimatedMinutes,
           body: lesson.body,
           quiz: lesson.quiz,

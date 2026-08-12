@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { connectDB } from "@/lib/db";
 import { Lesson, LessonProgress, Note, Skill } from "@/lib/models";
 import { requireUser } from "@/lib/user";
+import { readSections } from "@/lib/lesson-schema";
 import { MasteryGate, type GateState } from "@/components/mastery-gate";
 import { Quiz, type Question } from "@/components/quiz";
 import { NoteComposer } from "@/components/note-composer";
@@ -13,6 +14,8 @@ import { AiPanel } from "@/components/ai-panel";
 import { TimeTracker } from "@/components/time-tracker";
 import { IconTile, PageHeader } from "@/components/ui";
 import { Challenges } from "@/components/learn/challenges";
+import { LessonReader, ObjectivesList } from "@/components/learn/lesson-reader";
+import { HintLadder } from "@/components/learn/hint-ladder";
 
 export const dynamic = "force-dynamic";
 
@@ -41,13 +44,23 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
     order: number;
     skill: unknown;
     objectives?: string[];
+    /** The measurable form, additive per DECISIONS 025. Empty on every lesson
+     *  authored before this model existed — `objectives` above stays the
+     *  fallback, not a duplicate to keep in sync. */
+    learningObjectives?: { statement: string; dimensions: string[]; cognitiveLevel: string }[];
     estimatedMinutes?: number;
     body: string;
+    /** The structured lesson. Parsed defensively below — see readSections. */
+    sections?: unknown[];
     exercise?: { brief?: string; acceptance?: string[] };
     quiz?: Question[];
     tasks?: { level: 1 | 2 | 3; prompt: string; hint?: string }[];
   }>();
   if (!lesson) notFound();
+
+  // Leniently parsed: a stored activity that no longer matches the schema
+  // costs that activity, never the lesson. See the note on readSections.
+  const sections = readSections(lesson.sections);
 
   const [skill, progress, noteCount, nextLesson] = await Promise.all([
     Skill.findById(lesson.skill).lean<{ _id: unknown; title: string }>(),
@@ -55,6 +68,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
       gate?: Partial<GateState>;
       state?: string;
       quizScore?: number;
+      hintLevel?: number;
     } | null>(),
     Note.countDocuments({ user: user._id, lesson: lessonId, trashedAt: null }),
     Lesson.findOne({ skill: lesson.skill, order: { $gt: lesson.order } })
@@ -85,7 +99,12 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
             eyebrow={`Lesson ${lesson.order} · ${lesson.estimatedMinutes ?? 30} min`}
             title={lesson.title}
             meta={
-              lesson.objectives && lesson.objectives.length > 0 ? (
+              // Measurable objectives, when the lesson carries them, replace the
+              // plain bullet list — see DECISIONS 025. Both read from the same
+              // document; nothing here is a duplicate to keep in sync.
+              lesson.learningObjectives && lesson.learningObjectives.length > 0 ? (
+                <ObjectivesList objectives={lesson.learningObjectives} />
+              ) : lesson.objectives && lesson.objectives.length > 0 ? (
                 <ul className="flex w-full flex-col gap-1.5">
                   {lesson.objectives.map((o) => (
                     <li key={o} className="flex gap-2.5 text-ui leading-relaxed">
@@ -98,9 +117,18 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
             }
           />
 
-          <article className="card prose-doc p-5 sm:p-8">
-            <Markdown remarkPlugins={[remarkGfm]}>{lesson.body}</Markdown>
-          </article>
+          {sections.length > 0 ? (
+            // The structured lesson. Chapter 5's activity sequence, in place of
+            // one markdown card — see components/learn/lesson-reader.tsx.
+            <LessonReader lessonId={String(lesson._id)} sections={sections} totalMinutes={lesson.estimatedMinutes ?? 30} />
+          ) : (
+            // The two-field seam holding: every lesson authored before this
+            // model, all 92 catalog lessons included, renders exactly as it
+            // always has.
+            <article className="card prose-doc p-5 sm:p-8">
+              <Markdown remarkPlugins={[remarkGfm]}>{lesson.body}</Markdown>
+            </article>
+          )}
 
           {/* Generated lessons carry practice tasks now, and they render with
               the same component the catalog courses use — one practice
@@ -127,6 +155,9 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
                   </ul>
                 </>
               )}
+              <div className="mt-6 border-t pt-5">
+                <HintLadder lessonId={String(lesson._id)} initialLevel={progress?.hintLevel ?? 0} />
+              </div>
             </Requirement>
           )}
 

@@ -459,11 +459,16 @@ export function Stat({
   value,
   sub,
   tone = "neutral",
+  bar,
 }: {
   label: string;
   value: string | number;
   sub?: string;
   tone?: Tone;
+  /** 0–100. For the readings that are also a fraction of something — path
+   *  progress, XP into the next level — where the bar is real progress, not
+   *  decoration standing in for it. */
+  bar?: number;
 }) {
   return (
     <div className="flex flex-col gap-1">
@@ -476,6 +481,11 @@ export function Stat({
       >
         {value}
       </p>
+      {bar !== undefined && (
+        <div className="progress mt-1">
+          <div className="progress-bar" style={{ width: `${Math.max(0, Math.min(100, bar))}%` }} />
+        </div>
+      )}
       {sub && (
         <p className="text-micro truncate" style={{ color: "var(--text-faint)" }}>
           {sub}

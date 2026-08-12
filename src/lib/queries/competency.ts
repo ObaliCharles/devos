@@ -140,6 +140,26 @@ export async function getIndependence(userId: unknown, days = 30): Promise<Indep
   return independenceFrom(toInputs(rows));
 }
 
+/**
+ * The initial skill graph the diagnostic assessment produces (learning-
+ * upgrade spec §19–20) — derived the same way every other competency reading
+ * is, from `source: "diagnostic"` evidence rows that carry no `skill`, since
+ * they are taken before a learner has one to attach to. This is why
+ * `Evidence.skill` had to become optional: a general baseline in
+ * "problem_solving" is a real, honest reading and does not belong to any one
+ * Skill document.
+ *
+ * The `{user, createdAt}` index already covers this; a diagnostic is at most
+ * nine rows ever written per user, so no dedicated index earns its keep here.
+ */
+export async function getDiagnosticProfile(userId: unknown): Promise<Competency | null> {
+  await connectDB();
+  const rows = await Evidence.find({ user: userId, source: "diagnostic" }).select(FIELDS).lean<Row[]>();
+  if (rows.length === 0) return null;
+  const dimensions = Array.from(new Set(rows.map((r) => r.dimension))) as Dimension[];
+  return competencyFrom(toInputs(rows), dimensions);
+}
+
 export type EvidenceItem = {
   id: string;
   dimension: string;

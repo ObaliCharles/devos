@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Clock,
   Download,
-  Flame,
   Lock,
   Play,
   Target,
@@ -27,7 +26,7 @@ import {
 import { COURSES, lessonCount } from "@/lib/catalog";
 import { TechLogo, inferTech } from "@/components/learn/tech-logo";
 import { DashboardMobile } from "@/components/dashboard-mobile";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, IconTile } from "@/components/ui";
 import { Greeting } from "@/components/greeting";
 import { formatDate } from "@/lib/utils";
 
@@ -137,36 +136,43 @@ export default async function DashboardPage() {
           : "todo") as "done" | "locked" | "current" | "todo",
   }));
 
-  /* ---- Today: only rows the app can actually check off ------------------- */
+  /* ---- Today's mission ----------------------------------------------------
+     The same three real signals as before — next lesson, due reviews, a
+     practice suggestion — restated as a single sequenced list rather than
+     buried as one of three equal-weight cards. `minutes` is now a number, not
+     a pre-formatted string: the mission needs a real total, and parsing
+     "15 min" back out of its own display text is the kind of thing that
+     breaks quietly the day someone changes the format. */
   const today = [
     next && {
       href: `/learning/lesson/${next.lesson.id}`,
       label: next.lesson.title,
       sub: next.skill.title,
-      meta: `${next.lesson.estimatedMinutes} min`,
+      minutes: next.lesson.estimatedMinutes,
       icon: Play,
     },
     dueCount > 0 && {
       href: "/review",
       label: `Clear ${dueCount} review${dueCount === 1 ? "" : "s"}`,
       sub: "Spaced repetition queue",
-      meta: `${dueCount * 3} min`,
+      minutes: dueCount * 3,
       icon: Target,
     },
     {
       href: "/practice",
       label: "Solve a challenge",
       sub: "Practice",
-      meta: "15 min",
+      minutes: 15,
       icon: Zap,
     },
   ].filter(Boolean) as {
     href: string;
     label: string;
     sub: string;
-    meta: string;
+    minutes: number;
     icon: typeof Play;
   }[];
+  const missionMinutes = today.reduce((sum, t) => sum + t.minutes, 0);
 
   const earned = achievements.filter((a) => a.unlocked).slice(0, 4);
   const nearest = achievements
@@ -208,7 +214,7 @@ export default async function DashboardPage() {
           path={roadmap ? { title: roadmap.title, origin: roadmap.origin } : null}
           steps={mobileSteps}
           pathPct={pathPct}
-          tasks={today.map((t) => ({ href: t.href, label: t.label, sub: t.sub, meta: t.meta }))}
+          tasks={today.map((t) => ({ href: t.href, label: t.label, sub: t.sub, meta: `${t.minutes} min` }))}
           level={level}
           recommended={recommended.map((c) => ({
             slug: c.slug,
@@ -221,500 +227,334 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* ============================================================= DESKTOP */}
       <div className="page-body hidden lg:flex">
-      {/* ============================================================ Greeting */}
-      <header className="rise">
-        <Greeting name={user.name?.split(" ")[0] || "Developer"} className="title-page" />
-        <p className="text-body mt-1 text-ui">
-          {next
-            ? `You're ${lessonTotal - lessonIndex + 1} lesson${lessonTotal - lessonIndex + 1 === 1 ? "" : "s"} from finishing ${next.skill.title}.`
-            : "Nothing queued. Pick a path to get started."}
-        </p>
-      </header>
-
-      {/* ========================================================= Signal row */}
-      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-label="This week">
-        <Signal
-          icon={<Flame size={15} />}
-          label="Learning streak"
-          value={`${streak}`}
-          unit={streak === 1 ? "day" : "days"}
-          foot={streak > 0 ? "Keep it going" : "Start today"}
-        />
-        <Signal
-          icon={<Clock size={15} />}
-          label="Hours this week"
-          value={`${hrs(thisWeek)}`}
-          unit="hrs"
-          foot={
-            lastWeek > 0
-              ? `${deltaMin >= 0 ? "+" : ""}${hrs(deltaMin)} hrs vs last week`
-              : "First week tracked"
-          }
-        />
-        <Signal
-          icon={<Target size={15} />}
-          label="Path progress"
-          value={`${pathPct}%`}
-          foot={`${lessonsMastered} of ${totalLessons} lessons`}
-          bar={pathPct}
-        />
-        <Signal
-          icon={<Zap size={15} />}
-          label="Experience"
-          value={xp.toLocaleString()}
-          unit="XP"
-          foot={`Level ${level.level} · ${level.need - level.into} to next`}
-          bar={Math.round((level.into / level.need) * 100)}
-        />
-      </section>
-
-      {/* ============================ Continue · Path · Today (the main band) */}
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)_minmax(0,0.95fr)]">
-        {/* ------------------------------------------------ Continue learning */}
-        <div className="card flex flex-col p-5">
-          <h2 className="title-card">Continue learning</h2>
-
-          {next ? (
-            <>
-              <div className="mt-4 flex items-start gap-3">
-                {tech ? (
-                  <TechLogo name={tech} mode="plate" size={52} />
-                ) : (
-                  <span className="icon-tile icon-tile-lg h-[52px] w-[52px]">
-                    <Play size={18} />
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-ui font-medium leading-snug">{next.skill.title}</p>
-                  <p className="text-meta mt-1 truncate text-micro">
-                    {next.phase.title} · Lesson {lessonIndex} of {lessonTotal}
-                  </p>
-                </div>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_272px]">
+          <div className="min-w-0 space-y-6">
+            <header className="rise flex min-h-[76px] items-end justify-between gap-6">
+              <div>
+                <Greeting name={user.name?.split(" ")[0] || "Developer"} className="title-page" />
+                <p className="text-body mt-1.5 text-ui">
+                  {next
+                    ? `Keep building your skills. ${next.skill.title} is ready when you are.`
+                    : "Keep building your skills. Pick a path to get moving."}
+                </p>
               </div>
-
-              <p className="mt-4 truncate text-ui font-medium">{next.lesson.title}</p>
-
-              <div className="mt-2.5 flex items-center gap-2.5">
-                <div className="progress flex-1">
-                  <div className="progress-bar" style={{ width: `${skillPct}%` }} />
-                </div>
-                <span className="num text-micro" style={{ color: "var(--text-faint)" }}>
-                  {skillPct}%
-                </span>
+              <div className="flex items-center gap-2">
+                <Link href="/review" className="btn btn-secondary">
+                  {dueCount > 0 ? `${dueCount} reviews` : "Review"}
+                </Link>
+                <Link href="/analytics" className="btn btn-secondary">
+                  {streak > 0 ? `${streak} day streak` : "Progress"}
+                </Link>
               </div>
+            </header>
 
-              <p className="text-meta mt-2 flex items-center gap-1.5 text-micro">
-                <Clock size={12} /> {next.lesson.estimatedMinutes} min left
-              </p>
+            <section className="panel overflow-hidden p-6">
+              <div className="grid min-h-[230px] gap-6 lg:grid-cols-[minmax(0,1fr)_240px]">
+                <div className="flex min-w-0 flex-col">
+                  <p className="eyebrow eyebrow-accent">Continue Learning</p>
+                  {next ? (
+                    <>
+                      <div className="mt-8 flex items-start gap-5">
+                        {tech ? (
+                          <TechLogo name={tech} mode="plate" size={86} />
+                        ) : (
+                          <span className="icon-tile icon-tile-lg h-[86px] w-[86px]">
+                            <Play size={28} />
+                          </span>
+                        )}
+                        <div className="min-w-0 flex-1 pt-2">
+                          <h2 className="truncate text-[22px] font-semibold leading-tight">
+                            {next.skill.title}
+                          </h2>
+                          <p className="text-meta mt-2 truncate text-ui">
+                            Lesson {lessonIndex} of {lessonTotal} · {next.lesson.title}
+                          </p>
+                          <div className="mt-5 flex items-center gap-3">
+                            <div className="progress flex-1">
+                              <div className="progress-bar" style={{ width: `${skillPct}%` }} />
+                            </div>
+                            <span className="num text-ui" style={{ color: "var(--primary)" }}>
+                              {skillPct}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-              <div className="mt-auto flex items-center gap-2 pt-4">
-                <Link
-                  href={`/learning/lesson/${next.lesson.id}`}
-                  className="btn btn-primary flex-1"
+                      <div className="mt-auto flex items-center justify-between gap-4 pt-8">
+                        <span
+                          className="inline-flex items-center gap-2 rounded-[var(--radius-control)] border px-3 py-2 text-ui"
+                          style={{
+                            borderColor: "var(--border-faint)",
+                            background: "var(--surface-2)",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          <span className="h-2 w-2 rounded-full" style={{ background: "var(--primary)" }} />
+                          {next.lesson.gateDone > 0 ? "In progress" : "Ready to start"}
+                        </span>
+                        <Link href={`/learning/lesson/${next.lesson.id}`} className="btn btn-primary">
+                          Continue Learning <ChevronRight size={16} />
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <EmptyState
+                      compact
+                      icon={<Target size={20} />}
+                      title="No lesson queued"
+                      body="Choose a roadmap or browse the course library to start learning."
+                      action={
+                        <Link href="/learning" className="btn btn-primary">
+                          Browse paths
+                        </Link>
+                      }
+                    />
+                  )}
+                </div>
+
+                <div
+                  className="hidden min-h-full rounded-[var(--radius-card)] border p-4 lg:block"
+                  style={{ borderColor: "var(--border-faint)", background: "var(--surface-2)" }}
+                  aria-hidden
                 >
-                  {next.lesson.gateDone > 0 ? "Resume" : "Start"} <ArrowRight size={15} />
-                </Link>
-                <Link href="/learning/roadmap" className="btn-icon" aria-label="View full path">
-                  <Bookmark size={16} />
+                  <div className="grid h-full place-items-center">
+                    <div className="relative h-[150px] w-[190px]">
+                      <span
+                        className="absolute left-10 top-5 h-24 w-32 rotate-[-18deg] rounded-[var(--radius-card)] border"
+                        style={{ borderColor: "var(--border)", background: "var(--surface-3)" }}
+                      />
+                      <span
+                        className="absolute left-5 top-14 h-24 w-36 rotate-[10deg] rounded-[var(--radius-card)] border"
+                        style={{
+                          borderColor: "var(--primary-muted)",
+                          background: "var(--primary-faint)",
+                          boxShadow: "0 18px 60px rgb(124 107 255 / 0.18)",
+                        }}
+                      />
+                      <span className="absolute left-14 top-20 h-2 w-20 rounded-full" style={{ background: "var(--primary)" }} />
+                      <span className="absolute left-14 top-32 h-2 w-28 rounded-full" style={{ background: "var(--border-strong)" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="eyebrow eyebrow-accent">Your Learning Path</p>
+                <Link href="/learning/roadmap" className="btn-icon" aria-label="View learning roadmap">
+                  <ChevronRight size={16} />
                 </Link>
               </div>
-            </>
-          ) : (
-            <p className="text-body mt-4 text-ui">
-              No lesson queued. Pick a path from Learning to start.
-            </p>
-          )}
-        </div>
+              {phases.length > 0 ? (
+                <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  {phases.slice(0, 4).map((p) => (
+                    <li key={p.id}>
+                      <Link href="/learning/roadmap" className="card card-link block p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-ui font-semibold">{p.title}</p>
+                            <p className="text-meta mt-1 truncate text-micro">
+                              {p.pct === 100 ? "Completed" : p.locked ? "Locked" : p.current ? "In progress" : "Upcoming"}
+                            </p>
+                          </div>
+                          <span
+                            className="grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-tile)]"
+                            style={{
+                              background: p.pct === 100 ? "var(--primary-faint)" : "var(--surface-2)",
+                              color: p.pct === 100 ? "var(--primary)" : "var(--text-faint)",
+                            }}
+                          >
+                            {p.pct === 100 ? <Check size={15} /> : p.locked ? <Lock size={14} /> : <Bookmark size={14} />}
+                          </span>
+                        </div>
+                        <div className="mt-5 flex items-center gap-3">
+                          <div className="progress flex-1">
+                            <div className="progress-bar" style={{ width: `${p.pct}%` }} />
+                          </div>
+                          <span className="num text-micro" style={{ color: "var(--text-muted)" }}>
+                            {p.pct}%
+                          </span>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="card p-5">
+                  <p className="text-body text-ui">No path loaded yet.</p>
+                </div>
+              )}
+            </section>
 
-        {/* ------------------------------------------------------- The path */}
-        <div className="card flex flex-col p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="title-card">Your learning path</h2>
-            <Link href="/learning/roadmap" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
-              View full path
-            </Link>
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
+              <div className="card p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="eyebrow eyebrow-accent">Recommended For You</p>
+                  <Link href="/learning/browse" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
+                    Explore all <ArrowRight size={13} className="inline" />
+                  </Link>
+                </div>
+                <ul className="mt-5 grid gap-4 sm:grid-cols-3">
+                  {recommended.slice(0, 3).map((c) => (
+                    <li key={c.slug}>
+                      <Link href={`/learning/course/${c.slug}`} className="card card-link flex h-full flex-col overflow-hidden">
+                        <div className="flex h-[92px] items-center p-4" style={{ background: "var(--primary-faint)" }}>
+                          <TechLogo name={c.tech!} mode="plate" size={44} />
+                        </div>
+                        <div className="flex flex-1 flex-col p-4">
+                          <p className="line-clamp-2 text-ui font-medium leading-snug">{c.title}</p>
+                          <p className="text-meta mt-auto flex items-center gap-2 pt-4 text-micro">
+                            <span>{lessonCount(c)} lessons</span>
+                            <span className="ml-auto rounded-full px-2 py-0.5" style={{ background: "var(--neutral-faint)" }}>
+                              {c.level}
+                            </span>
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="card p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="eyebrow eyebrow-accent">Achievements</p>
+                  <Link href="/analytics/achievements" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
+                    View all
+                  </Link>
+                </div>
+                {badges.length > 0 ? (
+                  <ul className="mt-5 divide-y" style={{ borderColor: "var(--border-faint)" }}>
+                    {badges.slice(0, 3).map((b) => (
+                      <li key={b.key} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                        <span
+                          className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-tile)]"
+                          style={{
+                            background: b.unlocked ? "var(--primary-faint)" : "var(--surface-2)",
+                            color: b.unlocked ? "var(--primary)" : "var(--text-faint)",
+                          }}
+                        >
+                          <Award size={16} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-ui font-medium">{b.title}</span>
+                          <span className="text-meta block truncate text-micro">{b.description}</span>
+                        </span>
+                        <span className="num shrink-0 text-micro" style={{ color: "var(--text-faint)" }}>
+                          {b.unlocked ? "Done" : `${b.progress}%`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-body mt-5 text-ui">Master a lesson to earn your first one.</p>
+                )}
+              </div>
+            </section>
+
+            {!roadmap && (
+              <EmptyState
+                compact
+                icon={<Target size={20} />}
+                title="No roadmap loaded"
+                body="Run the seed script to load the starter curriculum, or generate a path from Learning."
+                action={
+                  <Link href="/learning" className="btn btn-primary">
+                    Browse paths
+                  </Link>
+                }
+              />
+            )}
           </div>
 
-          {phases.length > 0 ? (
-            <div className="mt-4 grid flex-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,150px)]">
-              {/* Vertical stepper — a rail with a node per phase */}
-              <ol className="relative flex flex-col gap-5">
-                <span
-                  className="absolute bottom-3 left-[11px] top-3 w-px"
-                  style={{ background: "var(--border)" }}
-                  aria-hidden
-                />
-                {phases.map((p) => (
-                  <li key={p.id} className="relative flex items-start gap-3">
-                    <span
-                      className="relative z-[1] grid h-[23px] w-[23px] shrink-0 place-items-center rounded-full text-micro font-medium"
-                      style={{
-                        background: p.pct === 100 ? "var(--primary)" : "var(--surface-3)",
-                        border: `1px solid ${p.current ? "var(--primary)" : "var(--border)"}`,
-                        color: p.pct === 100 ? "var(--primary-ink)" : "var(--text-muted)",
-                      }}
-                    >
-                      {p.pct === 100 ? <Check size={11} strokeWidth={3} /> : p.locked ? <Lock size={10} /> : null}
-                    </span>
-                    <span className="min-w-0 flex-1 pt-0.5">
-                      <span className="block truncate text-ui font-medium">{p.title}</span>
-                      <span className="text-meta block text-micro">
-                        {p.pct === 100
-                          ? "Completed"
-                          : p.locked
-                            ? "Locked"
-                            : p.current
-                              ? `In progress · ${p.pct}%`
-                              : "Upcoming"}
+          <aside className="space-y-6">
+            <section className="card p-5">
+              <p className="eyebrow eyebrow-accent">Upcoming</p>
+              <ol className="mt-5 space-y-4">
+                {today.map((t, i) => (
+                  <li key={t.href}>
+                    <Link href={t.href} className="row-link flex items-center gap-3 p-2">
+                      <IconTile tone={i === 0 ? "primary" : i === 1 ? "warning" : "success"}>
+                        <t.icon size={15} />
+                      </IconTile>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-ui font-medium">{t.label}</span>
+                        <span className="text-meta block truncate text-micro">
+                          {i === 0 ? "Today" : i === 1 ? "Next" : `${t.minutes} min`}
+                        </span>
                       </span>
-                    </span>
+                    </Link>
                   </li>
                 ))}
               </ol>
+              <Link href="/calendar" className="mt-5 inline-flex items-center gap-1.5 text-micro font-medium" style={{ color: "var(--primary)" }}>
+                View calendar <ArrowRight size={13} />
+              </Link>
+            </section>
 
-              {/* Next up, the reference's side panel */}
-              {next && (
-                <div
-                  // self-start: this panel holds four short lines, so letting
-                  // the grid stretch it to the stepper's full height left it
-                  // mostly empty box.
-                  className="self-start rounded-[var(--radius-tile)] p-3"
-                  style={{ background: "var(--surface-2)", border: "1px solid var(--border-faint)" }}
-                >
-                  <p className="group-heading">Next up</p>
-                  <p className="mt-2 text-ui font-medium leading-snug">{next.lesson.title}</p>
-                  <p className="text-meta mt-1.5 flex items-center gap-1.5 text-micro">
-                    <Clock size={11} /> {next.lesson.estimatedMinutes} min
-                  </p>
-                  {next.lesson.gateDone > 0 && (
-                    <p className="text-meta mt-2 text-micro">
-                      {next.lesson.gateDone} of 5 requirements done
+            <section className="panel p-5">
+              <p className="eyebrow eyebrow-accent">Daily Goal</p>
+              <div className="mt-5 flex items-center justify-between gap-4">
+                <div>
+                  <p className="num text-[24px] font-semibold leading-none">{pathPct}%</p>
+                  <p className="text-meta mt-1 text-micro">Path progress</p>
+                </div>
+                <ol className="flex items-center gap-2">
+                  {week.map((d, i) => (
+                    <li key={d.day} className="flex flex-col items-center gap-1">
+                      <span className="text-micro" style={{ color: "var(--text-faint)" }}>
+                        {DAY_LABELS[i]}
+                      </span>
+                      <span
+                        className="h-[5px] w-[5px] rounded-full"
+                        style={{
+                          background:
+                            i === week.length - 1
+                              ? "var(--primary)"
+                              : d.minutes > 0
+                                ? "var(--text-muted)"
+                                : "var(--border-strong)",
+                        }}
+                        aria-hidden
+                      />
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="progress mt-5">
+                <div className="progress-bar" style={{ width: `${pathPct}%` }} />
+              </div>
+              <p className="text-meta mt-3 flex items-center gap-1.5 text-micro">
+                <Clock size={12} /> {missionMinutes} min queued today
+              </p>
+            </section>
+
+            {latestCert && (
+              <section className="card p-5">
+                <p className="eyebrow eyebrow-accent">Latest Certificate</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <IconTile>
+                    <Award size={16} />
+                  </IconTile>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-ui font-medium">{latestCert.name}</p>
+                    <p className="text-meta truncate text-micro">
+                      {latestCert.issuedAt ? `Issued ${formatDate(latestCert.issuedAt)}` : latestCert.provider}
                     </p>
+                  </div>
+                  {latestCert.credentialUrl && (
+                    <a href={latestCert.credentialUrl} target="_blank" rel="noopener noreferrer" className="btn-icon" aria-label="Open credential">
+                      <Download size={15} />
+                    </a>
                   )}
                 </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-body mt-4 text-ui">No path loaded yet.</p>
-          )}
-        </div>
-
-        {/* --------------------------------------------------- Today's tasks */}
-        <div className="card flex flex-col p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="title-card">Today</h2>
-            <span className="text-meta num text-micro">{today.length} left</span>
-          </div>
-
-          <ul className="-mx-1.5 mt-3 flex flex-col">
-            {today.map((t) => (
-              <li key={t.href}>
-                <Link href={t.href} className="row-link flex items-start gap-2.5 px-1.5 py-2">
-                  <span
-                    className="mt-[1px] grid h-[17px] w-[17px] shrink-0 place-items-center rounded-[5px]"
-                    style={{ border: "1px solid var(--border-strong)" }}
-                    aria-hidden
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-ui font-medium">{t.label}</span>
-                    <span className="text-meta block truncate text-micro">{t.sub}</span>
-                  </span>
-                  <span className="num shrink-0 pt-0.5 text-micro" style={{ color: "var(--text-faint)" }}>
-                    {t.meta}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* The reference's week strip. Dots are days you actually studied. */}
-          <div className="mt-auto pt-4">
-            <p className="group-heading mb-2">This week</p>
-            <ol className="flex justify-between gap-1">
-              {week.map((d, i) => {
-                const isToday = i === week.length - 1;
-                return (
-                  <li key={d.day} className="flex flex-1 flex-col items-center gap-1.5">
-                    <span className="text-micro" style={{ color: "var(--text-faint)" }}>
-                      {DAY_LABELS[i]}
-                    </span>
-                    <span
-                      className="num grid h-[26px] w-full place-items-center rounded-[7px] text-micro"
-                      style={{
-                        background: isToday ? "var(--primary)" : "transparent",
-                        color: isToday ? "var(--primary-ink)" : "var(--text-muted)",
-                      }}
-                    >
-                      {Number(d.day.slice(-2))}
-                    </span>
-                    <span
-                      className="h-[3px] w-[3px] rounded-full"
-                      style={{ background: d.minutes > 0 ? "var(--primary)" : "transparent" }}
-                      aria-hidden
-                    />
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================ Analytics · Achievements · Certificate */}
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        {/* ---------------------------------------------------- Analytics */}
-        <div className="card flex flex-col p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="title-card">Learning analytics</h2>
-            <Link href="/analytics" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
-              Details
-            </Link>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Mini value={hrs(counts?.focusMinutes ?? 0)} unit="hrs" label="Total focus" />
-            <Mini value={lessonsMastered} label="Lessons mastered" />
-            <Mini value={counts?.challengesSolved ?? 0} label="Challenges solved" />
-            <Mini value={counts?.notesWritten ?? 0} label="Notes written" />
-          </div>
-
-          {/* 14 days of real minutes. Bars, because the data is discrete daily
-              totals and a line between them implies values never measured.
-
-              The chart grows into whatever height this card inherits from the
-              taller column beside it, rather than sitting at a fixed 96px and
-              leaving the bottom third of the card empty. Bar heights are
-              percentages of the plot area for the same reason. */}
-          <div className="chart mt-5 min-h-[96px] flex-1">
-            <div className="chart-grid" aria-hidden>
-              <span /><span /><span /><span />
-            </div>
-            {strip.map((d, i) => {
-              const empty = d.minutes === 0;
-              return (
-                <div
-                  key={d.day}
-                  className="chart-col tooltip"
-                  data-tip={`${d.minutes} min · ${d.day.slice(5)}`}
-                >
-                  <div
-                    className={`bar ${empty ? "bar-empty" : i === strip.length - 1 ? "bar-today" : ""}`}
-                    style={
-                      empty
-                        ? { height: 2 }
-                        : { height: `${Math.max(3, (d.minutes / maxMin) * 96)}%` }
-                    }
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-2 flex justify-between text-micro" style={{ color: "var(--text-faint)" }}>
-            <span>{strip[0]?.day.slice(5)}</span>
-            <span>Today</span>
-          </div>
-        </div>
-
-        {/* ------------------------------------- Achievements + certificate */}
-        <div className="flex flex-col gap-5">
-          <div className="card p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="title-card">Achievements</h2>
-              <Link
-                href="/analytics/achievements"
-                className="text-micro font-medium"
-                style={{ color: "var(--primary)" }}
-              >
-                View all
-              </Link>
-            </div>
-            {badges.length > 0 ? (
-              <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
-                {badges.map((b) => (
-                  <li
-                    key={b.key}
-                    className="flex flex-col items-center gap-1.5 rounded-[var(--radius-tile)] p-2.5 text-center"
-                    style={{ background: "var(--surface-2)" }}
-                  >
-                    <span
-                      className="grid h-8 w-8 place-items-center rounded-full"
-                      style={{
-                        background: b.unlocked ? "var(--primary-faint)" : "var(--neutral-faint)",
-                        color: b.unlocked ? "var(--primary)" : "var(--text-faint)",
-                      }}
-                    >
-                      <Award size={15} />
-                    </span>
-                    <span className="line-clamp-2 text-micro font-medium leading-tight">{b.title}</span>
-                    <span className="text-meta text-micro">
-                      {b.unlocked ? "Earned" : `${b.progress}%`}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-body mt-3 text-ui">
-                Master a lesson to earn your first one.
-              </p>
+              </section>
             )}
-          </div>
-
-          <div className="card p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="title-card">Latest certificate</h2>
-              <Link
-                href="/career/certificates"
-                className="text-micro font-medium"
-                style={{ color: "var(--primary)" }}
-              >
-                View all
-              </Link>
-            </div>
-            {latestCert ? (
-              <div className="mt-3 flex items-center gap-3">
-                <span
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-tile)]"
-                  style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
-                >
-                  <Award size={18} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-ui font-medium">{latestCert.name}</p>
-                  <p className="text-meta truncate text-micro">
-                    {latestCert.issuedAt ? `Issued ${formatDate(latestCert.issuedAt)}` : latestCert.provider}
-                  </p>
-                </div>
-                {latestCert.credentialUrl && (
-                  <a
-                    href={latestCert.credentialUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-icon"
-                    aria-label="Open credential"
-                  >
-                    <Download size={15} />
-                  </a>
-                )}
-              </div>
-            ) : (
-              <p className="text-body mt-3 text-ui">
-                Finish a course and one is issued with a code anyone can verify.
-              </p>
-            )}
-          </div>
+          </aside>
         </div>
-      </section>
-
-      {/* ==================================================== Recommended */}
-      <section className="section-stack">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="title-section">Recommended for you</h2>
-          <Link href="/learning" className="text-micro font-medium" style={{ color: "var(--primary)" }}>
-            View all
-          </Link>
-        </div>
-        <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {recommended.map((c) => (
-            <li key={c.slug}>
-              <Link href={`/learning/course/${c.slug}`} className="card card-link flex h-full flex-col p-5">
-                <TechLogo name={c.tech!} mode="plate" size={34} />
-                <p className="mt-3 text-ui font-medium leading-snug">{c.title}</p>
-                <p className="text-meta mt-1 line-clamp-2 text-micro">{c.tagline}</p>
-                <p className="text-meta mt-auto flex items-center gap-2 pt-3 text-micro">
-                  <span>{c.level}</span>
-                  <span aria-hidden>·</span>
-                  <span>{c.hours}h</span>
-                  <ChevronRight size={13} className="ml-auto" />
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {!roadmap && (
-        <EmptyState
-          compact
-          icon={<Target size={20} />}
-          title="No roadmap loaded"
-          body="Run the seed script to load the starter curriculum, or generate a path from Learning."
-          action={
-            <Link href="/learning" className="btn btn-primary">
-              Browse paths
-            </Link>
-          }
-        />
-      )}
       </div>
     </>
-  );
-}
-
-/**
- * One signal tile. Icon left in a near-invisible circle, label, value, and a
- * foot line that is either a real delta or a real remainder — never a target
- * nobody set.
- */
-function Signal({
-  icon,
-  label,
-  value,
-  unit,
-  foot,
-  bar,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  unit?: string;
-  foot: string;
-  bar?: number;
-}) {
-  return (
-    <div className="card flex items-start gap-3 p-5">
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
-        style={{ background: "var(--neutral-faint)", color: "var(--text-muted)" }}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-micro" style={{ color: "var(--text-muted)" }}>
-          {label}
-        </p>
-        <p className="mt-1 flex items-baseline gap-1">
-          <span className="num text-[22px] font-semibold leading-none">{value}</span>
-          {unit && (
-            <span className="text-micro" style={{ color: "var(--text-faint)" }}>
-              {unit}
-            </span>
-          )}
-        </p>
-        {bar !== undefined && (
-          <div className="progress mt-2">
-            <div className="progress-bar" style={{ width: `${bar}%` }} />
-          </div>
-        )}
-        <p className="text-meta mt-1.5 truncate text-micro">{foot}</p>
-      </div>
-    </div>
-  );
-}
-
-function Mini({ value, unit, label }: { value: number | string; unit?: string; label: string }) {
-  return (
-    <div>
-      <p className="flex items-baseline gap-1">
-        <span className="num text-[16px] font-semibold leading-none">{value}</span>
-        {unit && (
-          <span className="text-micro" style={{ color: "var(--text-faint)" }}>
-            {unit}
-          </span>
-        )}
-      </p>
-      <p className="text-meta mt-1 truncate text-micro">{label}</p>
-    </div>
   );
 }

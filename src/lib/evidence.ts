@@ -30,7 +30,11 @@ import type { Dimension, EvidenceSource } from "./competency";
 
 type RecordInput = {
   userId: unknown;
-  skill: unknown;
+  /** Optional for exactly one case: `source: "diagnostic"` evidence, taken
+   *  before a learner has a roadmap to scope it to. See the field's own note
+   *  on the Evidence model. Every other recorder in this file still always
+   *  passes one. */
+  skill?: unknown;
   lesson?: unknown;
   project?: unknown;
   dimension: Dimension;
@@ -190,10 +194,20 @@ export async function evidenceFromReview(userId: unknown, lessonId: unknown, rem
  * `ACTIVITY_META` says about `text` and `reflection`. The two files agree on
  * purpose.
  */
-export async function evidenceFromExerciseClaim(userId: unknown, lessonId: string) {
+/**
+ * `assistLevel` is the deepest rung of the hint ladder (lib/hint-ladder.ts)
+ * the learner reached before ticking the box — 0 if they never asked, up to 6
+ * if they were shown the full solution. This is the row `independenceFrom` in
+ * `lib/competency.ts` was built to read; before the hint ladder existed to
+ * produce a real number, every exercise claim wrote `assistLevel: undefined`,
+ * and the independence metric had nothing to measure. Omit the argument and
+ * that stays true for a caller that has no ladder to report from.
+ */
+export async function evidenceFromExerciseClaim(userId: unknown, lessonId: string, assistLevel?: number) {
   await safely(async () => {
     const lesson = await Lesson.findById(lessonId).select("skill").lean<{ skill: unknown } | null>();
     if (!lesson) return;
+    const level = typeof assistLevel === "number" && assistLevel > 0 ? assistLevel : undefined;
     await recordEvidence({
       userId,
       skill: lesson.skill,
@@ -202,8 +216,11 @@ export async function evidenceFromExerciseClaim(userId: unknown, lessonId: strin
       source: "self_report",
       strength: 1,
       verified: false,
+      assistLevel: level,
       ref: lessonId,
-      detail: "Self-reported the exercise complete",
+      detail: level
+        ? `Self-reported the exercise complete, after a level ${level} hint`
+        : "Self-reported the exercise complete, unaided",
     });
   });
 }

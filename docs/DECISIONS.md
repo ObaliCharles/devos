@@ -575,3 +575,524 @@ to 0 would report every learner as 100% independent from the day this shipped �
 a flattering number produced by measuring nothing, on the one metric the product
 exists to move. Nothing writes it until the hint ladder lands, so `sample` is
 honestly 0 today and callers must check it before drawing anything.
+
+## 027 — The lesson reader renders activities client-side, and never writes evidence
+
+**Status:** accepted
+
+`components/learn/activity-renderer.tsx` and `lesson-reader.tsx` are the first
+consumer of the schema from DECISIONS 025 — the renderer Chapter 5 and the
+design brief's §7–9 both describe. Two decisions carried over from the schema
+layer, now made concrete in UI:
+
+**No answer here ever calls `recordEvidence`.** Every activity — multiple
+choice, fill-in-the-code, teach-back — is `useState` that resets on refresh.
+This is DECISIONS 026 holding at the last mile: evidence is written only by
+code that has already graded something server-side, and a client click has not
+been graded by anyone. What these activities give instead is *formative*
+feedback — right/wrong, a rubric to compare against — matching Chapter 5's
+"Interactive Understanding" step, which sits before assessment. The lesson's
+real evidence still comes from exactly the three places it always has: the
+Requirement 4 quiz, the exercise gate, and graded code once the sandbox exists.
+Nothing new competes with those, and nothing new inflates a competency score.
+
+**The executing activity types render locked, not hidden.** `coding_exercise`,
+`debugging_exercise`, `interactive_example` and `assessment` need to actually
+run learner code, which today means `lib/runner.ts` — the documented RCE path
+from DECISIONS 018. `EXECUTING_ACTIVITY_TYPES` from `lesson-schema.ts` is
+checked at render time; those activities show their brief (the reading value
+survives) with the run action disabled and a plain explanation, rather than
+being generated and then discovered broken. This is the schema's own promise —
+written into DECISIONS 025 before any renderer existed — being kept literally.
+
+**The seam is additive, and proven in the render, not just the model.** The
+lesson page now branches on `readSections(lesson.body's sibling field)`: sections
+present renders the structured reader, empty falls back to the markdown card
+exactly as before. `npm run smoke` (246/246) confirms the existing gate/quiz/
+review loop is unaffected, and a standalone fixture check confirmed all 22
+activity payload shapes assumed while writing the renderer actually satisfy the
+Zod union — the TypeScript exhaustiveness check (`const _exhaustive: never`)
+additionally guarantees the switch in `ActivityRenderer` has a case for every
+member of the union, so a future activity type added to the schema without a
+render case fails the build rather than rendering nothing silently in
+production.
+
+**The section rail replaced the markdown-derived TOC, for structured lessons
+only.** `lesson-toc.tsx`'s heading-scraping TOC is unchanged and still serves
+every lesson with no `sections` — including all 92 catalog lessons. A
+structured lesson gets a truer rail instead: one entry per authored section, in
+`SECTION_LABELS`' vocabulary (Orientation, Concept, Guided Practice, ...) rather
+than whatever happened to be an `h2`. The two coexist rather than one replacing
+the other, because they are answering the same question from two different
+kinds of document.
+
+## 028 — The dashboard leads with a mission, not a stat row
+
+**Status:** accepted
+
+The dashboard already computed the right things — a real next lesson, a real
+due-review count, a real weekly delta — but presented them as three
+equal-weight cards (Continue / Path / Today) with the four headline numbers
+*above* all of them. Three problems followed from that layout rather than from
+the data: there was no single primary action (Resume, in one card, and a list
+of un-checked-off rows, in another, both said "start something"); the numbers
+led before the action did, which is backwards for a product whose one
+non-negotiable idea is capability over completion; and the Today list rendered
+an empty checkbox square in front of every row that did nothing when clicked —
+a decoration implying an interaction the product does not have, the same
+mistake this codebase's own principles already rule out for fake badges and
+meaningless streaks.
+
+The restructure is presentation only — no query changed, nothing new is
+computed. Today's three real signals (next lesson, due reviews, a practice
+suggestion) become one full-width mission panel, first under the greeting, with
+one primary action ("Start", to the first item) and a numbered list beneath it
+— numbers that are real sequence information, not decoration, since this is the
+order to do them in. The fake checkbox is removed rather than rebuilt into a
+working one: a per-mission-task completion model is Today-engine scope (learning
+upgrade spec §8–9), not a styling pass, and a decoration that cannot yet do what
+it implies is worse than no decoration.
+
+Continue and Path move below the mission as supporting detail — Continue is the
+mission's first item, expanded. The four-tile signal row becomes a `StatRow`
+(DECISIONS' neighbour on `Section`/`StatRow`, Design Phase 4) and moves below the
+action band, since a number is not the day's headline. `Stat` takes one value,
+not a value-plus-unit pair the way the old tile did, so units are folded into
+the value string here exactly as `/analytics` already does ("8h", not "8" with
+a separate "hrs") — dropping a unit silently would have been a real information
+loss on the streak, hours and XP readings.
+
+Mobile (`components/dashboard-mobile.tsx`) is unchanged in this pass; it already
+leads with a different pattern (a Continue hero, Today further down) that has
+the same "which card is primary" ambiguity and is a separate piece of work.
+
+## 029 — The landing page loses the particle field and its invented numbers
+
+**Status:** accepted
+
+Two unrelated problems on one page, fixed together because both come down to
+the same rule: show the real thing, not an effect or a number standing in
+for it.
+
+**The particle hero is gone.** It was flagged in the Phase 1 design audit as
+a direct conflict with the design handbook — an interactive particle field
+with a four-second idle auto-drift (sine/cosine motion that never stops) and
+a radial glow wash behind the headline. `CLAUDE.md`'s own list of "rules that
+get violated most often" names this pattern outright: no decorative glow, no
+infinite motion. The engineering in `particle-hero.tsx` was genuinely good —
+one `requestAnimationFrame` loop instead of 225 per-particle timers, tokens
+instead of a hard-coded red palette, `prefers-reduced-motion` honoured — none
+of that changes what it is. The fix was not to tune it down; the handbook does
+not carve out an exception for a well-built version of a banned pattern. The
+component file stays in the repo unused rather than deleted, since nothing
+else references it and it may find a legitimate one-off use later; `app/page.tsx`
+just stops importing it.
+
+What replaced it is what the learning-upgrade spec's §19–20 actually asked
+for and the handbook's §19 permits without qualification: the product's own
+UI. `DashboardPreview` — a faithful static rendering of the app's dashboard
+chrome — was already written and never rendered anywhere; it is now the hero's
+visual, directly under the headline.
+
+**The stats and journey cards were inventing numbers.** "15+ Learning
+Journeys", "200+ Projects", "50+ Achievements" and four persona cards each
+claiming a specific mission/project/achievement count (28 missions, 15
+projects...) did not correspond to anything `lib/catalog.ts` contains. This is
+the same failure mode the dashboard restructure (DECISIONS 028) already named
+and fixed once — "a dashboard of plausible-looking fake numbers is the single
+fastest way to make a product untrustworthy" — except here it is worse: a
+signed-out visitor has no way to check the claim before signing up, so the
+first thing they can verify against the product is finding out the homepage
+was wrong.
+
+Fixed by computing every number from the catalog: total courses, lessons,
+practice challenges and certification tracks for the stat row; and the four
+real tracks (Development, Data Science, Cloud, Security) with real per-track
+course/lesson/hour counts in place of the four fabricated personas. The
+persona framing survives in "Choose your path", because that section makes no
+numeric claim — it is advertising the AI roadmap generator, which really can
+build a path for "AI Engineer" or any other goal typed in. A line was added
+making that distinction explicit, since it now sits directly under a section
+that *is* fixed catalog content and the two could otherwise read as the same
+kind of claim.
+
+**What was deliberately left alone:** `ProgressPreview`'s illustrative activity
+feed ("Alex", "2 hours ago", "36% Overall") is a mocked-up screenshot of what
+the product looks like in use, the same convention every SaaS marketing page
+uses for a sample dashboard — it does not claim to be a platform aggregate the
+way "15+ Learning Journeys" did, so it is not the same problem and was not
+rewritten.
+
+## 030 — Roadmap and Practice needed no changes; Projects got the one real fix
+
+**Status:** accepted
+
+Design Phase 10 targeted three surfaces. Two turned out to already be
+correct, which is worth recording so the next pass does not re-litigate them.
+
+**`/learning/roadmap`** has no stat-tile row and no card wrapping a region that
+is not an object. `CourseCatalog` already draws the phase/skill tree the right
+way: a phase is a plain `<section>` with a text header, never boxed, and only
+a skill — which really is an object, a specific course with its own progress —
+gets `.card`. This is the exact distinction `Section` was built to enforce,
+arrived at independently before `Section` existed.
+
+**`/practice`** likewise needed nothing. Its own header comment already states
+the rule this whole design pass is built around — "The summary tiles that used
+to sit here are gone... putting one above the challenges said the numbers
+mattered more than the practice" — and `ChallengeLibrary`'s says "every number
+on a card is a real count. A library nobody has attempted shows no solve rates
+rather than a fabricated 82%." Both are the DECISIONS 028/029 principle,
+applied here before either of those was written. The remaining `.card` uses
+(This week, Topics, Activity, Recent submissions) are kept deliberately: they
+sit in a dense multi-panel grid, not a single reading column, and adjacent
+unrelated panels in a grid need a visible edge to disambiguate them — the same
+reasoning DECISIONS 028 already used to keep Continue/Path as cards on the
+dashboard rather than converting them to bare sections. Converting every
+`.card` on sight, regardless of layout, would have been the mechanical pass
+§33 of the design brief warns against ("consistency does not mean every page
+should be a clone").
+
+**`/projects`** had the one real instance of the pattern: four `StatTile`
+cards in a row, above the fold, each carrying one number and a now-decorative
+icon — identical in shape to the rows already fixed on `/analytics` and the
+dashboard. Converted to `StatRow`/`Stat`, semantic colour kept on the bugs
+reading (`tone="danger"`/`"success"`, real state, not decoration). `Clock` fell
+out of the icon imports as dead code once its only remaining use — the removed
+tile's icon — was gone.
+
+## 031 — The route audit found one more real instance, and one that looked like one but was not
+
+**Status:** accepted
+
+Design Phase 11 swept every route for the patterns DECISIONS 028–030 already
+named — hex colours outside a token, sub-12px text, stat-tile rows — rather
+than opening all 73 pages individually.
+
+**`/admin`** had the fourth instance: six `StatCard` tiles across two grids
+(Users/Lessons/Challenges/Projects, then Notes/AI spend), same shape as
+analytics, the dashboard and `/projects`. Converted to `StatRow`/`Stat`.
+
+**`/career`** looked like a fifth instance and is not one. Its four `StatTile`
+cards (Resume/Portfolio/Applications/Certificates) carry `href` — each is a
+real link into its own module page — and heterogeneous values: a percentage, a
+publish state, two plain counts. `StatRow`/`Stat` has no link affordance and
+represents homogeneous readings of one thing, which this is not. These are
+closer to the project cards on `/projects` — distinct objects with their own
+identity and destination — than to a row of numbers being compared. Converting
+them would have cost real navigation for a resemblance in class name only, so
+they stay `StatTile`.
+
+**A known, deliberately unresolved gap:** `StatRow`'s divider CSS clears the
+leading border with `:first-child`, which is correct for exactly one row.
+`/admin`'s six-item row can wrap to two rows of four at tablet content widths
+(roughly 641–840px, the range below where `auto-fit`'s 140px-minimum columns
+stop fitting six across and above the 640px mobile breakpoint that switches to
+an explicit 2-column layout), and when it does, the fifth item — first in row
+two — keeps a left border with nothing to its left. A fix was drafted (fixed
+column counts per breakpoint instead of `auto-fit`, so "first in row" becomes
+`nth-child(4n+1)` and is correct for any row length, full or partial) and not
+applied — it touches a primitive shared by four pages for a cosmetic edge case
+in one specific viewport band. Left as a known limitation rather than pushed
+through; the correct fix is recorded above if `/admin`'s stat count or another
+consumer makes it worth doing.
+
+**Audited and confirmed already correct, changed nothing:** `/learning/roadmap`
+and `/practice` (DECISIONS 030). Full audit surface: hex colours (18, all
+accounted for — Clerk's theming API, the browser `theme-color` meta, real
+language brand marks, and `global-error.tsx`'s necessarily-inline styles, none
+of them a token violation), the 12px type floor (0 violations codebase-wide),
+loading/error boundary coverage (29 `loading.tsx` / 10 `error.tsx`, both up
+from Phase 5 by exactly the files added there, no regression).
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 246/246. The production build
+could not be verified in this pass — `next/font`'s fetch to the Google Fonts
+CSS endpoint failed repeatedly in this sandbox despite the host itself being
+reachable by a plain request, an environment condition unrelated to anything
+in this diff (`app/layout.tsx`'s font imports are untouched this session).
+
+## 032 — The hint ladder is the first thing to give the independence metric a real number
+
+**Status:** accepted
+
+Learning-spec Phase 2 is six items (tutor state, hint ladder, dependency
+tracking, planning assistant, teach-back, AI-free mode). This is the first
+slice — the hint ladder alone — chosen because it is the one piece the rest of
+Phase 1 was already waiting on: `independenceFrom` in `lib/competency.ts` and
+`getIndependence` in `lib/queries/competency.ts` have existed since Phase 1b,
+correctly reporting `sample: 0` because nothing in the product had ever
+written a real `assistLevel`. The hint ladder is that writer.
+
+**Progression is enforced server-side, not just offered client-side.**
+`lib/hint-ladder.ts` is pure — a level, an instruction, and
+`nextAllowedLevel`/`isLevelAllowed` — and `requestExerciseHint` in
+`lib/actions/learning.ts` checks a requested level against the deepest level
+already reached on `LessonProgress.hintLevel` before it will spend a model
+call. This is the same split the mastery gate already uses: the UI only ever
+offers "one more rung", so a normal session never hits the refusal, but the
+refusal exists because a request is a request, not a click, and skipping
+straight to "give me the full solution" for a two-word question is exactly the
+failure mode a hint ladder exists to prevent.
+
+**The level is stored on `LessonProgress`, not on a new collection**, because
+it is scoped to exactly the thing `LessonProgress` already scopes everything
+else to — one user, one lesson, the current attempt at its exercise. It resets
+to 0 the moment `exercised` flips false→true (the same transition that already
+fires `evidenceFromExerciseClaim`, per DECISIONS 026), so redoing an exercise
+later starts the ladder fresh rather than inheriting today's assistance
+forever.
+
+**The connection to evidence is one changed call site.**
+`evidenceFromExerciseClaim` now takes an optional `assistLevel`, read from
+`hintLevel` at the exact moment it is about to be reset. An unaided claim still
+writes `assistLevel: undefined`, not `0` — DECISIONS 026's rule holds:
+"not measured" and "measured and found to be zero" are different claims, and
+`independenceFrom` already excludes the former rather than counting it as the
+latter. What changes is that a *hinted* claim now writes a real number for the
+first time since the metric was built.
+
+**Deliberately out of scope for this slice**, each a separate follow-up:
+coding-challenge hints (the ladder only reaches lesson exercises; challenges
+have their own attempt/evidence path and would need their own wiring), hint
+text persistence (a returning learner sees the level they reached but not the
+prose — refreshing loses the text, matching how the general tutor already
+behaves, not a new gap), and any UI surfacing of `getIndependence` itself
+(no analytics view renders it yet — this slice only guarantees it now has
+something real to show once one exists). The remaining five items of Phase 2 —
+tutor state, planning assistant, teach-back grading, AI-free mode
+enforcement — are unbuilt.
+
+Verified: `tsc --noEmit` clean (app and smoke config, modulo the pre-existing,
+unrelated Clerk typing errors in `middleware.ts` noted since Phase 1a),
+`npm run smoke` 264/264 (up from 246 by the 18 assertions this adds — 9 pure
+ladder-logic checks, 9 database-backed checks covering the skip-refusal, the
+evidence connection, the unaided/hinted distinction, and the independence
+metric receiving its first non-zero sample).
+
+## 033 — Generated lessons finally produce their own sections, in a wire shape too small to fail
+
+**Status:** accepted
+
+Since DECISIONS 025 this has been the standing gap: the structured lesson
+schema and its renderer existed, but nothing populated `sections` on a real
+lesson — not the catalog (92 hand-authored lessons predate the model), not the
+seed data, and not the AI generator. The entire lesson reader from Phase 1c
+was correct and untestable in the running app at the same time. This closes
+it from the generator's side.
+
+**The model is not asked for `Section`/`Activity` JSON.** `Activity` is a
+23-variant union; asking a model already writing a body, a quiz and tasks for
+two or three lessons per call to also produce that shape reliably is asking
+for the exact failure mode `roadmap-gen.ts`'s own top comment describes — a
+good start that drifts on a nested shape, and Zod rejecting the whole lesson
+for it. Instead Pass 2's wire shape gained four small, flat, independently
+optional fields: a `pitfall` paragraph, one `check` question, one `reflection`
+prompt, and one `{dimension, cognitiveLevel}` tag per objective.
+`lib/roadmap-gen-sections.ts` — pure, no network — turns that into real,
+validated `Section[]`/`Objective[]`, parsed through the actual
+`Section.safeParse`/`Objective.safeParse` lesson-schema.ts defines rather than
+trusted. A malformed `check` (too few choices, say) is dropped; the pitfall and
+reflection either side of it are not.
+
+**Deliberately narrow, on purpose.** Three activity types requested
+(`callout`, `multiple_choice`, `reflection`), not the full 22 — and none of
+the four executing types, which would render `Locked` today regardless (per
+DECISIONS 027) and so would only spend tokens on content nobody can use yet.
+Every generated lesson still gets exactly the `body`/quiz/tasks it always has;
+the additions are strictly on top, and a lesson whose extras never came back
+or failed validation renders exactly as it did before this shipped — same
+two-field seam as DECISIONS 025, now visible from both the schema side and the
+generator side.
+
+**The formative `check` is not the graded quiz.** They are two different
+questions on purpose: the existing `quiz` is Requirement 4 of the mastery gate
+and stays exactly as it is; `check` lives inside the reading flow as an
+ungraded, local-only comprehension check, per DECISIONS 027's rule that
+nothing rendered by `ActivityRenderer` writes evidence.
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 277/277 (up from 264 by the 13
+assertions this adds, all against the pure transform — the actual model call
+in `generateRoadmap` remains untested by smoke, as it always has been, since
+it needs a configured provider and a network call neither CI nor this sandbox
+reliably has).
+
+## 034 — The diagnostic is reachable, not mandatory, and produces skill-less evidence
+
+**Status:** accepted
+
+Learning-spec Phase 1's last unbuilt piece. §44 calls this the actual first
+step of the product's most important test — "what do I know?" before
+anything else — and until this shipped a new signup went straight to picking
+a roadmap with the system knowing nothing real about them. Like the hint
+ladder, this is the second feature this rewrite has built specifically to
+give an already-anticipated, already-unused piece of infrastructure its first
+real writer: `EVIDENCE_SOURCES` has included `"diagnostic"` with its own
+`SOURCE_WEIGHT` since Phase 1a, and `User.onboardedAt` has existed, set
+nowhere, since before this rewrite began.
+
+**Reachable, not forced.** There is no middleware gate. `middleware.ts`'s
+public-route list is unchanged, and no new redirect sends a fresh signup here
+before they can do anything else. A hard gate is a real product-behaviour
+change — friction on every future signup, a new failure mode if the page ever
+breaks — and is not this change's decision to make unilaterally. `/diagnostic`
+is a real, complete, working page, linked wherever the product chooses to
+surface it.
+
+**Eight questions, four dimensions, no Planning.** Every question is one of
+the *existing*, already-validated `Activity` shapes from `lesson-schema.ts` —
+`multiple_choice`, `code_tracing`, `fill_in_code` — not a parallel question
+format invented for this one feature, and machine-gradable the instant it is
+submitted, no round trip to a model. Coding and debugging are asked as
+*predict* and *diagnose* rather than *write and run*, so none of it waits on
+DECISIONS 018's sandbox. Planning is deliberately not one of the four tested
+dimensions: none of the eight real competency dimensions is "planning
+ability", and the spec's own §13 gives planning its own AI-reviewed workflow
+(Phase 2's still-unbuilt planning assistant) — testing it here would produce a
+number force-fit to a dimension it does not belong to.
+
+**`Evidence.skill` is now optional, for exactly this one case.** A diagnostic
+happens before a learner has a roadmap, so its evidence cannot be scoped to
+any Skill document — and forcing one would either block the feature entirely
+or invent a fake skill to hang it on. The alternative kept: every skill-scoped
+query (`getSkillCompetency`, `getCompetencyMap`) filters *by* skill, so a
+skill-less row simply never surfaces there — asserted directly in smoke,
+because "does diagnostic evidence quietly inflate some unrelated skill's
+score" is exactly the kind of bug that would not announce itself. Reading it
+back is `getDiagnosticProfile` in `lib/queries/competency.ts`, which derives a
+`Competency` from `source: "diagnostic"` evidence with no skill filter at
+all — the same `competencyFrom` every other reading in the product already
+uses, not a parallel scoring path.
+
+**The free-response question is honestly unverified.** It is not machine-
+graded, so it is recorded as `source: "self_report"` (DECISIONS 026's weight,
+not the diagnostic's) rather than inflating trust in something nobody
+checked — and a trivially short non-answer ("idk") is not recorded as an
+attempt at all.
+
+**Retaking is idempotent on the date, not on the evidence.** Evidence is an
+append-only ledger, so a retake writes fresh rows exactly like the first
+attempt; `onboardedAt` only ever gets set once, so a retake cannot look like
+someone's "first diagnosed" date moved.
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 309/309 (up from 277 by 32
+assertions — 16 pure grading-logic checks including the deliberately-mixed
+half-right-half-wrong submission, and 16 database-backed checks covering the
+full submit → evidence → profile round trip, the skill-isolation property,
+and the idempotent onboarding timestamp).
+
+## 035 — The tutor is told the learner's mastery and dependency, shared by every AI touchpoint
+
+**Status:** accepted
+
+Learning-spec §10 lists what the tutor must know: current mastery, AI
+dependency, learning history, alongside what it already knew (the lesson,
+memory, the project in front of them). The AI context builder had none of
+the first two — every recorded competency and independence signal built in
+Phase 1 and by the hint ladder existed in the database and was invisible to
+the model answering questions about it.
+
+**One function, two callers, not two guesses at the same phrasing.**
+`learnerStateSummary()` in `lib/ai-context.ts` is the shared "mastery +
+dependency" paragraph. `buildSystemContext` (the concept tutor behind
+`/api/ai/explain`) and `requestExerciseHint` (the hint ladder) both call it
+and append the result to their own prompt, rather than each inventing its own
+version of "how do I tell the model this learner leans on full solutions." It
+is deliberately *not* folded into `buildSystemContext` as the only caller,
+because the hint ladder's prompt is already tight and level-specific —
+pulling in memory and full lesson bodies alongside it would dilute the one
+instruction that actually matters at that point, the current hint level.
+
+**Both halves are silent by default, not zero by default.** A skill with no
+evidence yet produces no competency sentence at all — there is nothing to
+report, and reporting "0% competent" would read as a judgement the data does
+not support. The independence share stays quiet below a sample of 10, reusing
+the exact threshold `Independence.sample`'s own doc comment already
+established in Phase 2a rather than inventing a second number: fewer graded
+pieces than that do not mean anything, and telling a model "62% independent"
+off two data points would be steering its behaviour on noise.
+
+**The dependency signal changes actual behaviour, not just phrasing.** Over
+30% of recent work shown a full solution or strategy: the tutor is told to
+favour the lower rungs of the hint ladder and ask what has been tried. Over
+60% solved unaided: told a small nudge is enough, do not over-explain. This is
+§12's own remediation list ("if dependency increases, reduce direct
+solutions...") expressed as an instruction the model actually receives, not a
+metric that only ever gets displayed.
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 317/317 (up from 309 by 8
+assertions covering both silent-by-default cases, the skill-isolation
+property — evidence for one skill must not leak into a summary requested for
+another — and both dependency-guidance branches).
+
+## 036 — Teach-back is graded, and is the one exception to "the reader writes no evidence"
+
+**Status:** accepted
+
+`EVIDENCE_SOURCES` has carried `"teach_back"` at a real weight (0.8, the same
+tier as a project or a challenge submission — second only to a full
+assessment) since Phase 1a. Nothing wrote it. Same shape of gap as the hint
+ladder and the diagnostic before it: infrastructure built ahead of its first
+real writer.
+
+**The generator did not produce teach-back activities either, so this shipped
+as two changes, not one.** Grading something nothing generates would have
+been the same unreachable-feature problem `sections` itself was before
+DECISIONS 033 — a correct code path with nothing real to exercise it.
+
+**One teach-back per skill, not per lesson.** Unlike `pitfall`/`check`/
+`reflection` (asked once per lesson, in `SkillContent.lessons[]`),
+`teachBack` is a new *skill-level* field in Pass 2's reply, attached in code
+to only the skill's last lesson. Chapter 5 is explicit that not every lesson
+needs every activity, and a teach-back is described as the rarer, stronger
+kind of evidence — asking for one per lesson would have both bloated Pass 2's
+JSON (more surface area for the exact truncation failure `roadmap-gen.ts`'s
+own top comment exists to avoid) and produced three teach-backs per skill,
+diluting the one that matters. The prompt is explicitly allowed to answer
+`null` — a single-fact or pure-syntax lesson has no core idea worth teaching
+back, and forcing one there would be worse than skipping it.
+
+**`extractJson` moved to `lib/ai-json.ts`.** It was private to `roadmap-gen.ts`
+until `lib/actions/teach-back.ts` needed the exact same tolerant-JSON-from-a-
+model-reply parsing for the exact same reason. Shared once two call sites
+needed it, rather than a second slightly-different regex growing independently.
+
+**Teach-back is now the one deliberate exception to DECISIONS 027's rule.**
+Every other activity in `ActivityRenderer` is `useState` that resets on
+refresh, because a client click has not been graded by anyone. A teach-back is
+different in kind: §29 calls it "stronger evidence than reading", and judging
+a real written explanation against a rubric is comparable in rigor to a
+challenge submission, not to picking a multiple-choice option. `gradeTeachBack`
+in `lib/actions/teach-back.ts` is a real server action; `TeachBack` in
+`activity-renderer.tsx` calls it and is the reason `ActivityRenderer` now
+takes a required `lessonId` prop that every other activity type ignores.
+
+**"Verified" here means "a machine decided it", the same sense DECISIONS 026
+already uses — not "deterministically exact".** Every other `verified: true`
+row in the product comes from an exact match: a quiz answerIndex, a test
+suite's pass/fail, the diagnostic's string comparison. An AI grading free text
+is a real machine decision but a probabilistic one, and that distinction is
+exactly what the pre-existing 0.8 source weight already prices in — below a
+challenge's or an assessment's 1.0, above a quiz's 0.5. Marking it unverified
+instead would have wasted a weight tier that was already sitting there
+calibrated for precisely this.
+
+**Grading failure degrades to the local rubric reveal, not a dead end.** No
+provider configured, or the model returns something unparseable: the score is
+lost, not the exercise — the learner can still compare their own answer
+against the rubric by eye, matching how a failed AI-generated lesson body
+already falls back to something real rather than nothing (DECISIONS 025's
+"a fallback is worse than none" reasoning, applied here to a UI failure rather
+than a generation one).
+
+**Not smoke-tested end to end, on purpose, for the same reason `generateRoadmap`
+and `requestExerciseHint` are not.** A real Anthropic key happens to be present
+in this sandbox's `.env.local`, and it was tempting to use it — but the smoke
+suite's reliability must not depend on incidental environment state a CI run
+or another machine will not have (DECISIONS 032/033's precedent). Only the
+guard that returns before any network call (`gradeTeachBack` on an empty
+answer) is asserted.
+
+Verified: `tsc --noEmit` clean, `npm run smoke` 322/322 (up from 317 by 5 —
+3 covering the new skill-level `teachBack` extra's containment, including that
+an empty rubric is dropped rather than sent through with nothing in it, and 2
+covering the pre-network guard).

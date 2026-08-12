@@ -21,8 +21,8 @@ import {
 } from "lucide-react";
 import { LogoTile, Wordmark } from "@/components/brand";
 import { SiteNavbar } from "@/components/marketing/site-navbar";
-import { ParticleHero } from "@/components/marketing/particle-hero";
 import { Reveal } from "@/components/reveal";
+import { CERTIFICATIONS, COURSES, challengeCount, lessonCount } from "@/lib/catalog";
 
 /**
  * The public landing page.
@@ -33,13 +33,21 @@ import { Reveal } from "@/components/reveal";
  * product's own dashboard, so the page shows the thing rather than only
  * describing it. Everything reads a design token, so it matches the app shell
  * exactly and flips to light mode with it.
+ *
+ * Every number on this page is computed from `lib/catalog.ts`, the same
+ * source the signed-in product reads. This page used to show "15+ Learning
+ * Journeys" and per-journey stats like "28 Missions" that did not correspond
+ * to anything in the app — a visitor who signed up would find a different,
+ * smaller number waiting. See DECISIONS on why that is the fastest way to
+ * make a product untrustworthy, and doubly so on the one page nobody is
+ * signed in yet to fact-check against.
  */
 
 const STATS = [
-  { value: "15+", label: "Learning Journeys" },
-  { value: "200+", label: "Projects" },
-  { value: "50+", label: "Achievements" },
-  { value: "100%", label: "Project Based" },
+  { value: String(COURSES.length), label: "Courses" },
+  { value: String(COURSES.reduce((n, c) => n + lessonCount(c), 0)), label: "Lessons" },
+  { value: String(COURSES.reduce((n, c) => n + challengeCount(c), 0)), label: "Practice challenges" },
+  { value: String(CERTIFICATIONS.length), label: "Certification tracks" },
 ];
 
 const STEPS = [
@@ -50,48 +58,40 @@ const STEPS = [
   { icon: Rocket, title: "Ship to the world", body: "Deploy production-ready applications." },
 ];
 
-const JOURNEYS = [
-  {
-    icon: BrainCircuit,
-    title: "AI Engineer",
-    body: "Master AI, machine learning and build intelligent applications.",
+/**
+ * The four real tracks the catalog is organised into, with real per-track
+ * totals — replacing four persona cards ("AI Engineer", "Fullstack
+ * Engineer"...) that quoted specific mission and project counts nothing in
+ * the product could back up. The persona framing survives below, in "Choose
+ * your path": that section makes no numeric claim, because it is advertising
+ * the AI roadmap generator — a goal typed in produces a real, custom path,
+ * for any goal, not only these four.
+ */
+const TRACK_ICON: Record<string, typeof BrainCircuit> = {
+  Development: Code2,
+  "Data Science": BrainCircuit,
+  Cloud: Cloud,
+  Security: ShieldCheck,
+};
+const TRACK_BLURB: Record<string, string> = {
+  Development: "Python, JavaScript, Git, APIs and React — the core of shipping software.",
+  "Data Science": "Prompt engineering, LLM applications and the ML foundations behind them.",
+  Cloud: "Docker and the fundamentals of running software in production.",
+  Security: "The vulnerabilities every developer should be able to recognise.",
+};
+const TRACKS = Array.from(new Set(COURSES.map((c) => c.track))).map((track) => {
+  const courses = COURSES.filter((c) => c.track === track);
+  return {
+    track,
+    icon: TRACK_ICON[track] ?? Code2,
+    body: TRACK_BLURB[track] ?? "",
     stats: [
-      ["28", "Missions"],
-      ["15", "Projects"],
-      ["6", "Achievements"],
-    ],
-  },
-  {
-    icon: Code2,
-    title: "Fullstack Engineer",
-    body: "Become a fullstack engineer and build modern web applications.",
-    stats: [
-      ["28", "Missions"],
-      ["15", "Projects"],
-      ["6", "Achievements"],
-    ],
-  },
-  {
-    icon: Server,
-    title: "Backend Engineer",
-    body: "Build scalable APIs, systems and backend services.",
-    stats: [
-      ["24", "Missions"],
-      ["12", "Projects"],
-      ["5", "Achievements"],
-    ],
-  },
-  {
-    icon: Cloud,
-    title: "Cloud Engineer",
-    body: "Learn cloud infrastructure, deployment and DevOps from scratch.",
-    stats: [
-      ["24", "Missions"],
-      ["12", "Projects"],
-      ["5", "Achievements"],
-    ],
-  },
-];
+      [String(courses.length), courses.length === 1 ? "Course" : "Courses"],
+      [String(courses.reduce((n, c) => n + lessonCount(c), 0)), "Lessons"],
+      [String(courses.reduce((n, c) => n + c.hours, 0)), "Hours"],
+    ] as [string, string][],
+  };
+});
 
 const PATHS = [
   { icon: BrainCircuit, label: "AI Engineer" },
@@ -117,11 +117,16 @@ export default function Landing() {
       <SiteNavbar />
 
       {/* ============================================================== Hero
-          The particle field is the backdrop; the copy below is unchanged and
-          renders on top of it, which is what the component's children slot is
-          for. Nothing about the message was traded for the animation. */}
-      <ParticleHero particleCount={13}>
-      <section className="mx-auto flex w-full flex-col items-center px-5 py-20 text-center sm:px-8 lg:py-28" style={{ maxWidth: 880 }}>
+          Previously an interactive particle field with an idle auto-drift and
+          an ambient glow wash behind this same copy. Both are the exact
+          pattern the design handbook names as most commonly violated —
+          infinite motion and decorative glow are banned outright, not "used
+          sparingly" — so rather than tune the particle field down, it comes
+          out. What replaces it is what §19/§20 actually ask for: the product's
+          real UI, not an effect standing in for one. `DashboardPreview` below
+          is the same static, faithful chrome this page always had — it was
+          built and then never rendered; this is the first time it is used. */}
+      <section className="mx-auto flex w-full flex-col items-center px-5 py-20 text-center sm:px-8 lg:py-24" style={{ maxWidth: 880 }}>
         <div className="rise flex flex-col items-center">
           <span className="badge badge-lg">
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--primary)" }} aria-hidden />
@@ -158,7 +163,14 @@ export default function Landing() {
           </div>
         </div>
       </section>
-      </ParticleHero>
+
+      {/* The product itself, not a screenshot standing in for a claim. Static
+          — nothing here is live data, and it does not pretend to be. */}
+      <section className="mx-auto w-full px-5 pb-20 sm:px-8 lg:pb-28" style={{ maxWidth: 900 }}>
+        <Reveal>
+          <DashboardPreview />
+        </Reveal>
+      </section>
 
       {/* ============================================================= Stats */}
       <section className="border-y" style={{ borderColor: "var(--border)" }}>
@@ -203,25 +215,32 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ==================================================== Explore journeys */}
+      {/* ================================================= Explore the catalog
+          Was four persona cards — "AI Engineer", "Fullstack Engineer" — each
+          quoting a specific mission and project count nothing in the product
+          could produce; every course here maps to one of four real tracks, not
+          to those names, so those numbers were never anything but plausible.
+          This is the same four tracks `lib/catalog.ts` actually organises
+          courses into, with counts computed from the same 10 courses and 92
+          lessons the signed-in catalog shows. */}
       <section className="mx-auto w-full px-5 py-8 sm:px-8" style={{ maxWidth: 1200 }}>
         <div className="text-center">
-          <p className="eyebrow eyebrow-accent">Explore Journeys</p>
+          <p className="eyebrow eyebrow-accent">Explore the catalog</p>
           <h2 className="mt-3 text-[26px] font-bold tracking-[-0.03em] sm:text-[36px]">
-            Structured paths. Real outcomes.
+            Structured paths. Real content.
           </h2>
         </div>
 
         <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
-          {JOURNEYS.map((j, i) => (
-            <Reveal key={j.title} index={i} className="card flex flex-col p-5">
+          {TRACKS.map((t, i) => (
+            <Reveal key={t.track} index={i} className="card flex flex-col p-5">
               <span className="icon-tile icon-tile-lg">
-                <j.icon size={20} />
+                <t.icon size={20} />
               </span>
-              <h3 className="title-card mt-4">{j.title}</h3>
-              <p className="text-body mt-1.5 flex-1 text-ui">{j.body}</p>
+              <h3 className="title-card mt-4">{t.track}</h3>
+              <p className="text-body mt-1.5 flex-1 text-ui">{t.body}</p>
               <div className="mt-4 flex gap-4">
-                {j.stats.map(([v, l]) => (
+                {t.stats.map(([v, l]) => (
                   <div key={l}>
                     <p className="num text-[16px] font-bold">{v}</p>
                     <p className="text-meta text-micro">{l}</p>
@@ -229,7 +248,7 @@ export default function Landing() {
                 ))}
               </div>
               <Link href="/sign-up" className="btn btn-secondary btn-sm btn-block mt-5">
-                Start Journey <ArrowRight size={14} />
+                Start Learning <ArrowRight size={14} />
               </Link>
             </Reveal>
           ))}
@@ -248,6 +267,14 @@ export default function Landing() {
         <h2 className="mt-3 text-[26px] font-bold tracking-[-0.03em] sm:text-[36px]">
           Become who you want to become.
         </h2>
+        {/* Unlike the catalog above, these seven are not pre-built content —
+            they are what the AI roadmap generator can start from. Said
+            plainly, so it reads as the real, broader capability it is rather
+            than as seven more courses. */}
+        <p className="text-body mx-auto mt-3 max-w-[46ch] text-ui">
+          Not fixed courses — tell the AI generator your goal and it plans a real path for it, these
+          seven or any other.
+        </p>
 
         <div className="mt-10 flex flex-wrap items-start justify-center gap-x-6 gap-y-7 sm:mt-12 sm:gap-x-14">
           {PATHS.map((p, i) => (

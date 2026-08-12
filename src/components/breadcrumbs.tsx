@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { NAV_GROUPS } from "./nav-config";
+import { navGroups } from "./nav-config";
 import { COURSES } from "@/lib/catalog";
 
 /**
@@ -27,9 +27,14 @@ import { COURSES } from "@/lib/catalog";
  * screen reader needs to announce it as a position rather than a menu.
  */
 
-/** href -> label, built once from the single nav model. */
+/** href -> label, built once from the single nav model. `false`: the Admin
+ *  entry it would add for an admin user resolves fine through the generic
+ *  de-slug fallback below anyway ("admin" -> "Admin"), so this table does not
+ *  need to know who is asking. */
 const NAV_LABELS: Record<string, string> = Object.fromEntries(
-  NAV_GROUPS.flatMap((g) => g.items).map((i) => [i.href, i.label]),
+  navGroups(false)
+    .flatMap((g) => g.items)
+    .map((i) => [i.href, i.label]),
 );
 
 const COURSE_TITLES: Record<string, string> = Object.fromEntries(
