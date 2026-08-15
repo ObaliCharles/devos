@@ -49,7 +49,11 @@ export function Topbar({
   return (
     <header
       className="glass sticky top-0 z-30 flex shrink-0 items-center gap-3 border-b px-4 sm:px-5"
-      style={{ height: "var(--topbar-h)", borderColor: "var(--border)" }}
+      style={{
+        height: "var(--topbar-h)",
+        borderColor: "var(--border)",
+        boxShadow: "0 1px 0 rgb(255 255 255 / 0.025)",
+      }}
     >
       {/* Phone-only: the menu trigger and drawer hold the full navigation. */}
       <MobileDrawer dueCount={dueCount} isAdmin={isAdmin} user={navUser} />

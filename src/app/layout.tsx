@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0b0d12" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e1f22" },
     { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
   ],
 };
@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html
         lang="en"
-        data-theme="light"
+        data-theme="dark"
         className={`${sans.variable} ${mono.variable}`}
         suppressHydrationWarning
       >

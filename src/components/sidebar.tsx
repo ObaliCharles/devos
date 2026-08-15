@@ -17,7 +17,7 @@ import { isExternal } from "@/lib/community-links";
 export type { SidebarUser };
 
 const STORAGE_KEY = "dos-sidebar-collapsed";
-const softSpring = "cubic-bezier(0.25, 1.1, 0.4, 1)";
+const softSpring = "var(--ease-smooth)";
 
 export function Sidebar({
   dueCount = 0,
@@ -58,8 +58,9 @@ export function Sidebar({
       className="hidden shrink-0 border-r md:flex"
       style={{
         width: collapsed ? "var(--sidebar-w-collapsed)" : "calc(var(--sidebar-w-collapsed) + var(--sidebar-w))",
-        background: "var(--surface)",
+        background: "var(--bg-elevated)",
         borderColor: "var(--border)",
+        boxShadow: "inset -1px 0 0 var(--border-faint)",
         transition: ready ? `width 520ms ${softSpring}` : "none",
       }}
     >
@@ -69,7 +70,7 @@ export function Sidebar({
         style={{
           width: "var(--sidebar-w-collapsed)",
           borderColor: "var(--border-faint)",
-          background: "var(--surface)",
+          background: "var(--bg)",
         }}
       >
         <div
@@ -88,7 +89,11 @@ export function Sidebar({
               onClick={toggle}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               className="absolute inset-0 grid place-items-center rounded-[var(--radius-tile)] opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/brand:opacity-100"
-              style={{ background: "var(--surface-3)", color: "var(--text)" }}
+              style={{
+                background: "var(--surface-hover)",
+                color: "var(--text)",
+                boxShadow: "var(--shadow-sm)",
+              }}
             >
               {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
             </button>
@@ -155,7 +160,7 @@ export function Sidebar({
       {!collapsed && (
         <div
           className="flex min-w-0 flex-1 flex-col"
-          style={{ opacity: ready ? 1 : 0, transition: `opacity 420ms ${softSpring}` }}
+          style={{ opacity: ready ? 1 : 0, transition: `opacity 360ms ${softSpring}` }}
         >
           <div
             className="flex shrink-0 items-center justify-between gap-3 px-4"
@@ -176,7 +181,11 @@ export function Sidebar({
             </p>
             <div
               className="mt-4 flex h-10 items-center gap-2 rounded-[var(--radius-control)] border px-3"
-              style={{ borderColor: "var(--border)", background: "var(--surface-2)" }}
+              style={{
+                borderColor: "var(--border)",
+                background: "var(--surface-2)",
+                boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.025)",
+              }}
             >
               <Search size={15} className="shrink-0" style={{ color: "var(--text-faint)" }} />
               <input

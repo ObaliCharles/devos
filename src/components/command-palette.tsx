@@ -213,13 +213,21 @@ export function CommandPalette() {
   return (
     <div
       className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[10vh]"
-      style={{ background: "rgb(4 5 8 / 0.62)", backdropFilter: "blur(3px)" }}
+      style={{
+        background: "var(--overlay)",
+        backdropFilter: "blur(5px) saturate(1.12)",
+        animation: "fade-in var(--dur) var(--ease-smooth) both",
+      }}
       onClick={() => setOpen(false)}
       role="presentation"
     >
       <div
-        className="glass-strong scale-in w-full max-w-[560px] overflow-hidden"
-        style={{ borderRadius: "var(--radius-dialog)", boxShadow: "var(--shadow-xl)" }}
+        className="glass-strong w-full max-w-[560px] overflow-hidden"
+        style={{
+          borderRadius: "var(--radius-dialog)",
+          boxShadow: "var(--shadow-xl)",
+          animation: "panel-in 380ms var(--ease-smooth) both",
+        }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -285,8 +293,10 @@ export function CommandPalette() {
                       onClick={() => go(row)}
                       className="flex w-full items-center gap-3 rounded-[var(--radius-control)] px-2.5 py-2 text-left"
                       style={{
-                        background: active ? "var(--primary-faint)" : "transparent",
-                        transition: "background var(--dur-fast) var(--ease)",
+                        background: active ? "var(--surface-selected)" : "transparent",
+                        boxShadow: active ? "inset 0 0 0 1px var(--primary-ring)" : "none",
+                        transition:
+                          "background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease)",
                       }}
                     >
                       <span

@@ -66,10 +66,11 @@ export function MobileDrawer({
         onClick={() => setOpen(false)}
         className="fixed inset-0 z-50 md:hidden"
         style={{
-          background: "rgb(0 0 0 / 0.5)",
+          background: "var(--overlay)",
+          backdropFilter: open ? "blur(2px)" : "blur(0)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
-          transition: "opacity var(--dur) var(--ease)",
+          transition: "opacity var(--dur) var(--ease-smooth), backdrop-filter var(--dur) var(--ease-smooth)",
         }}
         aria-hidden
       />
@@ -81,11 +82,12 @@ export function MobileDrawer({
         aria-modal="true"
         aria-label="Navigation"
         style={{
-          background: "var(--surface)",
+          background: "var(--chrome-strong)",
           borderRight: "1px solid var(--border)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
-          transition: "transform var(--dur-slow) var(--ease)",
+          transition: "transform var(--dur-slow) var(--ease-smooth)",
           boxShadow: open ? "var(--shadow-xl)" : "none",
+          backdropFilter: "blur(24px) saturate(1.35)",
         }}
       >
         <div

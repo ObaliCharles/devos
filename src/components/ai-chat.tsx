@@ -466,19 +466,25 @@ export function AiChat({
         onClick={() => setDrawerOpen(false)}
         className="fixed inset-0 z-40 lg:hidden"
         style={{
-          background: "rgb(0 0 0 / 0.5)",
+          background: "var(--overlay)",
+          backdropFilter: drawerOpen ? "blur(3px) saturate(1.12)" : "blur(0)",
           opacity: drawerOpen ? 1 : 0,
           pointerEvents: drawerOpen ? "auto" : "none",
-          transition: "opacity var(--dur) var(--ease)",
+          transition: "opacity var(--dur) var(--ease-smooth), backdrop-filter var(--dur) var(--ease-smooth)",
         }}
         aria-hidden
       />
       <aside
-        className={`flex min-h-0 flex-col gap-3 transition-transform duration-300 max-lg:fixed max-lg:inset-y-0 max-lg:right-0 max-lg:z-50 max-lg:w-[84%] max-lg:max-w-[320px] max-lg:border-l max-lg:p-3 max-lg:shadow-[var(--shadow-xl)] lg:!translate-x-0 ${
+        className={`flex min-h-0 flex-col gap-3 max-lg:fixed max-lg:inset-y-0 max-lg:right-0 max-lg:z-50 max-lg:w-[84%] max-lg:max-w-[320px] max-lg:border-l max-lg:p-3 max-lg:shadow-[var(--shadow-xl)] lg:!translate-x-0 ${
           drawerOpen ? "translate-x-0" : "max-lg:translate-x-full"
         }`}
         aria-label="Conversations"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        style={{
+          background: "var(--chrome-strong)",
+          borderColor: "var(--border)",
+          backdropFilter: "blur(24px) saturate(1.35)",
+          transition: "transform var(--dur-slow) var(--ease-smooth)",
+        }}
       >
         {/* Mobile-only drawer header with a close control. */}
         <div className="flex shrink-0 items-center justify-between lg:hidden">

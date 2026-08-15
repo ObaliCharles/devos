@@ -488,13 +488,21 @@ function AddEvent({
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center p-4"
-      style={{ background: "rgb(4 5 8 / 0.6)", backdropFilter: "blur(3px)" }}
+      style={{
+        background: "var(--overlay)",
+        backdropFilter: "blur(5px) saturate(1.12)",
+        animation: "fade-in var(--dur) var(--ease-smooth) both",
+      }}
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="glass-strong scale-in w-full max-w-[420px] p-4"
-        style={{ borderRadius: "var(--radius-dialog)", boxShadow: "var(--shadow-xl)" }}
+        className="glass-strong w-full max-w-[420px] p-4"
+        style={{
+          borderRadius: "var(--radius-dialog)",
+          boxShadow: "var(--shadow-xl)",
+          animation: "panel-in 360ms var(--ease-smooth) both",
+        }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

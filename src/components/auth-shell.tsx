@@ -86,13 +86,13 @@ export function AuthWidget({ children }: { children: ReactNode }) {
  */
 export const CLERK_APPEARANCE = {
   variables: {
-    colorPrimary: "#7c6bff",
-    colorBackground: "#11131a",
-    colorText: "#edeff4",
-    colorTextSecondary: "#8b93a3",
-    colorInputBackground: "#161923",
-    colorInputText: "#edeff4",
-    borderRadius: "9px",
+    colorPrimary: "#5865f2",
+    colorBackground: "#2b2d31",
+    colorText: "#f2f3f5",
+    colorTextSecondary: "rgba(242, 243, 245, 0.68)",
+    colorInputBackground: "#313338",
+    colorInputText: "#f2f3f5",
+    borderRadius: "8px",
     fontSize: "14px",
   },
   elements: {

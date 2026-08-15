@@ -240,13 +240,20 @@ function TaskDialog({
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center p-4"
-      style={{ background: "rgb(0 0 0 / 0.5)" }}
+      style={{
+        background: "var(--overlay)",
+        backdropFilter: "blur(4px) saturate(1.12)",
+        animation: "fade-in var(--dur) var(--ease-smooth) both",
+      }}
       onClick={onClose}
       role="presentation"
     >
       <div
         className="card w-full max-w-lg p-5"
-        style={{ borderRadius: "var(--radius-dialog)" }}
+        style={{
+          borderRadius: "var(--radius-dialog)",
+          animation: "panel-in 360ms var(--ease-smooth) both",
+        }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
